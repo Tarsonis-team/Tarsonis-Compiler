@@ -1,0 +1,13 @@
+/* TODO
+
+    Test calls of routines inside routines
+
+ */
+
+routine two(): is
+    return 2;
+end
+
+routine main(): is
+    var c: integer is two();
+end

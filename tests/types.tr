@@ -1,0 +1,8 @@
+
+type Weapon is record
+    var max_ammo: integer
+    var cur_ammo: integer
+end
+
+type socketFD is integer;
+type AK_74 is Weapon;
