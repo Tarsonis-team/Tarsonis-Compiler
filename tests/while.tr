@@ -1,0 +1,8 @@
+routine main() is
+    var n : integer is 10;
+
+    while n loop
+        n := n - 1;
+    end
+
+end

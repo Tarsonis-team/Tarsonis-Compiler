@@ -1,0 +1,23 @@
+type Point is record
+    var x: integer
+    var y: integer
+end
+
+type Line is record
+    var begin: Point
+    var end: Point
+end
+
+routine new_point(x integer, y integer): Point is
+    var p: Point
+    p.x := x
+    p.y := y
+    return p
+end
+
+routine new_line(p1 Point, p2 Point): Pointf is
+    var pf: Pointf
+    pf.begin := p1
+    pf.end := p2
+    return pf
+end

@@ -1,0 +1,7 @@
+routine main(): is
+    var a: integer
+    var b: integer
+
+    var c: integer is a + b
+
+end

@@ -1,0 +1,13 @@
+/*
+
+  The statement should be complex in terms of '(', ')'.
+
+*/
+
+routine main(): is
+    var a: integer
+    var b: integer
+
+    var c: integer is (a + b + (a - b) - (a + b) * 2);
+
+end
