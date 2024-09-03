@@ -1,4 +1,4 @@
-routine main(): is
+routine main() is
     var a: integer
     var b: integer
 

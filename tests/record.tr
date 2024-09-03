@@ -8,14 +8,14 @@ type Line is record
     var end: Point
 end
 
-routine new_point(x integer, y integer): Point is
+routine new_point(x integer, y integer) -> Point is
     var p: Point
     p.x := x
     p.y := y
     return p
 end
 
-routine new_line(p1 Point, p2 Point): Pointf is
+routine new_line(p1 Point, p2 Point) -> Line is
     var pf: Pointf
     pf.begin := p1
     pf.end := p2
