@@ -4,7 +4,7 @@
 
 */
 
-routine main(): is
+routine main() is
     var a: integer is 4
     var b: integer is 8
 

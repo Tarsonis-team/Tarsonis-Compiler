@@ -1,13 +1,8 @@
-/* TODO
 
-    Test calls of routines inside routines
-
- */
-
-routine two(): is
+routine two() -> integer is
     return 2;
 end
 
-routine main(): is
+routine main() is
     var c: integer is two();
 end

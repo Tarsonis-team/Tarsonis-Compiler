@@ -1,0 +1,15 @@
+type Point is record
+    
+    init() is
+        // open a file decriptor
+        // or lock a mutex
+        // or in any way acquire a resource
+    end
+    
+    die() is
+        // release the resource
+    end
+
+    var x: integer
+    var y: integer
+end
