@@ -1,5 +1,5 @@
 
-routine release_resource() begin
+routine release_resource() is
     // releasing stuff
 end
 
