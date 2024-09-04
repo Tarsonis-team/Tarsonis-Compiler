@@ -1,43 +1,44 @@
-#include <vector>
-#include <string>
 #include <fstream>
+#include <string>
+#include <vector>
 
 #include "token-lib.cpp"
 
-
 using namespace std;
 
-
-class Lexer {
+class Lexer
+{
 public:
     ifstream code_file;
     vector<int> code;
 
-    explicit Lexer(const string& file_name) {
+    explicit Lexer(const string& file_name)
+    {
         code_file.open(file_name, ios::in);
     }
-    string get_word() {
 
-
+    string get_word()
+    {
         return "Hello";
     }
 
-    vector<Token> parse() {
-
+    vector<Token> parse()
+    {
         vector<Token> res;
 
-        while (true) {
+        while (true)
+        {
             string word = get_word();
             int word_id = tokens.at(word);
 
-            switch (word_id) {
+            switch (word_id)
+            {
                 case 1:
                     res.emplace_back(word, word_id);
             }
         }
+        return { Token("d", 1) };
 
         return res;
     }
 };
-
-

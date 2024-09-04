@@ -1,31 +1,33 @@
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 #pragma once
 
 using namespace std;
 
-
-
-enum TokenType {
+enum TokenType
+{
     KEYWORD,
     IDENTIFIER,
     PUNCT
 };
 
-class Token {
+class Token
+{
 public:
     string value;
     int id;
     TokenType type;
 
-    Token(string value, int id):value(value), id(id) {
+    Token(string value, int id) : value(value), id(id)
+    {
         // TODO: define type
     }
 };
 
-const unordered_map<string, int> tokens = {
-        {"for", 1},
-        {"while", 2}
+// clang-format off
+const unordered_map<string, int> tokens = { 
+    { "for", 1 },
+    { "while", 2 }
 };
-
+// clang-format on
