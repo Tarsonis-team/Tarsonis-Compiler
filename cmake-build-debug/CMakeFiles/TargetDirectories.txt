@@ -1,3 +1,0 @@
-C:/Projects/C/C++/Compilers/Tarsonis-Compiler/cmake-build-debug/CMakeFiles/Tarsonis_Compiler.dir
-C:/Projects/C/C++/Compilers/Tarsonis-Compiler/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Projects/C/C++/Compilers/Tarsonis-Compiler/cmake-build-debug/CMakeFiles/rebuild_cache.dir
