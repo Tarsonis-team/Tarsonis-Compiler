@@ -1,0 +1,11 @@
+# ninja log v5
+9	110	7471765719745280	CMakeFiles/Tarsonis_Compiler.dir/src/lexer/tokenEnum.cpp.obj	16af74efb39a14a3
+381	590	7471765724489398	Tarsonis_Compiler.exe	d43e681a08c30520
+1	380	7471765722446227	CMakeFiles/Tarsonis_Compiler.dir/src/lexer/main.cpp.obj	5c69c1079d214b00
+2	193	7471782057905333	build.ninja	f5cdce59bd44136b
+5	570	7471782064642796	CMakeFiles/Tarsonis_Compiler.dir/src/lexer/token-lib.cpp.obj	6a638bae6096e600
+7	401	7471782757361384	CMakeFiles/Tarsonis_Compiler.dir/src/lexer/token-lib.cpp.obj	6a638bae6096e600
+2	514	7471782758487600	CMakeFiles/Tarsonis_Compiler.dir/src/lexer/main.cpp.obj	5c69c1079d214b00
+515	633	7471782759645906	Tarsonis_Compiler.exe	ef0f25303a6065cd
+4	518	7471783319113748	CMakeFiles/Tarsonis_Compiler.dir/src/lexer/main.cpp.obj	5c69c1079d214b00
+518	654	7471783320449254	Tarsonis_Compiler.exe	ef0f25303a6065cd
