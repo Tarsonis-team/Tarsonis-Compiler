@@ -1,8 +1,6 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.20)
 project(Tarsonis_Compiler)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Tarsonis_Compiler
-        src/lexer/main.cpp
-        src/lexer/token-lib.cpp)
+add_subdirectory(src)

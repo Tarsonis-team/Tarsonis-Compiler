@@ -1,44 +1,36 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
-#include "token-lib.cpp"
+#include "token.hpp"
+#include "lexer.hpp"
 
-using namespace std;
-
-class Lexer
+Lexer::Lexer(const std::string& file_name)
 {
-public:
-    ifstream code_file;
-    vector<int> code;
+    m_source_file.open(file_name, std::ios::in);
+}
 
-    explicit Lexer(const string& file_name)
-    {
-        code_file.open(file_name, ios::in);
-    }
+std::string Lexer::get_word()
+{
+    return "for";
+}
 
-    string get_word()
-    {
-        return "Hello";
-    }
+std::vector<Token> Lexer::parse()
+{
+    std::vector<Token> res;
 
-    vector<Token> parse()
-    {
-        vector<Token> res;
+    std::string tok;
+    while (m_source_file.eof()) {
+        m_source_file >> tok;
 
-        while (true)
-        {
-            string word = get_word();
-            int word_id = tokens.at(word);
-
-            switch (word_id)
+        int word_id = tokens.at(tok);
+        switch (word_id)
             {
                 case 1:
-                    res.emplace_back(word, word_id);
+                    res.emplace_back(tok, word_id);
             }
-        }
-        return { Token("d", 1) };
-
-        return res;
     }
-};
+    
+    return res;
+}
