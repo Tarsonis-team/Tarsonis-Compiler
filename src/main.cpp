@@ -14,7 +14,21 @@ int main(int argc, char *argv[])
     vector<Token> code = lexer.parse();
 
     for (auto &tok : code) {
-        std::cout << tok.m_value;
+        std::cout << tok.m_value << " (" << tok.m_id << ", ";
+        switch (tok.m_type) {
+            case TokenType::KEYWORD: {
+                cout << "K";
+                break;
+            }
+            case TokenType::IDENTIFIER: {
+                cout << "I";
+                break;
+            }
+            case TokenType::PUNCT: {
+                cout << "P";
+                break;
+            }
+        }
     }
 
     return 0;

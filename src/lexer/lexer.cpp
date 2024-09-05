@@ -40,6 +40,18 @@ pair<string, char> Lexer::get_word()
     }
 }
 
+// Separate function for checking punct after words
+void punct_handler(char punct, vector<Token>& res) {
+    if (punct == ' ') {
+        return;
+    }
+
+    string punct_string;
+    punct_string.push_back(punct);
+
+    res.emplace_back(punct_string, tokens.at(punct_string));
+}
+
 std::vector<Token> Lexer::parse()
 {
     std::vector<Token> res;
@@ -48,14 +60,15 @@ std::vector<Token> Lexer::parse()
     while (m_source_file.eof()) {
         tok = get_word();
 
+        if (!tokens.count(tok.first)) {
+            res.emplace_back(tok.first, 0);
+            punct_handler(tok.second, res);
+        }
+
         int word_id = tokens.at(tok.first);
-        switch (word_id)
-            {
-                case 1:
-                    res.emplace_back(tok.first, word_id);
-            }
+        res.emplace_back(tok.first, word_id);
 
-
+        punct_handler(tok.second, res);
     }
     
     return res;

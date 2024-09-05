@@ -19,5 +19,4 @@ struct Token
     TokenType m_type;
 
     Token(std::string value, int id);
-
 };
