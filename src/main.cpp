@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
                 break;
             }
         }
+        cout << ") ";
     }
 
     return 0;
