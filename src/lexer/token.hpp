@@ -9,7 +9,8 @@ enum class TokenType
 {
     KEYWORD,
     IDENTIFIER,
-    PUNCT
+    CONSTANT,
+    OPERATOR, // %, +, /, :=
 };
 
 struct Token
