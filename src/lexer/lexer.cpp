@@ -50,6 +50,7 @@ std::string Lexer::get_next_stripped_sequence()
     }
 
     return stripped;
+
 }
 
 std::vector<Token> Lexer::parse()
