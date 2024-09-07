@@ -1,10 +1,29 @@
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
 
-#include "token.hpp"
 #include "lexer.hpp"
+#include "sequence-breaker.hpp"
+#include "token.hpp"
+
+namespace
+{
+
+bool is_reserved_keyword(const std::string& sequence)
+{
+    return tokens.contains(sequence);
+}
+
+bool is_constant(const std::string& sequence)
+{
+    return std::all_of(sequence.begin(), sequence.end(), [](unsigned char c) { return std::isdigit(c); });
+}
+
+} // namespace
+
+namespace lexical
+{
 
 Lexer::Lexer(const std::string& file_name)
 {
@@ -14,11 +33,14 @@ Lexer::Lexer(const std::string& file_name)
 std::string Lexer::get_next_stripped_sequence()
 {
     std::string stripped;
-    while(m_source_file.peek() != std::char_traits<char>::eof()) {
+    while (m_source_file.peek() != std::char_traits<char>::eof())
+    {
         char ch = m_source_file.get();
 
-        if (ch == ' ') {
-            if (stripped.empty()) {
+        if (ch == ' ')
+        {
+            if (stripped.empty())
+            {
                 continue;
             }
             return stripped;
@@ -30,25 +52,61 @@ std::string Lexer::get_next_stripped_sequence()
     return stripped;
 }
 
-std::vector<Token> Lexer::break_stripped_into_tokens(const std::string& stripped)
-{
-
-}
-
 std::vector<Token> Lexer::parse()
 {
     std::vector<Token> res;
 
     std::string tok;
-    while (!m_source_file.eof()) {
+    while (!m_source_file.eof())
+    {
         auto stripped = get_next_stripped_sequence();
 
-        // there are cases like 'a:=4;' where there is no 
+        if (is_reserved_keyword(stripped))
+        {
+            res.push_back(Token::asReservedKeyword(stripped));
+            continue;
+        }
+
+        if (is_constant(stripped))
+        {
+            res.push_back(Token::asConstant(stripped));
+            continue;
+        }
+
+        // there are cases like 'a:=4;' where there is no
         // whitespace between the tokens, so we need additional
         // processing of the retreived stripped value.
-        auto tokens = break_stripped_into_tokens(stripped);
 
+        // as for this call - we expect this:
+        // a:=5; -> a, :=, 5, ;
+        // (3-2/5+12 - 1) -> (, 3, -, 2, /, 5, +, 12, -, 1, )
+        auto broken = SequenceBreaker(stripped)
+                          .breakBy(":=")
+                          .breakBy(";")
+                          .breakBy(".")
+                          .breakBy("/")
+                          .breakBy("+")
+                          .breakBy("-")
+                          .breakBy("%")
+                          .breakBy("\n")
+                          .breakBy("[")
+                          .breakBy("]")
+                          .breakBy("(")
+                          .breakBy(")")
+                          .done();
+
+        for (auto& tok : broken)
+        {
+            if (is_reserved_keyword(tok))
+                res.push_back(Token::asReservedKeyword(tok));
+            else if (is_constant(tok))
+                res.push_back(Token::asConstant(tok));
+            else
+                res.push_back(Token::asIdentifier(tok));
+        }
     }
-    
+
     return res;
 }
+
+} // namespace lexical

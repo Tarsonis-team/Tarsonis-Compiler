@@ -19,6 +19,10 @@ struct Token
     int m_id;
     TokenType m_type;
 
-    Token(std::string value, int id);
+    static Token asIdentifier(const std::string& value);
+    static Token asReservedKeyword(const std::string& keyword);
+    static Token asConstant(const std::string& cnst);
 
+private:
+    Token(std::string value, int id);
 };
