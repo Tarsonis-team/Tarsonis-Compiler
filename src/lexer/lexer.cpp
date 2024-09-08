@@ -14,7 +14,15 @@ Lexer::Lexer(const std::string& file_name)
     m_source_file.open(file_name, std::ios::in);
 }
 
-pair<string, char> Lexer::get_word()
+void Lexer::first_split() {
+
+}
+
+void Lexer::second_split() {
+
+}
+
+string Lexer::get_word()
 {
     char ch;
     pair<string, char> word;
@@ -28,12 +36,12 @@ pair<string, char> Lexer::get_word()
 
         if (ch == ' ') {
             word.second = ' ';
-            return word;
+//            return word;
         }
 
         if (ch == '\n') {
             word.second = '\n';
-            return word;
+//            return word;
         }
 
         word.first += ch;
@@ -58,7 +66,7 @@ std::vector<Token> Lexer::parse()
 
     pair<string, char> tok;
     while (m_source_file.eof()) {
-        tok = get_word();
+//        tok = get_word();
 
         if (!tokens.count(tok.first)) {
             res.emplace_back(tok.first, 0);
