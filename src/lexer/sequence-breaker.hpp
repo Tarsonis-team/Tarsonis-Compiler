@@ -48,7 +48,7 @@ public:
                 {
                     continue;
                 }
-                const std::string_view window = m_to_break.substr(i, keywd.size());
+                const std::string_view window = std::string_view(m_to_break).substr(i, keywd.size());
 
                 if (window == keywd)
                 {
