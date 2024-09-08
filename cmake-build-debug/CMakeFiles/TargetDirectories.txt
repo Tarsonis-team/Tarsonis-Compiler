@@ -1,8 +1,0 @@
-C:/Projects/C/C++/Compilers/Tarsonis-Compiler/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Projects/C/C++/Compilers/Tarsonis-Compiler/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-C:/Projects/C/C++/Compilers/Tarsonis-Compiler/cmake-build-debug/src/CMakeFiles/Tarsonis_Compiler.dir
-C:/Projects/C/C++/Compilers/Tarsonis-Compiler/cmake-build-debug/src/CMakeFiles/edit_cache.dir
-C:/Projects/C/C++/Compilers/Tarsonis-Compiler/cmake-build-debug/src/CMakeFiles/rebuild_cache.dir
-C:/Projects/C/C++/Compilers/Tarsonis-Compiler/cmake-build-debug/src/lexer/CMakeFiles/LEXER.dir
-C:/Projects/C/C++/Compilers/Tarsonis-Compiler/cmake-build-debug/src/lexer/CMakeFiles/edit_cache.dir
-C:/Projects/C/C++/Compilers/Tarsonis-Compiler/cmake-build-debug/src/lexer/CMakeFiles/rebuild_cache.dir

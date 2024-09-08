@@ -6,14 +6,19 @@
 
 #include "token.hpp"
 
+namespace lexical
+{
+
 class Lexer
 {
 public:
-    std::fstream m_source_file;
-    std::vector<int> m_tokens;
-
     explicit Lexer(const std::string& file_name);
-
-    std::pair<std::string, char> get_word();
     std::vector<Token> parse();
+
+private:
+    std::string get_next_stripped_sequence();
+    std::ifstream m_source_file;
+    std::vector<int> m_tokens;
 };
+
+} // namespace lexical

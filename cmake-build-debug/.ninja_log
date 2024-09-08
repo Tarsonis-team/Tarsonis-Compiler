@@ -1,6 +1,0 @@
-# ninja log v5
-9	729	7472591368195247	src/lexer/CMakeFiles/LEXER.dir/token.cpp.obj	417d1299376dd9fa
-0	752	7472591368445256	src/CMakeFiles/Tarsonis_Compiler.dir/main.cpp.obj	e038ac1eca17c60e
-5	844	7472591369355654	src/lexer/CMakeFiles/LEXER.dir/lexer.cpp.obj	67552b06b0e58644
-844	948	7472591370396952	src/lexer/libLEXER.a	38f9e151aae49af1
-948	1098	7472591371870183	src/Tarsonis_Compiler.exe	c88f9f19ddb8f5fb
