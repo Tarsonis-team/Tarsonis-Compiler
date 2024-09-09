@@ -2,7 +2,6 @@
 
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 namespace lexical
@@ -15,7 +14,7 @@ namespace lexical
 class SequenceBreaker
 {
 public:
-    SequenceBreaker(std::string to_break) : m_to_break(std::move(to_break))
+    explicit SequenceBreaker(std::string to_break) : m_to_break(std::move(to_break))
     {
     }
 
@@ -42,7 +41,7 @@ public:
         size_t last_token = 0;
         for (size_t i = 0; i < m_to_break.size(); ++i)
         {
-            for (auto& keywd : m_break_by)
+            for (const auto& keywd : m_break_by)
             {
                 if (m_to_break.size() < i + keywd.size())
                 {
