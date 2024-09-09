@@ -25,7 +25,7 @@ public:
         return *this;
     }
 
-    std::vector<std::string> done()
+    std::vector<std::string> done() const
     {
         std::vector<std::string> result;
 
@@ -36,7 +36,7 @@ public:
          * m - maximum length of signature
          * n - size of sequence to break
          * 
-         * But we now that reserved keywords are merely
+         * But we know that reserved keywords are merely
          * 1-2 characters, so we do have O(k * n)
         */
         size_t last_token = 0;

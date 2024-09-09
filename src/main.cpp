@@ -7,8 +7,13 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    char* source_file_path = argv[1];
+    if (argc < 2)
+    {
+        std::cout << "Error: path to a source file is not provided\n";
+        return EXIT_FAILURE;
+    }
 
+    char* source_file_path = argv[1];
     lexical::Lexer lexer(source_file_path);
 
     vector<Token> code = lexer.parse();
@@ -18,5 +23,5 @@ int main(int argc, char* argv[])
         std::cout << "\"" << (tok.m_value == "\n" ? "newline" : tok.m_value) << "\", \n";
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
