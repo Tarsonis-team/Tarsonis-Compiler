@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -18,7 +19,20 @@ bool is_reserved_keyword(const std::string& sequence)
 
 bool is_constant(const std::string& sequence)
 {
-    return std::all_of(sequence.begin(), sequence.end(), [](unsigned char c) { return std::isdigit(c); });
+    uint8_t amount_of_dots = 0;  // dont forget there are also real numbers
+    for (const auto ch : sequence) {
+        if (ch == '.') {
+            if (amount_of_dots == 1)
+                throw std::runtime_error("You can not put two dots in a number like in that sequence: \"" + sequence + "\"");
+            ++amount_of_dots;
+            continue;
+        }
+
+        if (!std::isdigit(ch)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 } // namespace
@@ -108,8 +122,11 @@ std::vector<Token> Lexer::parse()
                 res.push_back(Token::asReservedKeyword(tok));
             else if (is_constant(tok))
                 res.push_back(Token::asConstant(tok));
-            else
+            else {
+                if (isdigit(tok.at(0)))
+                    throw std::runtime_error("Identifier can not start with a digit: \"" + tok + "\"");
                 res.push_back(Token::asIdentifier(tok));
+            }
         }
     }
 
