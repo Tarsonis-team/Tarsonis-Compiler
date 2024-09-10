@@ -1,3 +1,4 @@
+#include <exception>
 #include <iostream>
 #include <vector>
 #include <filesystem>
@@ -21,12 +22,17 @@ int main(int argc, char* argv[])
     }
 
     lexical::Lexer lexer(source_file_path);
-
-    std::vector<Token> code = lexer.parse();
+    std::vector<Token> code;
+    try {
+        code = lexer.parse();
+    } catch (const std::exception& err) {
+        std::cout << err.what() << '\n';
+        return EXIT_FAILURE;
+    }
 
     for (auto& tok : code)
     {
-        std::cout << "\"" << (tok.m_value == "\n" ? "newline" : tok.m_value) << "\", \n";
+        std::cout << "\"" << (tok.m_value == "\n" ? "newline" : tok.m_value) << "\" " << tok.m_id << "\n";
     }
 
     return EXIT_SUCCESS;
