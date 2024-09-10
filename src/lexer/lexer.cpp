@@ -1,4 +1,4 @@
-#include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -23,7 +23,7 @@ bool is_constant(const std::string& sequence)
     for (const auto ch : sequence) {
         if (ch == '.') {
             if (amount_of_dots == 1)
-                throw std::runtime_error("You can not put two dots in a number like in that sequence: \"" + sequence + "\"");
+                throw std::runtime_error("Undefined sequence: \"" + sequence + "\"");
             ++amount_of_dots;
             continue;
         }
@@ -114,6 +114,8 @@ std::vector<Token> Lexer::parse()
                                 .breakBy("<=") 
                                 .breakBy("<")
                                 .breakBy(">")
+                                .except(".")
+                                .between(isdigit, isdigit)
                                 .done();
 
         for (const auto& tok : broken)

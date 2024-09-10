@@ -53,6 +53,7 @@ const std::unordered_map<std::string, int> tokens {
         {"not",     24},
         {"return",  25},
         {"defer",   26},
-        {"\n",      27}
+        {"\n",      27},
+        {"..",      28}
 };
 // clang-format on
