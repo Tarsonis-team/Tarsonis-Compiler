@@ -26,9 +26,8 @@ bool is_constant(const std::string& sequence)
 namespace lexical
 {
 
-Lexer::Lexer(const std::string& file_name)
+Lexer::Lexer(const std::string& file_name) : m_source_file(file_name, std::ios::in)
 {
-    m_source_file.open(file_name, std::ios::in);
 }
 
 std::string Lexer::get_next_stripped_sequence()
@@ -51,7 +50,6 @@ std::string Lexer::get_next_stripped_sequence()
     }
 
     return stripped;
-
 }
 
 std::vector<Token> Lexer::parse()
@@ -82,29 +80,29 @@ std::vector<Token> Lexer::parse()
         // as for this call - we expect this:
         // a:=5; -> a, :=, 5, ;
         // (3-2/5+12 - 1) -> (, 3, -, 2, /, 5, +, 12, -, 1, )
-        auto broken = SequenceBreaker(stripped)
-                          .breakBy(":=")
-                          .breakBy(":")
-                          .breakBy(";")
-                          .breakBy(".")
-                          .breakBy("*")
-                          .breakBy("/")
-                          .breakBy("+")
-                          .breakBy("-")
-                          .breakBy("%")
-                          .breakBy("\n")
-                          .breakBy("[")
-                          .breakBy("]")
-                          .breakBy("(")
-                          .breakBy(")")
-                          .breakBy("<")
-                          .breakBy(">")
-                          .breakBy(">=")
-                          .breakBy("<=")
-                          .breakBy("->")
-                          .done();
+        const auto broken = SequenceBreaker(stripped)
+                                .breakBy("->")
+                                .breakBy(":=")
+                                .breakBy(":")
+                                .breakBy(";")
+                                .breakBy(".")
+                                .breakBy("*")
+                                .breakBy("/")
+                                .breakBy("+")
+                                .breakBy("-")
+                                .breakBy("%")
+                                .breakBy("\n")
+                                .breakBy("[")
+                                .breakBy("]")
+                                .breakBy("(")
+                                .breakBy(")")
+                                .breakBy(">=")
+                                .breakBy("<=") 
+                                .breakBy("<")
+                                .breakBy(">")
+                                .done();
 
-        for (auto& tok : broken)
+        for (const auto& tok : broken)
         {
             if (is_reserved_keyword(tok))
                 res.push_back(Token::asReservedKeyword(tok));

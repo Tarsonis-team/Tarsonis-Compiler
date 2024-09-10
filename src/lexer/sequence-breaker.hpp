@@ -2,7 +2,6 @@
 
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 namespace lexical
@@ -15,7 +14,7 @@ namespace lexical
 class SequenceBreaker
 {
 public:
-    SequenceBreaker(std::string to_break) : m_to_break(std::move(to_break))
+    explicit SequenceBreaker(std::string to_break) : m_to_break(std::move(to_break))
     {
     }
 
@@ -25,7 +24,7 @@ public:
         return *this;
     }
 
-    std::vector<std::string> done()
+    std::vector<std::string> done() const
     {
         std::vector<std::string> result;
 
@@ -36,13 +35,13 @@ public:
          * m - maximum length of signature
          * n - size of sequence to break
          * 
-         * But we now that reserved keywords are merely
+         * But we know that reserved keywords are merely
          * 1-2 characters, so we do have O(k * n)
         */
         size_t last_token = 0;
         for (size_t i = 0; i < m_to_break.size(); ++i)
         {
-            for (auto& keywd : m_break_by)
+            for (const auto& keywd : m_break_by)
             {
                 if (m_to_break.size() < i + keywd.size())
                 {
