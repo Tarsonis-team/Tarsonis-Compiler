@@ -16,7 +16,7 @@ BraceWrapping:
     IndentBraces: false
 BreakConstructorInitializersBeforeComma: false
 Cpp11BracedListStyle: false
-ColumnLimit: 140
+ColumnLimit: 120
 AllowShortFunctionsOnASingleLine: None
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ExperimentalAutoDetectBinPacking: true
