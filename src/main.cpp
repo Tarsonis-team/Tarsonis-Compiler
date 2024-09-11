@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <cstdlib>
 
-#include "lexer/lexer.hpp"
+#include "lexer/lexer-controller.hpp"
 
 
 int main(int argc, char* argv[])
@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    lexical::Lexer lexer(source_file_path);
+    lexical::LexerController lexer(source_file_path);
     std::vector<Token> code;
     try {
         code = lexer.parse();

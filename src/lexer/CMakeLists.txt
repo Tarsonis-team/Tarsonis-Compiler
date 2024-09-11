@@ -5,4 +5,5 @@ add_library(
     LEXER STATIC 
             lexer.cpp
             token.cpp
+            lexer-controller.cpp
     )
