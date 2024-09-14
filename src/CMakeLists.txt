@@ -1,4 +1,5 @@
 add_subdirectory(lexer)
+add_subdirectory(parser)
 
 add_executable(
     Tarsonis_Compiler
@@ -7,4 +8,4 @@ add_executable(
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(Tarsonis_Compiler LEXER)
+target_link_libraries(Tarsonis_Compiler LEXER PARSER)
