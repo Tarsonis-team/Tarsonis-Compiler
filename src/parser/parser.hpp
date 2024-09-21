@@ -4,15 +4,16 @@
 #include <vector>
 
 #include "../lexer/token.hpp"
-#include "tree.hpp"
+#include "tree/tree.hpp"
+#include "utils/declarations/abstract_declaration.cpp"
 
 namespace parse {
 class Parser
 {
 public:
     explicit Parser(std::vector<Token>& tokens);
-    Tree create_tree();
 private:
+    Tree<Declaration> get_decl_tree();
     std::vector<Token> tokens;
 };
 }
