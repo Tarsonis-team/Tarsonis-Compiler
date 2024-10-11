@@ -1,19 +1,16 @@
 #pragma once
 
-#include <fstream>
 #include <vector>
+#include "../lexer/lexer.hpp"
+#include "utils/declarations/AST-node.hpp"
 
-#include "../lexer/token.hpp"
-#include "tree/tree.hpp"
-#include "utils/declarations/abstract_declaration.cpp"
-
-namespace parse {
+namespace parsing {
 class Parser
 {
 public:
-    explicit Parser(std::vector<Token>& tokens);
+    explicit Parser(const std::vector<Token>& tokens) : m_tokens(tokens) {};
 private:
-    Tree<Declaration> get_decl_tree();
-    std::vector<Token> tokens;
+    Program parse();
+    const std::vector<Token>& m_tokens;
 };
 }

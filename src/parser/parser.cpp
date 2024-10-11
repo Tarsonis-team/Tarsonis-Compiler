@@ -1,22 +1,25 @@
-#include <utility>
 #include <vector>
-
 #include "parser.hpp"
-#include "utils/declarations/declaration.cpp"
+#include "token.hpp"
+#include "utils/declarations/AST-node.hpp"
+#include "utils/declarations/declaration.hpp"
 
-namespace parse {
+namespace parsing {
 
-Parser::Parser(std::vector<Token>& tokens) : tokens(std::move(tokens))
-{
-}
+ASTNode Parser::parse() {
+    
+    int cur_token = 0;
+    while (true) {
+        auto token = m_tokens[cur_token];
 
-Tree<Declaration> Parser::get_decl_tree() {
-    // ...
-    typedef Constant<int> constant;
+        switch (token.m_id) {
+            case 1: // routine
+                Routine::
+        }
 
-    Constant<int> test_const = Constant<int>(VarType::INT, 1);
-    Node<constant> test_root = Node<constant>(test_const);
-    Tree<constant> test_tree = Tree(&test_root);
+    }
+    
+    return {};
 }
 
 }

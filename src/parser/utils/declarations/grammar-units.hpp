@@ -1,4 +1,4 @@
-enum class Category {
+enum class GrammarUnit {
     VARIABLE,
     FUNCTION,
     CONSTANT,
