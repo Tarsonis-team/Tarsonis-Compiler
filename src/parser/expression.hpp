@@ -1,8 +1,10 @@
+#pragma once
+
 #include <memory>
 #include "AST-node.hpp"
 #include "declaration.hpp"
 
-using namespace parsing;
+namespace parsing {
 
 class Primary : public Expression {
 
@@ -126,3 +128,5 @@ class NotEqual : public Relation {
 public:
     explicit NotEqual() : Relation(GrammarUnit::NOT_EQUAL) {}
 };
+
+}  // namespace parsing

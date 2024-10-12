@@ -22,8 +22,9 @@ bool is_constant(const std::string& sequence)
     uint8_t amount_of_dots = 0;  // dont forget there are also real numbers
     for (const auto ch : sequence) {
         if (ch == '.') {
-            if (amount_of_dots == 1)
+            if (amount_of_dots == 1) {
                 throw std::runtime_error("Undefined sequence: \"" + sequence + "\"");
+            }
             ++amount_of_dots;
             continue;
         }
@@ -120,13 +121,14 @@ std::vector<Token> Lexer::parse()
 
         for (const auto& tok : broken)
         {
-            if (is_reserved_keyword(tok))
+            if (is_reserved_keyword(tok)) {
                 res.push_back(Token::asReservedKeyword(tok));
-            else if (is_constant(tok))
+            } else if (is_constant(tok)) {
                 res.push_back(Token::asConstant(tok));
-            else {
-                if (isdigit(tok.at(0)))
+            } else {
+                if (isdigit(tok.at(0))) {
                     throw std::runtime_error("Identifier can not start with a digit: \"" + tok + "\"");
+                }
                 res.push_back(Token::asIdentifier(tok));
             }
         }

@@ -27,16 +27,16 @@ Token Token::asConstant(const std::string& cnst)
 const std::unordered_map<std::string, int> tokens {
         // -1 for consts
         // 0 for Identifiers
-        {"routine",  1},
-        {"while",    2},
-        {"for",      3},
-        {"integer",  4},
-        {"real",     5},
-        {"boolean",  6},
-        {"is",       7},
-        {"end",      8},
-        {"loop",     9},
-        {"in",      10},
+        {"routine",   1},
+        {"while",     2},
+        {"for",       3},
+        {"integer",   4},
+        {"real",      5},
+        {"boolean",   6},
+        {"is",        7},
+        {"end",       8},
+        {"loop",      9},
+        {"in",       10},
         {"reverse", 11},
         {"if",      12},
         {"then",    13},
@@ -54,6 +54,11 @@ const std::unordered_map<std::string, int> tokens {
         {"return",  25},
         {"defer",   26},
         {"\n",      27},
-        {"..",      28}
+        {"..",      28},
+        {"(",       29},
+        {")",       30},
+        {",",       31},
+        {"->",      32},
+        {":",       33}
 };
 // clang-format on

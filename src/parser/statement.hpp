@@ -5,7 +5,7 @@
 #include "declaration.hpp"
 
 
-using namespace parsing;
+namespace parsing {
 
 class If : public Statement {
 
@@ -49,5 +49,4 @@ public:
     std::unique_ptr<Expression> m_expression;
 };
 
-
-
+}  // namespace parsing

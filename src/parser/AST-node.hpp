@@ -39,7 +39,7 @@ public:
 class Declaration : public ASTNode {
 
 public:
-    explicit Declaration(GrammarUnit gr, std::string& name) : ASTNode(gr), m_name(name) {}
+    explicit Declaration(GrammarUnit gr, std::string name) : ASTNode(gr), m_name(std::move(name)) {}
     std::string m_name;
 };
 
@@ -47,7 +47,7 @@ class Program : public ASTNode {
 
 public:
     explicit Program() : ASTNode(GrammarUnit::PROGRAM) {}
-    std::vector<Declaration> m_declarations;
+    std::vector<std::shared_ptr<Declaration>> m_declarations;
 };
 
 class Range : public ASTNode {
