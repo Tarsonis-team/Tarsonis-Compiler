@@ -25,6 +25,7 @@ private:
     std::shared_ptr<Record> parse_record_decl();
     std::shared_ptr<Array> parse_array_type();
     std::shared_ptr<ArrayVariable> parse_array_variable();
+    std::shared_ptr<Expression> parse_expression();
 
 
     size_t m_cur_tok;

@@ -42,6 +42,8 @@ enum TokenType {
     TOKEN_COMA   = 31,
     TOKEN_ARROW  = 32,
     TOKEN_COLON = 33,
+    TOKEN_LBRACKET = 34,
+    TOKEN_RBRACKET = 35
 };
 
 struct Token

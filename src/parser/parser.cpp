@@ -17,7 +17,7 @@ void Parser::advanceTok() {
     ++m_cur_tok;
 }
 
-RoutineParameter Parser::parse_routine_parameter() {
+std::shared_ptr<RoutineParameter> Parser::parse_routine_parameter() {
     auto type = currentTok().m_id;
     if (type != TOKEN_IDENTIFIER && type != TOKEN_INTEGER && type != TOKEN_BOOLEAN && type != TOKEN_REAL) {
         throw std::runtime_error("Identifier expected or primitive type expected");
@@ -31,7 +31,7 @@ RoutineParameter Parser::parse_routine_parameter() {
     auto var_name = currentTok().m_value;
     advanceTok();
 
-    return { var_name, type_identifier };
+    return std::make_shared<RoutineParameter>(var_name, type_identifier);
 }
 
 std::shared_ptr<Routine> Parser::parse_routine_decl() {
@@ -80,12 +80,40 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
 
 }
 
-std::shared_ptr<Record> Parser::parse_record_decl() {
+std::shared_ptr<RecordType> Parser::parse_record_decl() {
 
 }
 
-std::shared_ptr<Array> Parser::parse_array_type() {
+std::shared_ptr<ArrayType> Parser::parse_array_type() {
+    if (currentTok().m_id != TOKEN_ARRAY) {
+        throw std::runtime_error("'array' token is expected!");
+    }
+
+    advanceTok();
+    if (currentTok().m_id != TOKEN_LBRACKET) {
+        throw std::runtime_error("'[' is expected !");
+    }
+    advanceTok();
+
+    std::shared_ptr<Expression> number_of_elements = parse_expression();
     
+    if (currentTok().m_id != TOKEN_RBRACKET) {
+        throw std::runtime_error("']' is expected !");
+    }
+
+    advanceTok();
+    switch (currentTok().m_id) {
+        case TOKEN_IDENTIFIER:
+            return std::make_shared<ArrayType>(CustomType(currentTok().m_value), number_of_elements);
+        case TOKEN_BOOLEAN:
+            return std::make_shared<ArrayType>(BoolType(), number_of_elements);
+        case TOKEN_INTEGER:
+            return std::make_shared<ArrayType>(IntType(), number_of_elements);
+        case TOKEN_REAL:
+            return std::make_shared<ArrayType>(RealType(), number_of_elements);
+        default:
+            throw std::runtime_error("Expected a type of the array !");
+    }    
 }
 
 

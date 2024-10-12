@@ -86,8 +86,9 @@ public:
                                 break;
                             }
                         }
-                        if (some_condition_met)
+                        if (some_condition_met) {
                             continue;
+                        }
                     }
 
                     if (i - last_token > 0)

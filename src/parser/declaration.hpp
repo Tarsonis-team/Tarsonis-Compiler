@@ -35,21 +35,20 @@ public:
 
 class Type : public Declaration {
 public:
-    explicit Type(std::string& name) : Declaration(GrammarUnit::TYPE, name) {}
-    std::shared_ptr<Declaration> m_original;
+    explicit Type(std::string name) : Declaration(GrammarUnit::TYPE, std::move(name)) {}
 };
 
-class Record : public Type {
+class RecordType : public Type {
 public:
-    explicit Record(std::string& name) : Type(name) {}
-    std::vector<std::shared_ptr<Declaration>> m_fields;
+    explicit RecordType(std::string& name) : Type(name) {}
+    std::vector<std::unique_ptr<Declaration>> m_fields;
 };
 
-class Array : public Type {
+class ArrayType : public Type {
 public:
-    explicit Array(std::string& name, int size) : Type(name), m_size(size) {}
-    std::vector<std::shared_ptr<Declaration>> m_items;
-    int m_size;
+    explicit ArrayType(Type type, std::shared_ptr<Expression> size) : Type("array"), m_type(std::move(type)), m_size(size) {}
+    Type m_type;
+    std::shared_ptr<Expression> m_size;
 };
 
 class TypeAliasing : public Type {
@@ -57,6 +56,28 @@ public:
     explicit TypeAliasing(std::string from, std::string to) : Type(to), m_from(std::move(from)), m_to(std::move(to)) {}
     std::string m_from;
     std::string m_to;
+};
+
+class IntType : public Type {
+public:
+    explicit IntType() : Type("int"){}
+};
+
+
+class RealType : public Type {
+public:
+    explicit RealType() : Type("real"){}
+};
+
+class BoolType : public Type {
+public:
+    explicit BoolType() : Type("bool"){}
+};
+
+class CustomType : public Type {
+public:
+    explicit CustomType(std::string identifier) : Type("custom"), m_identifier(std::move(identifier)){}
+    std::string m_identifier;
 };
 
 class PrimitiveVariable : public Variable {
