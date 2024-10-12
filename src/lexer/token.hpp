@@ -43,7 +43,8 @@ enum TokenType {
     TOKEN_ARROW  = 32,
     TOKEN_COLON = 33,
     TOKEN_LBRACKET = 34,
-    TOKEN_RBRACKET = 35
+    TOKEN_RBRACKET = 35,
+    TOKEN_ASSIGNMENT = 36
 };
 
 struct Token

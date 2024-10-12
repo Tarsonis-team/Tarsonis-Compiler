@@ -40,8 +40,8 @@ public:
 
 class RecordType : public Type {
 public:
-    explicit RecordType(std::string& name) : Type(name) {}
-    std::vector<std::unique_ptr<Declaration>> m_fields;
+    explicit RecordType(std::string name) : Type(std::move(name)) {}
+    std::vector<std::shared_ptr<Declaration>> m_fields;
 };
 
 class ArrayType : public Type {

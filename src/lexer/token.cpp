@@ -62,5 +62,6 @@ const std::unordered_map<std::string, int> tokens {
         {":",       33},
         {"[",       34},
         {"]",       35},
+        {":=",      36}
 };
 // clang-format on

@@ -6,6 +6,7 @@
 #include "../lexer/token.hpp"
 #include "AST-node.hpp"
 #include "declaration.hpp"
+#include "statement.hpp"
 
 namespace parsing {
 
@@ -15,6 +16,10 @@ Token Parser::currentTok() {
 
 void Parser::advanceTok() {
     ++m_cur_tok;
+}
+
+Token Parser::peekNextToken() {
+    return m_tokens[m_cur_tok+1];
 }
 
 std::shared_ptr<RoutineParameter> Parser::parse_routine_parameter() {
@@ -39,7 +44,7 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
     if (currentTok().m_id != TOKEN_IDENTIFIER) {
         throw std::runtime_error("Identifier was expected !");
     }
-    Routine res(currentTok().m_value);
+    auto res = std::make_shared<Routine>(currentTok().m_value);
     
     advanceTok();
     if (currentTok().m_id != TOKEN_LPAREN) {
@@ -53,7 +58,7 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
         if (currentTok().m_id != TOKEN_COMA) {
             break;
         }
-        res.m_params.push_back(std::make_shared<RoutineParameter>(parse_routine_parameter()));
+        res->m_params.push_back(std::make_shared<RoutineParameter>(parse_routine_parameter()));
     }
 
     if (currentTok().m_id != TOKEN_RPAREN) {
@@ -66,7 +71,7 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
         if (type != TOKEN_IDENTIFIER && type != TOKEN_INTEGER && type != TOKEN_BOOLEAN && type != TOKEN_REAL) {
             throw std::runtime_error("Identifier expected or primitive type expected");
         }
-        res.return_type = currentTok().m_value;
+        res->return_type = currentTok().m_value;
     }
     advanceTok();
 
@@ -74,18 +79,111 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
         throw std::runtime_error("'is' expected");
     }
 
+    advanceTok();
 
+    res->m_body = parse_body();
 
+    return res;
+}
 
+std::shared_ptr<Expression> Parser::parse_expression() {
 
+}
+
+std::shared_ptr<Assignment> Parser::parse_assignment() {
+    if (currentTok().m_id != TOKEN_IDENTIFIER) {
+        throw std::runtime_error("no modifiable identifier");
+    }
+    auto assignment = std::make_shared<Assignment>();
+    auto modifiable = parse_modifiable_primary();
+    
+    advanceTok();
+
+    if (currentTok().m_id != TOKEN_ASSIGNMENT) {
+        throw std::runtime_error("no assignment token found !");
+    }
+
+    advanceTok();
+    auto expression = parse_expression();
+
+    assignment->m_expression = expression;
+    assignment->m_modifiable = modifiable;
+    return assignment;
+}
+
+std::shared_ptr<RoutineCall> Parser::parse_routine_call() {
+    if (currentTok().m_id != TOKEN_IDENTIFIER) {
+        throw std::runtime_error("no routine identifier");
+    }
+    std::shared_ptr<RoutineCall> call;
+    advanceTok();
+    
+    if (currentTok().m_id != TOKEN_LPAREN) {
+        throw std::runtime_error("expected '(' ");
+    }
+    advanceTok();
+
+    while (currentTok().m_id != TOKEN_RPAREN) {
+        call->m_parameters.push_back(parse_expression());
+        if (currentTok().m_id == TOKEN_COMA) {
+            advanceTok();
+        }
+    }
+
+    return call;
+}
+
+std::shared_ptr<Statement> Parser::parse_statement() {
+    switch (currentTok().m_id) {
+        case TOKEN_IF:
+            return parse_if_statement();
+        case TOKEN_WHILE:
+            return parse_while_statement();
+        case TOKEN_FOR:
+            return parse_for_statement();
+        case TOKEN_IDENTIFIER:
+            if (peekNextToken().m_id == TOKEN_ASSIGNMENT) {  // we have an assignment here
+                return parse_assignment();
+            } else {  // otherwise, we got a routine call
+                return parse_routine_call();
+            }
+        default:
+            throw std::runtime_error("can't parse statement !");
+    }
 }
 
 std::shared_ptr<Body> Parser::parse_body() {
+    auto body_res = std::make_shared<Body>();
+    switch (currentTok().m_id) {
+        case TOKEN_VAR:
+            body_res->m_items.push_back(parse_variable_decl());
+            break;
+        case TOKEN_TYPE:
+            body_res->m_items.push_back(parse_type_decl());
+            break;
+        case TOKEN_IDENTIFIER:
+            body_res->m_items.push_back(parse_statement());
+            break;
+        default:
+            throw std::runtime_error("Can't parse body !");
+    }
 
+    return body_res;
 }
 
-std::shared_ptr<RecordType> Parser::parse_record_decl() {
+std::shared_ptr<RecordType> Parser::parse_record_decl(std::string name) {
+    if (currentTok().m_id != TOKEN_RECORD) {
+        throw std::runtime_error("'record' token is expected!"); 
+    }
+    advanceTok();
 
+    auto record = std::make_shared<RecordType>(name);
+    while (currentTok().m_id != TOKEN_END) {
+        record->m_fields.push_back(parse_variable_decl());
+    }
+
+    advanceTok();
+    return record;
 }
 
 std::shared_ptr<ArrayType> Parser::parse_array_type() {
@@ -290,12 +388,13 @@ std::shared_ptr<Type> Parser::parse_type_decl() {
     advanceTok();
     switch (currentTok().m_id) {
         case TOKEN_RECORD:
-            return parse_record_decl();
+            return parse_record_decl(currentTok().m_value);
         case TOKEN_ARRAY:
             return parse_array_type();
         case TOKEN_BOOLEAN:
         case TOKEN_INTEGER:
         case TOKEN_REAL:
+        case TOKEN_IDENTIFIER:
             return std::make_shared<TypeAliasing>(currentTok().m_value, name_of_the_type);
         default:
             throw std::runtime_error("Specify the type being declared or aliased!");
