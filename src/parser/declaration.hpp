@@ -28,7 +28,7 @@ class Routine : public Declaration {
 public:
     explicit Routine(std::string name) : Declaration(GrammarUnit::ROUTINE, std::move(name)) {}
     
-    std::unique_ptr<Body> m_body;
+    std::shared_ptr<Body> m_body;
     std::vector<std::shared_ptr<RoutineParameter>> m_params;
     std::string return_type;
 };
@@ -36,19 +36,19 @@ public:
 class Type : public Declaration {
 public:
     explicit Type(std::string& name) : Declaration(GrammarUnit::TYPE, name) {}
-    std::unique_ptr<Declaration> m_original;
+    std::shared_ptr<Declaration> m_original;
 };
 
 class Record : public Type {
 public:
     explicit Record(std::string& name) : Type(name) {}
-    std::vector<std::unique_ptr<Declaration>> m_fields;
+    std::vector<std::shared_ptr<Declaration>> m_fields;
 };
 
 class Array : public Type {
 public:
     explicit Array(std::string& name, int size) : Type(name), m_size(size) {}
-    std::vector<std::unique_ptr<Declaration>> m_items;
+    std::vector<std::shared_ptr<Declaration>> m_items;
     int m_size;
 };
 

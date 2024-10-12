@@ -42,25 +42,26 @@ public:
 class AccessArray : public Modifiable {
 
 public:
-    explicit AccessArray(Array& array) : Modifiable(GrammarUnit::ACCESS_ARRAY), m_array(&array) {}
-    std::unique_ptr<Array> m_array;
-    std::unique_ptr<Expression> m_accessor;
+    explicit AccessArray(std::shared_ptr<Array> array) : Modifiable(GrammarUnit::ACCESS_ARRAY), m_array(array) {}
+    std::shared_ptr<Array> m_array;
+    std::shared_ptr<Expression> m_accessor;
 };
 
 class AccessRecord : public Modifiable {
 
 public:
-    explicit AccessRecord(Record& record) : Modifiable(GrammarUnit::ACCESS_RECORD), m_record(&record) {}
-    std::unique_ptr<Record> m_record;
-    std::unique_ptr<Identifier> m_field;
+    explicit AccessRecord(std::shared_ptr<Record> record)
+        : Modifiable(GrammarUnit::ACCESS_RECORD), m_record(record) {}
+    std::shared_ptr<Record> m_record;
+    std::shared_ptr<Identifier> m_field;
 };
 
 class Math : public Expression {
 
 public:
     explicit Math(GrammarUnit gr) : Expression(gr) {}
-    std::unique_ptr<Expression> m_left;
-    std::unique_ptr<Expression> m_right;
+    std::shared_ptr<Expression> m_left;
+    std::shared_ptr<Expression> m_right;
 };
 
 class Plus : public Math {
