@@ -89,14 +89,14 @@ public:
 
 class ArrayVariable : public Variable {
 public:
-    explicit ArrayVariable(std::string name, std::string type) : Variable(std::move(name)), m_type(std::move(type)) {}
-    std::string m_type;
+    explicit ArrayVariable(std::string name, Type type) : Variable(std::move(name)), m_type(std::move(type)) {}
+    Type m_type;
 };
 
 class RecordVariable : public Variable {
 public:
-    explicit RecordVariable(std::string name, std::string type) : Variable(std::move(name)), m_type(std::move(type)) {}
-    std::string m_type;
+    explicit RecordVariable(std::string name, RecordType) : Variable(std::move(name)), m_type(std::move(type)) {}
+    RecordType m_type;
 };
 
 } // namespace parsing

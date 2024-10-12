@@ -80,6 +80,10 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
 
 }
 
+std::shared_ptr<Body> Parser::parse_body() {
+
+}
+
 std::shared_ptr<RecordType> Parser::parse_record_decl() {
 
 }
@@ -140,12 +144,14 @@ std::shared_ptr<Variable> Parser::parse_variable_decl() {
         case TOKEN_BOOLEAN:
         case TOKEN_INTEGER:
         case TOKEN_REAL:
-            declaration = std::make_shared<PrimitiveVariable>(var_name, currentTok().m_value);
-            break;
+            return std::make_shared<PrimitiveVariable>(var_name, currentTok().m_value);
         case TOKEN_ARRAY:
-            declaration = std::make_shared<ArrayVariable>();
+            return std::make_shared<ArrayVariable>(var_name, parse_array_type());
+        case TOKEN_IDENTIFIER:
+            return std::make_shared<RecordVariable>(var_name, Type(currentTok().m_value));
+        default:
+            throw std::runtime_error("type of variable is expected !");
     }
-
 }
 
 
