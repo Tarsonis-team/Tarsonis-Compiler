@@ -3,7 +3,7 @@
 #include <vector>
 #include "parser.hpp"
 // #include "lexer.hpp"
-#include "token.hpp"
+#include "../lexer/token.hpp"
 #include "AST-node.hpp"
 #include "declaration.hpp"
 
@@ -146,6 +146,123 @@ std::shared_ptr<Variable> Parser::parse_variable_decl() {
             declaration = std::make_shared<ArrayVariable>();
     }
 
+}
+
+
+
+std::shared_ptr<If> Parser::parse_if_statement() {
+    auto result = std::make_shared<If>();
+
+    if (currentTok().m_id != TOKEN_IF) {
+        throw std::runtime_error("'if' is expected as the begin of if-statement!");
+    }
+
+    advanceTok();
+    result->m_condition = parse_expression();
+
+    if (currentTok().m_id != TOKEN_THEN) {
+        throw std::runtime_error("'then' is expected as the begin of the true-block");
+    }
+
+    advanceTok();
+    result->m_then = parse_body();
+
+    if (currentTok().m_id != TOKEN_ELSE) {
+        if (currentTok().m_id != TOKEN_END) {
+            throw std::runtime_error("'else' or 'end' is expected as the begin of the false-block");
+        } else {
+            result->m_else = nullptr;
+            return result;
+        }
+    }
+
+    advanceTok();
+    result->m_else = parse_body();
+
+    if (currentTok().m_id != TOKEN_END) {
+        throw std::runtime_error("'end' is expected as the end of the if-statement");
+    }
+
+    return result;
+}
+
+std::shared_ptr<For> Parser::parse_for_statement() {
+    auto result = std::make_shared<For>();
+
+    if (currentTok().m_id != TOKEN_FOR) {
+        throw std::runtime_error("'for' is expected as the begin of for-loop!");
+    }
+
+    advanceTok();
+    if (currentTok().m_id != TOKEN_IDENTIFIER) {
+        throw std::runtime_error("identifier is expected at the for-loop!");
+    }
+    result->m_identifier = std::make_shared<PrimitiveVariable>(currentTok().m_value, "integer");
+
+    advanceTok();
+    result->m_range = parse_range();
+
+    if (currentTok().m_id != TOKEN_LOOP) {
+        throw std::runtime_error("'loop' is expected at the for-loop!");
+    }
+    advanceTok();
+
+    result->m_body = parse_body();
+
+    if (currentTok().m_id != TOKEN_END) {
+        throw std::runtime_error("'end' is expected as the end of the for-loop");
+    }
+
+    return result;
+}
+
+std::shared_ptr<Range> Parser::parse_range() {
+    auto result = std::make_shared<Range>();
+
+    if (currentTok().m_id != TOKEN_IN) {
+        throw std::runtime_error("'in' is expected before the range!");
+    }
+    advanceTok();
+
+    if (currentTok().m_id == TOKEN_REVERSE) {
+        result->m_reverse = true;
+        advanceTok();
+    }
+
+    result->m_begin = parse_expression();
+
+    if (currentTok().m_id != TOKEN_DOTDOT) {
+        throw std::runtime_error("'in' is expected before the range!");
+    }
+    advanceTok();
+
+    result-> m_end = parse_expression();
+
+    return result;
+}
+
+std::shared_ptr<While> Parser::parse_while_statement() {
+    auto result = std::make_shared<While>();
+
+    if (currentTok().m_id != TOKEN_WHILE) {
+        throw std::runtime_error("'while' is expected before the while-loop!");
+    }
+    advanceTok();
+
+    result->m_condition = parse_expression();
+
+    if (currentTok().m_id != TOKEN_LOOP) {
+        throw std::runtime_error("'loop' is expected at the while-loop!");
+    }
+    advanceTok();
+
+    result->m_body = parse_body();
+
+    if (currentTok().m_id != TOKEN_END) {
+        throw std::runtime_error("'end' is expected as the end of the while-loop");
+    }
+
+    return result;
 }
 
 std::shared_ptr<Type> Parser::parse_type_decl() {

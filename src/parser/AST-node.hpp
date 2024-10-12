@@ -20,7 +20,7 @@ class Body : public ASTNode {
 
 public:
     explicit Body() : ASTNode(GrammarUnit::BODY) {}
-    std::vector<std::unique_ptr<ASTNode>> m_items;
+    std::vector<std::shared_ptr<ASTNode>> m_items;
 };
 
 
@@ -55,14 +55,14 @@ class Range : public ASTNode {
 public:
     explicit Range() : ASTNode(GrammarUnit::RANGE), m_reverse(false) {}
     bool m_reverse;
-    std::unique_ptr<Expression> m_begin;
-    std::unique_ptr<Expression> m_end;
+    std::shared_ptr<Expression> m_begin;
+    std::shared_ptr<Expression> m_end;
 };
 
 class Identifier : public ASTNode {
 public:
     explicit Identifier(Declaration& ref) : ASTNode(GrammarUnit::IDENTIFIER), m_reference(&ref) {}
-    std::unique_ptr<Declaration> m_reference;
+    std::shared_ptr<Declaration> m_reference;
 };
 
 }  // namespace parsing
