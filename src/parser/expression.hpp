@@ -34,32 +34,19 @@ public:
 };
 
 class Modifiable : public Primary {
-
 public:
-    explicit Modifiable(GrammarUnit gr) : Primary(gr) {}
+
+struct Chained { 
+    virtual ~Chained() = default;
+};
+struct ArrayAccess : public Chained { ArrayAccess() = default; std::shared_ptr<Expression> access; };
+struct RecordAccess : public Chained { RecordAccess() = default; std::string identifier; };
+
+    explicit Modifiable(std::string head) : Primary(GrammarUnit::VARIABLE), m_head_name(head) {}
+    std::vector<std::shared_ptr<Chained>> m_chain;
+    std::string m_head_name;
 };
 
-class Identifier : public Modifiable {
-public:
-    explicit Identifier(std::string name) : Modifiable(GrammarUnit::IDENTIFIER), m_name(std::move(name)) {}
-    std::string m_name;
-};
-
-class AccessArray : public Modifiable {
-
-public:
-    explicit AccessArray() : Modifiable(GrammarUnit::ACCESS_ARRAY) {}
-    std::shared_ptr<Expression> m_accessor;
-    std::shared_ptr<Expression> m_array_name;
-};
-
-class AccessRecord : public Modifiable {
-
-public:
-    explicit AccessRecord() : Modifiable(GrammarUnit::ACCESS_RECORD) {}
-    std::shared_ptr<Identifier> m_field;
-    std::shared_ptr<Expression> m_record_name;
-};
 
 class Math : public Expression {
 

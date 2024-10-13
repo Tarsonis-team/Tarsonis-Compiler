@@ -8,6 +8,7 @@
 #include "declaration.hpp"
 #include "statement.hpp"
 #include "expression.hpp"
+#include "expression.hpp"
 
 namespace parsing {
 
@@ -401,6 +402,45 @@ std::shared_ptr<Expression> Parser::parse_expression() {
     return tree;
 }
 
+std::shared_ptr<Modifiable> Parser::parse_modifiable_primary() {
+    if (currentTok().m_id != TOKEN_IDENTIFIER) {
+        throw std::runtime_error("identifier expected !");
+    }
+    
+    auto modif_primary = std::make_shared<Modifiable>(currentTok().m_value);
+    advanceTok();
+
+    while (true) {
+        auto curtk = currentTok();
+        if (curtk.m_id != TOKEN_DOT && curtk.m_id != TOKEN_LBRACKET) {
+            break;
+        }
+
+        if (curtk.m_id == TOKEN_DOT) {
+            advanceTok();
+            auto field = std::make_shared<Modifiable::RecordAccess>();
+            field->identifier = currentTok().m_value;
+            modif_primary->m_chain.push_back(field);
+            advanceTok();
+        } else {
+            // TOKEN_LBRACKET
+            advanceTok();
+            auto expr = parse_expression();
+
+            if (currentTok().m_id != TOKEN_RBRACKET) {
+                throw std::runtime_error("']' expected !");
+            }
+
+            auto array_acc = std::make_shared<Modifiable::ArrayAccess>();
+            array_acc->access = expr;
+            modif_primary->m_chain.push_back(array_acc);
+            advanceTok();
+        }
+    }
+
+    return modif_primary;
+}
+
 std::shared_ptr<Assignment> Parser::parse_assignment() {
     if (currentTok().m_id != TOKEN_IDENTIFIER) {
         throw std::runtime_error("no modifiable identifier");
@@ -735,10 +775,7 @@ Program Parser::parse() {
         }
     }
     
-    // return {};
 }
-
-
 
 
 }  // namespace parsing

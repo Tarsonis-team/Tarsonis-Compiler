@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "expression.hpp"
 #include "token.hpp"
 #include "AST-node.hpp"
 #include "declaration.hpp"
@@ -20,7 +21,7 @@ private:
     Token peekNextToken();
     void advanceTok();
 
-    std::shared_ptr<Variable> parse_modifiable_primary();
+    std::shared_ptr<Modifiable> parse_modifiable_primary();
     std::shared_ptr<Routine> parse_routine_decl();
     std::shared_ptr<Variable> parse_variable_decl();
     std::shared_ptr<Type> parse_type_decl();

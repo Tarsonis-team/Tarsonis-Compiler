@@ -4,6 +4,7 @@
 #include <vector>
 #include "AST-node.hpp"
 #include "declaration.hpp"
+#include "expression.hpp"
 
 
 namespace parsing {
@@ -47,7 +48,7 @@ class Assignment : public Statement {
 
 public:
     explicit Assignment() : Statement(GrammarUnit::ASSIGNMENT) {}
-    std::shared_ptr<Variable> m_modifiable;
+    std::shared_ptr<Modifiable> m_modifiable;
     std::shared_ptr<Expression> m_expression;
 };
 
