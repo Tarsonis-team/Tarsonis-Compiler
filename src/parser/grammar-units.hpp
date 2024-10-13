@@ -34,5 +34,7 @@ enum class GrammarUnit {
     NOT_EQUAL,
     AND,
     OR,
-    XOR
+    XOR,
+    TRUE,
+    FALSE
 };

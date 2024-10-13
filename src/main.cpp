@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
     // }
     // std::string source_file_path = argv[1];
     std::string source_file_path = "/home/max/vscdir/tarsonis/tests/examples/aplusb.tr";
+//    std::string source_file_path = "C:/Projects/C/C++/Compilers/Tarsonis-Compiler/tests/examples/arithmetics.tr";
 
     if (!std::filesystem::exists(source_file_path)) {
         std::cerr << "Error: path to a source file is not valid\n";

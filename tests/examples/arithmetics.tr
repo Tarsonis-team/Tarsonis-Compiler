@@ -1,11 +1,5 @@
-/* TODO 
-
-    It is whether the compiler recognizes '/', '*', '+', '-'
-
-*/
-
 routine main() is
-    var a: integer is 4
+    var a: integer is 4 + 2
     var b: integer is 8
 
     var c: integer is a / b + a * b - a / b

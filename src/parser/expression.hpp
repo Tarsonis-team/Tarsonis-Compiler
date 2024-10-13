@@ -18,6 +18,12 @@ class Integer : public Primary {
 public:
     explicit Integer(int value) : Primary(), m_value(value) {}
     int m_value;
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::INTEGER;
+    }
+    void print() override {
+        std::cout << "int_const:" << m_value;
+    }
 };
 
 class Boolean : public Primary {
@@ -25,6 +31,9 @@ class Boolean : public Primary {
 public:
     explicit Boolean(bool value) : Primary(), m_value(value) {}
     bool m_value;
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::BOOL;
+    }
 };
 
 class Real : public Primary {
@@ -32,6 +41,9 @@ class Real : public Primary {
 public:
     explicit Real(double value) : Primary(), m_value(value) {}
     double m_value;
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::REAL;
+    }
 };
 
 class Modifiable : public Primary {
@@ -46,6 +58,10 @@ struct RecordAccess : public Chained { RecordAccess() = default; std::string ide
     explicit Modifiable(std::string head) : Primary(), m_head_name(head) {}
     std::vector<std::shared_ptr<Chained>> m_chain;
     std::string m_head_name;
+
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::IDENTIFIER;
+    }
 };
 
 
@@ -60,25 +76,48 @@ public:
 class Plus : public Math {
 
 public:
-    explicit Plus() : Math() {}
+    explicit Plus() : Math() { this->m_grammar = GrammarUnit::PLUS; }
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::PLUS;
+    }
+    void print() override {
+        std::cout << "Plus with params:\n";
+
+        std::cout << " ";
+        this->m_left->print();
+
+        std::cout << "\ns ";
+        this->m_right->print();
+
+        std::cout << "\n";
+    }
 };
 
 class Minus : public Math {
 
 public:
     explicit Minus() : Math() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::MINUS;
+    }
 };
 
 class Multiplication : public Math {
 
 public:
     explicit Multiplication() : Math() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::MULTIPLICATE;
+    }
 };
 
 class Division : public Math {
 
 public:
     explicit Division() : Math() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::DIVISION;
+    }
 };
 
 class Logic : public Math {
@@ -91,18 +130,45 @@ class And : public Logic {
 
 public:
     explicit And() : Logic() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::AND;
+    }
 };
 
 class Or : public Logic {
 
 public:
     explicit Or() : Logic() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::OR;
+    }
 };
 
 class Xor : public Logic {
 
 public:
     explicit Xor() : Logic() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::XOR;
+    }
+};
+
+class True : public Logic {
+
+public:
+    explicit True() : Logic() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::TRUE;
+    }
+};
+
+class False : public Logic {
+
+public:
+    explicit False() : Logic() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::FALSE;
+    }
 };
 
 class Relation : public Math {
@@ -115,42 +181,63 @@ class Mod : public Relation {
 
 public:
     explicit Mod() : Relation() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::MOD;
+    }
 };
 
 class Greater : public Relation {
 
 public:
     explicit Greater() : Relation() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::GREATER;
+    }
 };
 
 class Less : public Relation {
 
 public:
     explicit Less() : Relation() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::LESS;
+    }
 };
 
 class GreaterEqual : public Relation {
 
 public:
     explicit GreaterEqual() : Relation() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::GREATER_EQUAL;
+    }
 };
 
 class LessEqual : public Relation {
 
 public:
     explicit LessEqual() : Relation() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::LESS_EQUAL;
+    }
 };
 
 class Equal : public Relation {
 
 public:
     explicit Equal() : Relation() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::EQUAL;
+    }
 };
 
 class NotEqual : public Relation {
 
 public:
     explicit NotEqual() : Relation() {}
+    GrammarUnit get_grammar() const override {
+        return GrammarUnit::NOT_EQUAL;
+    }
 };
 
 }  // namespace parsing

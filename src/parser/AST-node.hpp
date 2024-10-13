@@ -19,6 +19,11 @@ public:
         cout << "Some AST-Node, the default print function\n";
     };
 
+    virtual GrammarUnit get_grammar() const {
+        return this->m_grammar;
+    };
+
+
     GrammarUnit m_grammar;
     std::weak_ptr<ASTNode> parent;
 };
