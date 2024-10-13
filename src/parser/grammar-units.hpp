@@ -23,10 +23,14 @@ enum class GrammarUnit {
     MINUS,
     MULTIPLICATE,
     DIVISION,
+    MOD,
     GREATER,
     LESS,
     GREATER_EQUAL,
     LESS_EQUAL,
     EQUAL,
-    NOT_EQUAL
+    NOT_EQUAL,
+    AND,
+    OR,
+    XOR
 };

@@ -59,10 +59,4 @@ public:
     std::shared_ptr<Expression> m_end;
 };
 
-class Identifier : public ASTNode {
-public:
-    explicit Identifier(Declaration& ref) : ASTNode(GrammarUnit::IDENTIFIER), m_reference(&ref) {}
-    std::shared_ptr<Declaration> m_reference;
-};
-
 }  // namespace parsing
