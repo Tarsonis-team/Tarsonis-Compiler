@@ -22,10 +22,17 @@ Token Token::asConstant(const std::string& cnst)
     return { cnst, -1 };
 }
 
+Token Token::asEndOfFile()
+{
+    return { "EOF", -3 };
+}
+
 // clang-format off
 // token signature -> id of the token
 const std::unordered_map<std::string, int> tokens {
-        // -1 for consts
+        // -3 for EOF
+        // -2 for real consts
+        // -1 for integer consts
         // 0 for Identifiers
         {"routine",   1},
         {"while",     2},

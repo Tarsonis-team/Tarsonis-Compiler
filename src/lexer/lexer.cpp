@@ -133,6 +133,7 @@ std::vector<Token> Lexer::parse()
             }
         }
     }
+    res.push_back(Token::asEndOfFile());
 
     return res;
 }

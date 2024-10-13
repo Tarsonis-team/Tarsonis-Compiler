@@ -1,9 +1,7 @@
 
-routine main() -> is
+routine main() -> integer is
     var a: integer
     var b: integer
     var vara: integer;
 
-    var c: integer is a + b
-    vara := a + b;
 end

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "expression.hpp"
-#include "token.hpp"
+#include "lexer/token.hpp"
 #include "AST-node.hpp"
 #include "declaration.hpp"
 #include "statement.hpp"
@@ -14,12 +14,12 @@ class Parser
 {
 public:
     explicit Parser(const std::vector<Token>& tokens) : m_tokens(tokens) {};
+    std::shared_ptr<Program> parse();
 private:
-    Program parse();
-
     Token currentTok();
     Token peekNextToken();
     void advanceTok();
+    void consumeNewlines();
 
     std::shared_ptr<Modifiable> parse_modifiable_primary();
     std::shared_ptr<Routine> parse_routine_decl();
@@ -40,7 +40,7 @@ private:
 
     std::shared_ptr<Body> parse_body();
 
-    size_t m_cur_tok;
+    size_t m_cur_tok = 0;
     const std::vector<Token>& m_tokens;
 };
 

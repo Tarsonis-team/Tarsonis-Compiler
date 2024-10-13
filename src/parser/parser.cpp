@@ -2,12 +2,10 @@
 #include <stdexcept>
 #include <vector>
 #include "parser.hpp"
-// #include "lexer.hpp"
-#include "../lexer/token.hpp"
+#include "lexer/token.hpp"
 #include "AST-node.hpp"
 #include "declaration.hpp"
 #include "statement.hpp"
-#include "expression.hpp"
 #include "expression.hpp"
 
 namespace parsing {
@@ -19,6 +17,13 @@ Token Parser::currentTok() {
 void Parser::advanceTok() {
     ++m_cur_tok;
 }
+
+void Parser::consumeNewlines() {
+    while (m_tokens[m_cur_tok].m_id == TOKEN_NEWLINE) {
+        m_cur_tok++;
+    }
+}
+
 
 Token Parser::peekNextToken() {
     return m_tokens[m_cur_tok+1];
@@ -57,10 +62,13 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
     // they can only be in form of [primitive_type | identifier_of_type] identifier 
     advanceTok();
     while (true) {
-        if (currentTok().m_id != TOKEN_COMA) {
+        if (currentTok().m_id == TOKEN_RPAREN) {
             break;
         }
-        res->m_params.push_back(std::make_shared<RoutineParameter>(parse_routine_parameter()));
+        res->m_params.push_back(parse_routine_parameter());
+        if (currentTok().m_id == TOKEN_COMA) {
+            advanceTok();
+        }
     }
 
     if (currentTok().m_id != TOKEN_RPAREN) {
@@ -69,6 +77,7 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
     advanceTok();
     
     if (currentTok().m_id == TOKEN_ARROW) {
+        advanceTok();
         auto type = currentTok().m_id;
         if (type != TOKEN_IDENTIFIER && type != TOKEN_INTEGER && type != TOKEN_BOOLEAN && type != TOKEN_REAL) {
             throw std::runtime_error("Identifier expected or primitive type expected");
@@ -88,318 +97,35 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
     return res;
 }
 
-// Is related to expressions
-namespace expressions {
-
-template<typename T>
-std::vector<T> take_subvector(const std::vector<T> &vec, int begin, int end) {
-    if (begin > end || end > vec.size()) {
-        throw std::out_of_range("Invalid range for sub vector");
-    }
-
-    std::vector<T> sub_vec(vec.begin() + begin, vec.begin() + end);
-    return sub_vec;
-}
-
-
-int look_for_next_item(const std::vector<std::shared_ptr<Expression>> &vec, int begin,
-                       std::vector<GrammarUnit> &units) {
-    for (int j = begin; j < vec.size(); ++j) {
-        for (auto unit: units) {
-            if (vec[j]->m_grammar == unit) {
-                return j;
-            }
-        }
-
-    }
-
-    return int(vec.size()) - 1;
-}
-
-using ExpressionParserBuilderPtr = std::shared_ptr<Expression> (*)(std::vector<std::shared_ptr<Expression>>);
-
-std::shared_ptr<Logic> get_fork_in_expression(
-        const std::vector<std::shared_ptr<Expression>> &expression_line,
-        std::vector<GrammarUnit> &units,
-        ExpressionParserBuilderPtr function,
-        std::shared_ptr<Logic> &fork,
-        bool &achieved
-) {
-
-    for (auto unit: units) {
-        if (expression_line[0]->m_grammar == unit) {
-            throw std::runtime_error("Unexpected item at the beginning of an expression");
-        }
-    }
-
-    for (int i = 0; i < expression_line.size(); ++i) {
-        auto &item = expression_line[i];
-
-        for (auto &unit: units) {
-            if (item->m_grammar == unit) {
-                achieved = true;
-
-                fork = std::make_shared<Or>();
-
-                auto left_part = take_subvector(expression_line, 0, i);
-                fork->m_left = function(left_part);
-
-                if (i == expression_line.size() - 1) {
-                    throw std::runtime_error("This item cannot be last term in expression");
-                }
-
-                int next_pos = look_for_next_item(expression_line, i + 1, units);
-                auto right_part = take_subvector(expression_line, i + 1, next_pos);
-                fork->m_right = function(right_part);
-
-                break;
-            }
-        }
-
-    }
-}
-
-// A recursion for building a tree
-std::shared_ptr<Expression> expression_parser_builder(std::vector<std::shared_ptr<Expression>> expression_line) {
-    // Order: */ +- <> = xor and or (start from the end)
-
-    std::shared_ptr<Logic> fork;
-    std::vector<GrammarUnit> grammar_units;
-    bool was_achieved = false;
-
-    // or
-    grammar_units.push_back(GrammarUnit::OR);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
-    if (was_achieved) {
-        return fork;
-    }
-    grammar_units.clear();
-
-    // and
-    grammar_units.push_back(GrammarUnit::AND);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
-    if (was_achieved) {
-        return fork;
-    }
-    grammar_units.clear();
-
-    // xor
-    grammar_units.push_back(GrammarUnit::XOR);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
-    if (was_achieved) {
-        return fork;
-    }
-    grammar_units.clear();
-
-    // = /=
-    grammar_units.push_back(GrammarUnit::EQUAL);
-    grammar_units.push_back(GrammarUnit::NOT_EQUAL);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
-    if (was_achieved) {
-        return fork;
-    }
-    grammar_units.clear();
-
-    // > < <= >= = /=
-    grammar_units.push_back(GrammarUnit::GREATER);
-    grammar_units.push_back(GrammarUnit::LESS);
-    grammar_units.push_back(GrammarUnit::LESS_EQUAL);
-    grammar_units.push_back(GrammarUnit::GREATER_EQUAL);
-    grammar_units.push_back(GrammarUnit::EQUAL);
-    grammar_units.push_back(GrammarUnit::NOT_EQUAL);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
-    if (was_achieved) {
-        return fork;
-    }
-    grammar_units.clear();
-
-    // + -
-    grammar_units.push_back(GrammarUnit::PLUS);
-    grammar_units.push_back(GrammarUnit::MINUS);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
-    if (was_achieved) {
-        return fork;
-    }
-    grammar_units.clear();
-
-    // * / %
-    grammar_units.push_back(GrammarUnit::MULTIPLICATE);
-    grammar_units.push_back(GrammarUnit::DIVISION);
-    grammar_units.push_back(GrammarUnit::MOD);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
-    if (was_achieved) {
-        return fork;
-    }
-    grammar_units.clear();
-
-    // Now, here are only numbers and identifiers
-    if (expression_line.size() != 1) {
-        throw std::runtime_error("Two numbers/identifiers should be connected by some action (e.g. 5 2 -> 5 + 2");
-    }
-
-    return expression_line[0];
-}
-
-bool is_end_of_expression(int token_id) {
-    int end_tokens[] = {
-            TOKEN_NEWLINE,
-            TOKEN_THEN,
-            TOKEN_DOTDOT,
-            TOKEN_SEMICOLON,
-            TOKEN_LOOP,
-
-            TOKEN_RPAREN,
-            TOKEN_RBRACKET
-    };
-
-    for (auto end_token: end_tokens) {
-        if (end_token == token_id) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-} // expressions
-
 std::shared_ptr<Expression> Parser::parse_expression() {
-    // TODO: function calls are not handled!
-    std::vector<std::shared_ptr<Expression>> expression_line;
-
-    while (!expressions::is_end_of_expression(currentTok().m_id)) {
-        std::shared_ptr<Expression> item_to_add = nullptr;
-
+    while (true) {
         switch (currentTok().m_id) {
+            case TOKEN_CONST_INT:
+            case TOKEN_CONST_REAL:
             case TOKEN_IDENTIFIER:
-                item_to_add = std::make_shared<Identifier>(currentTok().m_value);
-                break;
-            case TOKEN_CONST: {
-                bool is_real_constant = false;
-
-                for (char c: currentTok().m_value) {
-                    if (c == '.') {
-                        is_real_constant = true;
-                        break;
-                    }
-                }
-
-                if (is_real_constant) {
-                    double value = std::stod(currentTok().m_value);
-                    item_to_add = std::make_shared<Real>(value);
-                } else {
-                    int value = std::stoi(currentTok().m_value);
-                    item_to_add = std::make_shared<Integer>(value);
-                }
-
-                break;
-            }
-            case TOKEN_PLUS:
-                item_to_add = std::make_shared<Plus>();
-                break;
-            case TOKEN_MINUS:
-                item_to_add = std::make_shared<Minus>();
-                break;
-            case TOKEN_MULTIP:
-                item_to_add = std::make_shared<Multiplication>();
-                break;
-            case TOKEN_DIVISION:
-                item_to_add = std::make_shared<Division>();
-                break;
-            case TOKEN_GREATER:
-                item_to_add = std::make_shared<Greater>();
-                break;
-            case TOKEN_LESS:
-                item_to_add = std::make_shared<Less>();
-                break;
-            case TOKEN_GREATEREQ:
-                item_to_add = std::make_shared<GreaterEqual>();
-                break;
-            case TOKEN_LESSEQ:
-                item_to_add = std::make_shared<LessEqual>();
-                break;
-            case TOKEN_EQUAL:
-                item_to_add = std::make_shared<Equal>();
-                break;
-            case TOKEN_NOTEQUAL:
-                item_to_add = std::make_shared<NotEqual>();
-                break;
-            case TOKEN_MOD:
-                item_to_add = std::make_shared<Mod>();
-                break;
+            case TOKEN_LBRACKET:
+            case TOKEN_RBRACKET:
             case TOKEN_AND:
-                item_to_add = std::make_shared<And>();
-                break;
             case TOKEN_OR:
-                item_to_add = std::make_shared<Or>();
-                break;
             case TOKEN_XOR:
-                item_to_add = std::make_shared<Xor>();
-                break;
-
-            // More complex structures
-
-            case TOKEN_DOT: {
-                // TODO: consider a chain of accessors
-                auto access_record = std::make_shared<AccessRecord>();
-
+            case TOKEN_LESS:
+            case TOKEN_LESSEQ:
+            case TOKEN_GREATER:
+            case TOKEN_GREATEREQ:
+            case TOKEN_EQUAL:
+            case TOKEN_PLUS:
+            case TOKEN_DIVISION:
+            case TOKEN_MOD:
+            case TOKEN_MULTIP:
+            case TOKEN_MINUS:
+            case TOKEN_DOT:
+            case TOKEN_TRUE:
+            case TOKEN_FALSE:
                 advanceTok();
-                if (currentTok().m_id != TOKEN_IDENTIFIER) {
-                    throw std::runtime_error("An identifier is expected after the . when access a record");
-                }
-
-                if (expression_line.empty()) {
-                    throw std::runtime_error("'.' is not expected at the beginning of an expression");
-                }
-
-                access_record->m_field = std::make_shared<Identifier>(currentTok().m_value);
-                access_record->m_record_name = expression_line[expression_line.size() - 1];
-
-                expression_line.pop_back();
-
-                item_to_add = access_record;
-                break;
-            }
-            case TOKEN_LBRACKET: {
-                auto access_array = std::make_shared<AccessArray>();
-
-                if (expression_line.empty()) {
-                    throw std::runtime_error("'[' is not expected at the beginning of an expression");
-                }
-
-                advanceTok();
-                access_array->m_accessor = parse_expression();
-                access_array->m_array_name = expression_line[expression_line.size() - 1];
-
-                expression_line.pop_back();
-
-                item_to_add = access_array;
-                break;
-            }
-            case TOKEN_LPAREN: {
-                advanceTok();
-                auto nested_expression = parse_expression();
-
-                item_to_add = nested_expression;
-                break;
-            }
-
             default:
-                throw std::runtime_error("Some item in expression was not recognised: " + currentTok().m_value);
-
+                return std::make_shared<Expression>();
         }
-
-        if (item_to_add == nullptr) {
-            throw std::runtime_error("Some item in expression was not recognised: " + currentTok().m_value);
-        }
-
-        expression_line.push_back(item_to_add);
-        advanceTok();
     }
-    
-    // Building a tree based on a vector
-    auto tree = expressions::expression_parser_builder(expression_line);
-    return tree;
 }
 
 std::shared_ptr<Modifiable> Parser::parse_modifiable_primary() {
@@ -504,21 +230,33 @@ std::shared_ptr<Statement> Parser::parse_statement() {
 }
 
 std::shared_ptr<Body> Parser::parse_body() {
+    consumeNewlines();
     auto body_res = std::make_shared<Body>();
-    switch (currentTok().m_id) {
-        case TOKEN_VAR:
-            body_res->m_items.push_back(parse_variable_decl());
+    while (true) {
+        consumeNewlines();
+        switch (currentTok().m_id) {
+            case TOKEN_VAR:
+                body_res->m_items.push_back(parse_variable_decl());
+                break;
+            case TOKEN_TYPE:
+                body_res->m_items.push_back(parse_type_decl());
+                break;
+            case TOKEN_IDENTIFIER:
+                body_res->m_items.push_back(parse_statement());
+                break;
+            case TOKEN_END:
+                break;
+            default:
+                throw std::runtime_error("Can't parse body !");
+        }
+        if (currentTok().m_id == TOKEN_NEWLINE || currentTok().m_id == TOKEN_SEMICOLON) {
+            advanceTok();
+        }
+        if (currentTok().m_id == TOKEN_END) {
+            advanceTok();
             break;
-        case TOKEN_TYPE:
-            body_res->m_items.push_back(parse_type_decl());
-            break;
-        case TOKEN_IDENTIFIER:
-            body_res->m_items.push_back(parse_statement());
-            break;
-        default:
-            throw std::runtime_error("Can't parse body !");
+        }
     }
-
     return body_res;
 }
 
@@ -557,13 +295,13 @@ std::shared_ptr<ArrayType> Parser::parse_array_type() {
     advanceTok();
     switch (currentTok().m_id) {
         case TOKEN_IDENTIFIER:
-            return std::make_shared<ArrayType>(CustomType(currentTok().m_value), number_of_elements);
+            return std::make_shared<ArrayType>(currentTok().m_value, number_of_elements);
         case TOKEN_BOOLEAN:
-            return std::make_shared<ArrayType>(BoolType(), number_of_elements);
+            return std::make_shared<ArrayType>(currentTok().m_value, number_of_elements);
         case TOKEN_INTEGER:
-            return std::make_shared<ArrayType>(IntType(), number_of_elements);
+            return std::make_shared<ArrayType>(currentTok().m_value, number_of_elements);
         case TOKEN_REAL:
-            return std::make_shared<ArrayType>(RealType(), number_of_elements);
+            return std::make_shared<ArrayType>(currentTok().m_value, number_of_elements);
         default:
             throw std::runtime_error("Expected a type of the array !");
     }    
@@ -589,21 +327,21 @@ std::shared_ptr<Variable> Parser::parse_variable_decl() {
     advanceTok();
     
     std::shared_ptr<Variable> declaration;
+    std::string type;
     switch (currentTok().m_id) {
         case TOKEN_BOOLEAN:
         case TOKEN_INTEGER:
+        case TOKEN_IDENTIFIER:
         case TOKEN_REAL:
-            return std::make_shared<PrimitiveVariable>(var_name, currentTok().m_value);
+            type = currentTok().m_value;
+            advanceTok();
+            return std::make_shared<PrimitiveVariable>(var_name, type);
         case TOKEN_ARRAY:
             return std::make_shared<ArrayVariable>(var_name, parse_array_type());
-        case TOKEN_IDENTIFIER:
-            return std::make_shared<RecordVariable>(var_name, Type(currentTok().m_value));
         default:
             throw std::runtime_error("type of variable is expected !");
     }
 }
-
-
 
 std::shared_ptr<If> Parser::parse_if_statement() {
     auto result = std::make_shared<If>();
@@ -750,32 +488,36 @@ std::shared_ptr<Type> Parser::parse_type_decl() {
         default:
             throw std::runtime_error("Specify the type being declared or aliased!");
     }
-
 }
 
-Program Parser::parse() {
-    Program result;
-    int cur_token = 0;
+std::shared_ptr<Program> Parser::parse() {
+    auto result = std::make_shared<Program>();
     while (true) {
         auto token = currentTok();
 
+        if (currentTok().m_id == TOKEN_EOF) {
+            break;
+        }
+
         switch (token.m_id) {
             case TOKEN_ROUTINE:
-                result.m_declarations.push_back(parse_routine_decl());
+                result->m_declarations.push_back(parse_routine_decl());
                 break;
             case TOKEN_VAR:
-                result.m_declarations.push_back(parse_variable_decl());
+                result->m_declarations.push_back(parse_variable_decl());
                 break;
             case TOKEN_TYPE:
-                result.m_declarations.push_back(parse_type_decl());
+                result->m_declarations.push_back(parse_type_decl());
                 break;
-            default:
+            case TOKEN_NEWLINE:
+            case TOKEN_SEMICOLON:
                 advanceTok();
                 break;
+            default:
+                throw std::runtime_error("Failed to parse program in the space outside of routines !");
         }
     }
-    
+    return result;
 }
-
 
 }  // namespace parsing

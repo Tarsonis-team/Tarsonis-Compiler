@@ -2,34 +2,35 @@
 
 #include <memory>
 #include "AST-node.hpp"
-#include "declaration.hpp"
+// #include "grammar-units.hpp"
 
 namespace parsing {
 
 class Primary : public Expression {
 
 public:
-    explicit Primary(GrammarUnit gr) : Expression(gr) {}
+    explicit Primary() : Expression() {}
+    ~Primary() override = default;
 };
 
 class Integer : public Primary {
 
 public:
-    explicit Integer(int value) : Primary(GrammarUnit::INTEGER), m_value(value) {}
+    explicit Integer(int value) : Primary(), m_value(value) {}
     int m_value;
 };
 
 class Boolean : public Primary {
 
 public:
-    explicit Boolean(bool value) : Primary(GrammarUnit::BOOL), m_value(value) {}
+    explicit Boolean(bool value) : Primary(), m_value(value) {}
     bool m_value;
 };
 
 class Real : public Primary {
 
 public:
-    explicit Real(double value) : Primary(GrammarUnit::REAL), m_value(value) {}
+    explicit Real(double value) : Primary(), m_value(value) {}
     double m_value;
 };
 
@@ -42,7 +43,7 @@ struct Chained {
 struct ArrayAccess : public Chained { ArrayAccess() = default; std::shared_ptr<Expression> access; };
 struct RecordAccess : public Chained { RecordAccess() = default; std::string identifier; };
 
-    explicit Modifiable(std::string head) : Primary(GrammarUnit::VARIABLE), m_head_name(head) {}
+    explicit Modifiable(std::string head) : Primary(), m_head_name(head) {}
     std::vector<std::shared_ptr<Chained>> m_chain;
     std::string m_head_name;
 };
@@ -51,7 +52,7 @@ struct RecordAccess : public Chained { RecordAccess() = default; std::string ide
 class Math : public Expression {
 
 public:
-    explicit Math(GrammarUnit gr) : Expression(gr) {}
+    explicit Math() : Expression() {}
     std::shared_ptr<Expression> m_left;
     std::shared_ptr<Expression> m_right;
 };
@@ -59,97 +60,97 @@ public:
 class Plus : public Math {
 
 public:
-    explicit Plus() : Math(GrammarUnit::PLUS) {}
+    explicit Plus() : Math() {}
 };
 
 class Minus : public Math {
 
 public:
-    explicit Minus() : Math(GrammarUnit::MINUS) {}
+    explicit Minus() : Math() {}
 };
 
 class Multiplication : public Math {
 
 public:
-    explicit Multiplication() : Math(GrammarUnit::MULTIPLICATE) {}
+    explicit Multiplication() : Math() {}
 };
 
 class Division : public Math {
 
 public:
-    explicit Division() : Math(GrammarUnit::DIVISION) {}
+    explicit Division() : Math() {}
 };
 
 class Logic : public Math {
 
 public:
-    explicit Logic(GrammarUnit gr) : Math(gr) {}
+    explicit Logic() : Math() {}
 };
 
 class And : public Logic {
 
 public:
-    explicit And() : Logic(GrammarUnit::AND) {}
+    explicit And() : Logic() {}
 };
 
 class Or : public Logic {
 
 public:
-    explicit Or() : Logic(GrammarUnit::OR) {}
+    explicit Or() : Logic() {}
 };
 
 class Xor : public Logic {
 
 public:
-    explicit Xor() : Logic(GrammarUnit::XOR) {}
+    explicit Xor() : Logic() {}
 };
 
 class Relation : public Math {
 
 public:
-    explicit Relation(GrammarUnit gr) : Math(gr) {}
+    explicit Relation() : Math() {}
 };
 
 class Mod : public Relation {
 
 public:
-    explicit Mod() : Relation(GrammarUnit::MOD) {}
+    explicit Mod() : Relation() {}
 };
 
 class Greater : public Relation {
 
 public:
-    explicit Greater() : Relation(GrammarUnit::GREATER) {}
+    explicit Greater() : Relation() {}
 };
 
 class Less : public Relation {
 
 public:
-    explicit Less() : Relation(GrammarUnit::LESS) {}
+    explicit Less() : Relation() {}
 };
 
 class GreaterEqual : public Relation {
 
 public:
-    explicit GreaterEqual() : Relation(GrammarUnit::GREATER_EQUAL) {}
+    explicit GreaterEqual() : Relation() {}
 };
 
 class LessEqual : public Relation {
 
 public:
-    explicit LessEqual() : Relation(GrammarUnit::LESS_EQUAL) {}
+    explicit LessEqual() : Relation() {}
 };
 
 class Equal : public Relation {
 
 public:
-    explicit Equal() : Relation(GrammarUnit::EQUAL) {}
+    explicit Equal() : Relation() {}
 };
 
 class NotEqual : public Relation {
 
 public:
-    explicit NotEqual() : Relation(GrammarUnit::NOT_EQUAL) {}
+    explicit NotEqual() : Relation() {}
 };
 
 }  // namespace parsing

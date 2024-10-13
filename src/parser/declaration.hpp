@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <iostream>
 
 namespace parsing {
 
@@ -16,18 +17,22 @@ public:
 };
 
 class RoutineParameter : public Declaration {
-
 public:
     RoutineParameter(std::string name, std::string type) : Declaration(GrammarUnit::PARAMETER, std::move(name)), m_type(std::move(type)) {}
-    std::string m_identifier;
+    RoutineParameter(RoutineParameter&& param) = default;
     std::string m_type;
 };
 
 class Routine : public Declaration {
-
 public:
     explicit Routine(std::string name) : Declaration(GrammarUnit::ROUTINE, std::move(name)) {}
     
+    void print() override {
+        cout << "Routine declaration, name: " << m_name << " -> " << return_type << '\n';
+        m_body->print();
+        cout << "End of routine declaration\n";
+    }
+
     std::shared_ptr<Body> m_body;
     std::vector<std::shared_ptr<RoutineParameter>> m_params;
     std::string return_type;
@@ -35,6 +40,7 @@ public:
 
 class Type : public Declaration {
 public:
+    ~Type() override = default;
     explicit Type(std::string name) : Declaration(GrammarUnit::TYPE, std::move(name)) {}
 };
 
@@ -46,8 +52,8 @@ public:
 
 class ArrayType : public Type {
 public:
-    explicit ArrayType(Type type, std::shared_ptr<Expression> size) : Type("array"), m_type(std::move(type)), m_size(size) {}
-    Type m_type;
+    explicit ArrayType(std::string type, std::shared_ptr<Expression> size) : Type("array"), m_type(std::move(type)), m_size(size) {}
+    std::string m_type;
     std::shared_ptr<Expression> m_size;
 };
 
@@ -62,7 +68,6 @@ class IntType : public Type {
 public:
     explicit IntType() : Type("int"){}
 };
-
 
 class RealType : public Type {
 public:
@@ -82,21 +87,23 @@ public:
 
 class PrimitiveVariable : public Variable {
 public:
+    void print() override {
+        std::cout << "varname: " << m_name << " " << "type: " << m_type << '\n';
+    }
     explicit PrimitiveVariable(std::string name, std::string type) : Variable(std::move(name)), m_type(std::move(type)) {}
     std::string m_type;
 };
 
-
 class ArrayVariable : public Variable {
 public:
-    explicit ArrayVariable(std::string name, Type type) : Variable(std::move(name)), m_type(std::move(type)) {}
-    Type m_type;
+    explicit ArrayVariable(std::string name, std::shared_ptr<ArrayType> type) : Variable(std::move(name)), m_type(std::move(type)) {}
+    std::shared_ptr<ArrayType> m_type;
 };
 
 class RecordVariable : public Variable {
 public:
-    explicit RecordVariable(std::string name, RecordType) : Variable(std::move(name)), m_type(std::move(type)) {}
-    RecordType m_type;
+    explicit RecordVariable(std::string name, std::string type) : Variable(std::move(name)), m_type(std::move(type)) {}
+    std::string m_type;
 };
 
 } // namespace parsing

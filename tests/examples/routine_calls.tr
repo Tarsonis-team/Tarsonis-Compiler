@@ -7,4 +7,3 @@ routine main() is
     var c: integer is two();
 end
 
-Identifier { . Identifier | [ Expression ] }
