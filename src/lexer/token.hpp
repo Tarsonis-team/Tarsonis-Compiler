@@ -8,7 +8,7 @@ extern const std::unordered_map<std::string, int> tokens;
 enum TokenType {
     TOKEN_IDENTIFIER = 0, // 0 for Identifiers
     TOKEN_CONST_INT = -1,     // -1 for consts
-    TOKEN_CONST_REAL = -2,    
+    TOKEN_CONST_REAL = -2,
     TOKEN_EOF = -3,
 
     TOKEN_ROUTINE = 1,
@@ -69,8 +69,10 @@ struct Token
 
     static Token asIdentifier(const std::string& value);
     static Token asReservedKeyword(const std::string& keyword);
-    static Token asConstant(const std::string& cnst);
+    static Token asIntConstant(const std::string& cnst);
+    static Token asRealConstant(const std::string& cnst);
     static Token asEndOfFile();
+
 
 private:
     Token(std::string value, int id);
