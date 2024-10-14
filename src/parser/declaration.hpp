@@ -91,7 +91,10 @@ public:
         std::cout << "varname: " << m_name << " " << "type: " << m_type << '\n';
     }
     explicit PrimitiveVariable(std::string name, std::string type) : Variable(std::move(name)), m_type(std::move(type)) {}
+    PrimitiveVariable(std::string name, std::string type, std::shared_ptr<Expression> expr) : Variable(std::move(name)), m_type(std::move(type)), m_assigned(expr) {}
+
     std::string m_type;
+    std::shared_ptr<Expression> m_assigned;
 };
 
 class ArrayVariable : public Variable {

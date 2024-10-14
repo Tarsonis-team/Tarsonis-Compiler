@@ -744,6 +744,7 @@ std::shared_ptr<Variable> Parser::parse_variable_decl() {
     advanceTok();
     
     std::string type;
+    // std::shared_ptr<Variable> declared;
     switch (currentTok().m_id) {
         case TOKEN_BOOLEAN:
         case TOKEN_INTEGER:
@@ -751,12 +752,18 @@ std::shared_ptr<Variable> Parser::parse_variable_decl() {
         case TOKEN_REAL:
             type = currentTok().m_value;
             advanceTok();
-            return std::make_shared<PrimitiveVariable>(var_name, type);
+            if (currentTok().m_id == TOKEN_IS) {
+                advanceTok();
+                return make_shared<PrimitiveVariable>(var_name, type, parse_expression());
+            }
+            return make_shared<PrimitiveVariable>(var_name, type);
         case TOKEN_ARRAY:
             return std::make_shared<ArrayVariable>(var_name, parse_array_type());
         default:
             throw std::runtime_error("type of variable is expected !");
     }
+
+
 }
 
 std::shared_ptr<If> Parser::parse_if_statement() {
