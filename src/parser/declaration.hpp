@@ -88,7 +88,12 @@ public:
 class PrimitiveVariable : public Variable {
 public:
     void print() override {
-        std::cout << "varname: " << m_name << " " << "type: " << m_type << '\n';
+        std::cout << "varname: " << m_name << " " << "type: " << m_type; 
+        if (m_assigned.get()) {
+            std::cout << " assigned "; m_assigned->print();
+            std::cout << "\n";
+        }
+
     }
     explicit PrimitiveVariable(std::string name, std::string type) : Variable(std::move(name)), m_type(std::move(type)) {}
     PrimitiveVariable(std::string name, std::string type, std::shared_ptr<Expression> expr) : Variable(std::move(name)), m_type(std::move(type)), m_assigned(expr) {}
