@@ -112,7 +112,7 @@ std::vector<T> take_subvector(const std::vector<T> &vec, int begin, int end) {
 }
 
 
-using ExpressionParserBuilderPtr = std::shared_ptr<Expression> (*)(std::vector<std::shared_ptr<Expression>>);
+using ExpressionParserBuilderPtr = std::shared_ptr<Expression> (*)(std::vector<std::shared_ptr<Expression>>, bool);
 
 std::shared_ptr<Math> get_fork_in_expression(
         const std::vector<std::shared_ptr<Expression>> &expression_line,
@@ -124,10 +124,16 @@ std::shared_ptr<Math> get_fork_in_expression(
 
     for (auto unit: units) {
         if (expression_line[0]->get_grammar() == unit) {
+            // already an expression
             const auto& check_fork =
                     std::dynamic_pointer_cast<Math>(expression_line[0]);
 
             if (check_fork->m_right != nullptr || check_fork->m_left != nullptr) {
+                break;
+            }
+
+            // case like -5 + 6 ... or +3 + 7
+            if (unit == GrammarUnit::PLUS || unit == GrammarUnit::MINUS) {
                 break;
             }
 
@@ -205,7 +211,22 @@ std::shared_ptr<Math> get_fork_in_expression(
                 }
 
                 auto left_part = take_subvector(expression_line, 0, i);
-                fork->m_left = function(left_part);
+
+                // case -8 + 3 or +5 - 2 (valid)
+                if (left_part.empty() && (unit == GrammarUnit::PLUS || unit == GrammarUnit::MINUS)) {
+                    // case --8 + 3 (invalid)
+                    if (expression_line[i + 1]->get_grammar() == GrammarUnit::PLUS
+                        || expression_line[i + 1]->get_grammar() == GrammarUnit::MINUS) {
+
+                        throw std::runtime_error("Unexpected token in a expression: "
+                            + expression_line[i+1]->gr_to_str());
+                    }
+
+                    fork->m_left = function(left_part, true);
+                } else {
+                    fork->m_left = function(left_part, false);
+                }
+
 
                 if (i == expression_line.size() - 1) {
                     throw std::runtime_error("This item cannot be last term in expression");
@@ -214,7 +235,7 @@ std::shared_ptr<Math> get_fork_in_expression(
 //                int next_pos = look_for_next_item(expression_line, i + 1, units);
                 int next_pos = int(expression_line.size());
                 auto right_part = take_subvector(expression_line, i + 1, next_pos);
-                fork->m_right = function(right_part);
+                fork->m_right = function(right_part, false);
 
                 need_to_break = true;
                 break;
@@ -227,8 +248,15 @@ std::shared_ptr<Math> get_fork_in_expression(
 }
 
 // A recursion for building a tree
-std::shared_ptr<Expression> expression_parser_builder(std::vector<std::shared_ptr<Expression>> expression_line) {
+std::shared_ptr<Expression> expression_parser_builder(
+        std::vector<std::shared_ptr<Expression>> expression_line,
+        bool return_zero
+        ) {
     // Order: */ +- <> = xor and or (start from the end)
+
+    if (return_zero) {
+        return std::make_shared<Integer>(0);
+    }
 
     std::shared_ptr<Math> fork;
     std::vector<GrammarUnit> grammar_units;
@@ -486,7 +514,7 @@ std::shared_ptr<Expression> Parser::parse_expression() {
     }
 
     // Building a tree based on a vector
-    auto tree = expressions::expression_parser_builder(expression_line);
+    auto tree = expressions::expression_parser_builder(expression_line, false);
     return tree;
 }
 
