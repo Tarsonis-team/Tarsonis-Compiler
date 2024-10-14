@@ -1,7 +1,7 @@
 
 routine main() -> integer is
     var a: integer
-    var b: integer
+    var b: integer is 1 + 2
     var vara: integer;
 
 end

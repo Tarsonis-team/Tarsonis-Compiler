@@ -363,7 +363,7 @@ bool is_end_of_expression(int token_id) {
     return false;
 }
 
-} // expressions
+} // namespace expressions
 
 std::shared_ptr<Expression> Parser::parse_expression() {
     // TODO: function calls are not handled!
@@ -646,16 +646,6 @@ std::shared_ptr<Body> Parser::parse_body() {
             case TOKEN_ELSE:
             case TOKEN_END:
                 break;
-            case TOKEN_IS: {
-                // TODO: just for demonstration
-                advanceTok();
-
-                auto exp = parse_expression();
-                exp->print();
-
-                exit(0);
-                break;
-            }
             default:
                 throw std::runtime_error("Can't parse body !");
         }

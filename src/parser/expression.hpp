@@ -97,11 +97,7 @@ public:
     GrammarUnit get_grammar() const override {
         return GrammarUnit::IDENTIFIER;
     }
-    void print() override {
-//        std::cout << get_str_representation(this->m_grammar) << " " << this->m_head_name << "\n";
-        std::cout << this->gr_to_str() << " " << this->m_head_name;
-        // TODO: print chain
-    }
+
 };
 
 
