@@ -91,8 +91,7 @@ public:
     std::shared_ptr<Expression> m_left;
     std::shared_ptr<Expression> m_right;
     void print() override {
-        std::cout << this->gr_to_str() << " with params: {\n";
-//        std::cout << std::to_string(int(this->m_grammar)) << " with params:\n";
+        std::cout << this->gr_to_str() << " with params: {" << std::to_string(int(this->m_grammar)) << "::\n";
 
         std::cout << " ";
         this->m_left->print();
@@ -100,7 +99,7 @@ public:
         std::cout << ", ";
         this->m_right->print();
 
-        std::cout << "\n}";
+        std::cout << " ::" << std::to_string(int(this->m_grammar)) << "}";
     }
 };
 

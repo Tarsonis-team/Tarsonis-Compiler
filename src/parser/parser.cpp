@@ -124,7 +124,16 @@ std::shared_ptr<Math> get_fork_in_expression(
 
     for (auto unit: units) {
         if (expression_line[0]->get_grammar() == unit) {
-            throw std::runtime_error("Unexpected item at the beginning of an expression");
+            const auto& check_fork =
+                    std::dynamic_pointer_cast<Math>(expression_line[0]);
+
+            if (check_fork->m_right != nullptr || check_fork->m_left != nullptr) {
+                break;
+            }
+
+
+            throw std::runtime_error("Unexpected item at the beginning of an expression: "
+            + expression_line[0]->gr_to_str());
         }
     }
 
@@ -139,6 +148,14 @@ std::shared_ptr<Math> get_fork_in_expression(
 
         for (auto &unit: units) {
             if (item->get_grammar() == unit) {
+                const auto& check_fork =
+                        std::dynamic_pointer_cast<Math>(item);
+
+                if (check_fork->m_right != nullptr || check_fork->m_left != nullptr) {
+                    break;
+                }
+
+
                 achieved = true;
 
                 switch (unit) {
@@ -317,8 +334,11 @@ std::shared_ptr<Expression> Parser::parse_expression() {
     // TODO: function calls are not handled!
     std::vector<std::shared_ptr<Expression>> expression_line;
 
+    bool do_not_add_new_item = false;
+
     while (!expressions::is_end_of_expression(currentTok().m_id)) {
         std::shared_ptr<Expression> item_to_add = nullptr;
+        do_not_add_new_item = false;
 
         switch (currentTok().m_id) {
             case TOKEN_IDENTIFIER:
@@ -383,44 +403,59 @@ std::shared_ptr<Expression> Parser::parse_expression() {
                 item_to_add = std::make_shared<False>();
                 break;
 
-                // More complex structures
+            // More complex structures
 
             case TOKEN_DOT: {
-                // TODO: consider a chain of accessors
-//                auto access_record = std::make_shared<AccessRecord>();
-//
-//                advanceTok();
-//                if (currentTok().m_id != TOKEN_IDENTIFIER) {
-//                    throw std::runtime_error("An identifier is expected after the . when access a record");
-//                }
-//
-//                if (expression_line.empty()) {
-//                    throw std::runtime_error("'.' is not expected at the beginning of an expression");
-//                }
-//
-//                access_record->m_field = std::make_shared<Identifier>(currentTok().m_value);
-//                access_record->m_record_name = expression_line[expression_line.size() - 1];
-//
+                if (expression_line.empty()) {
+                    throw std::runtime_error("'.' is not expected at the beginning of an expression");
+                }
+
+                if (expression_line[expression_line.size() - 1]->get_grammar() != GrammarUnit::IDENTIFIER) {
+                    throw std::runtime_error("'.' is expected after an identifier");
+                }
+
+                const auto& access_record =
+                        std::dynamic_pointer_cast<Modifiable>(expression_line[expression_line.size() - 1]);
+
+                advanceTok();
+                if (currentTok().m_id != TOKEN_IDENTIFIER) {
+                    throw std::runtime_error("An identifier is expected after the . when access a record");
+                }
+
+
+                auto access_item = std::make_shared<Modifiable::RecordAccess>();
+                access_item->identifier = currentTok().m_value;
+
+                access_record->m_chain.push_back(access_item);
+
 //                expression_line.pop_back();
-//
-//                item_to_add = access_record;
+                item_to_add = access_record;
+
+                do_not_add_new_item = true;
                 break;
             }
             case TOKEN_LBRACKET: {
-                // TODO: add to the last element in expression_line
-//                auto access_array = std::make_shared<AccessArray>();
-//
-//                if (expression_line.empty()) {
-//                    throw std::runtime_error("'[' is not expected at the beginning of an expression");
-//                }
-//
-//                advanceTok();
-//                access_array->m_accessor = parse_expression();
-//                access_array->m_array_name = expression_line[expression_line.size() - 1];
-//
+                if (expression_line.empty()) {
+                    throw std::runtime_error("'[ ... ]' is not expected at the beginning of an expression");
+                }
+
+                if (expression_line[expression_line.size() - 1]->get_grammar() != GrammarUnit::IDENTIFIER) {
+                    throw std::runtime_error("'[ ... ]' is expected after an identifier");
+                }
+
+                const auto& access_array =
+                        std::dynamic_pointer_cast<Modifiable>(expression_line[expression_line.size() - 1]);
+
+                advanceTok();
+
+                auto access_item = std::make_shared<Modifiable::ArrayAccess>();
+                access_item->access = parse_expression();
+
+                access_array->m_chain.push_back(access_item);
+
 //                expression_line.pop_back();
-//
-//                item_to_add = access_array;
+                item_to_add = access_array;
+                do_not_add_new_item = true;
                 break;
             }
             case TOKEN_LPAREN: {
@@ -430,6 +465,10 @@ std::shared_ptr<Expression> Parser::parse_expression() {
                 item_to_add = nested_expression;
                 break;
             }
+            case TOKEN_RPAREN:
+            case TOKEN_RBRACKET:
+                advanceTok();
+                break;
 
             default:
                 throw std::runtime_error("Some item in expression was not recognised: " + currentTok().m_value);
@@ -440,7 +479,9 @@ std::shared_ptr<Expression> Parser::parse_expression() {
             throw std::runtime_error("Some item in expression was not recognised: " + currentTok().m_value);
         }
 
-        expression_line.push_back(item_to_add);
+        if (!do_not_add_new_item) {
+            expression_line.push_back(item_to_add);
+        }
         advanceTok();
     }
 
