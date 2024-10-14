@@ -61,11 +61,32 @@ public:
 class Modifiable : public Primary {
 public:
 
-struct Chained { 
-    virtual ~Chained() = default;
-};
-struct ArrayAccess : public Chained { ArrayAccess() = default; std::shared_ptr<Expression> access; };
-struct RecordAccess : public Chained { RecordAccess() = default; std::string identifier; };
+    struct Chained { 
+        virtual ~Chained() = default;
+        virtual void print() = 0;
+    };
+    struct ArrayAccess : public Chained { 
+        ArrayAccess() = default; 
+        std::shared_ptr<Expression> access; 
+        void print() override {
+            std::cout << "[]";
+        }
+    };
+    struct RecordAccess : public Chained { 
+        void print() override {
+            std::cout << "." + identifier;
+        }
+        RecordAccess() = default; 
+        std::string identifier; 
+    };
+
+    void print() override {
+        std::cout << m_head_name;
+        for (auto& chain : m_chain) {
+            chain->print();
+        }
+        std::cout << '\n';
+    }
 
     explicit Modifiable(std::string head) : Primary(), m_head_name(head) {
         this->m_grammar = GrammarUnit::IDENTIFIER;

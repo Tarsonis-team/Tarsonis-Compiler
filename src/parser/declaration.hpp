@@ -28,7 +28,7 @@ public:
     explicit Routine(std::string name) : Declaration(GrammarUnit::ROUTINE, std::move(name)) {}
     
     void print() override {
-        cout << "Routine declaration, name: " << m_name << " -> " << return_type << '\n';
+        cout << "Routine declaration, name: " << m_name << " -> " << (return_type.empty() ? "void" : return_type) << '\n';
         m_body->print();
         cout << "End of routine declaration\n";
     }

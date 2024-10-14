@@ -20,6 +20,7 @@ private:
     Token peekNextToken();
     void advanceTok();
     void consumeNewlines();
+    bool isCurrentRoutineCall();
 
     std::shared_ptr<Modifiable> parse_modifiable_primary();
     std::shared_ptr<Routine> parse_routine_decl();

@@ -1,4 +1,4 @@
-routine main(a integer) is
+routine main(integer a) is
     if a > 4 then
         a := 3
     else

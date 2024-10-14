@@ -24,6 +24,9 @@ void Parser::consumeNewlines() {
     }
 }
 
+bool Parser::isCurrentRoutineCall() {
+    return peekNextToken().m_id == TOKEN_RPAREN;
+}
 
 Token Parser::peekNextToken() {
     return m_tokens[m_cur_tok+1];
@@ -83,9 +86,8 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
             throw std::runtime_error("Identifier expected or primitive type expected");
         }
         res->return_type = currentTok().m_value;
+        advanceTok();
     }
-    // TODO: is it correct?
-//    advanceTok();
 
     if (currentTok().m_id != TOKEN_IS) {
         throw std::runtime_error("'is' expected");
@@ -94,6 +96,11 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
     advanceTok();
 
     res->m_body = parse_body();
+
+    if (currentTok().m_id != TOKEN_END) {
+        throw std::runtime_error("end expected after routine !");
+    }
+    advanceTok();
 
     return res;
 }
@@ -525,7 +532,6 @@ std::shared_ptr<Modifiable> Parser::parse_modifiable_primary() {
     
     auto modif_primary = std::make_shared<Modifiable>(currentTok().m_value);
     advanceTok();
-
     while (true) {
         auto curtk = currentTok();
         if (curtk.m_id != TOKEN_DOT && curtk.m_id != TOKEN_LBRACKET) {
@@ -535,6 +541,9 @@ std::shared_ptr<Modifiable> Parser::parse_modifiable_primary() {
         if (curtk.m_id == TOKEN_DOT) {
             advanceTok();
             auto field = std::make_shared<Modifiable::RecordAccess>();
+            if (currentTok().m_id != TOKEN_IDENTIFIER) {
+                throw std::runtime_error("identifier expected !");
+            }
             field->identifier = currentTok().m_value;
             modif_primary->m_chain.push_back(field);
             advanceTok();
@@ -564,8 +573,6 @@ std::shared_ptr<Assignment> Parser::parse_assignment() {
     auto assignment = std::make_shared<Assignment>();
     auto modifiable = parse_modifiable_primary();
     
-    advanceTok();
-
     if (currentTok().m_id != TOKEN_ASSIGNMENT) {
         throw std::runtime_error("no assignment token found !");
     }
@@ -609,10 +616,10 @@ std::shared_ptr<Statement> Parser::parse_statement() {
         case TOKEN_FOR:
             return parse_for_statement();
         case TOKEN_IDENTIFIER:
-            if (peekNextToken().m_id == TOKEN_ASSIGNMENT) {  // we have an assignment here
-                return parse_assignment();
-            } else {  // otherwise, we got a routine call
+            if (isCurrentRoutineCall()) {
                 return parse_routine_call();
+            } else {
+                return parse_assignment();
             }
         default:
             throw std::runtime_error("can't parse statement !");
@@ -620,7 +627,6 @@ std::shared_ptr<Statement> Parser::parse_statement() {
 }
 
 std::shared_ptr<Body> Parser::parse_body() {
-    consumeNewlines();
     auto body_res = std::make_shared<Body>();
     while (true) {
         consumeNewlines();
@@ -631,9 +637,13 @@ std::shared_ptr<Body> Parser::parse_body() {
             case TOKEN_TYPE:
                 body_res->m_items.push_back(parse_type_decl());
                 break;
+            case TOKEN_IF:
+            case TOKEN_WHILE:
+            case TOKEN_FOR:
             case TOKEN_IDENTIFIER:
                 body_res->m_items.push_back(parse_statement());
                 break;
+            case TOKEN_ELSE:
             case TOKEN_END:
                 break;
             case TOKEN_IS: {
@@ -652,11 +662,14 @@ std::shared_ptr<Body> Parser::parse_body() {
         if (currentTok().m_id == TOKEN_NEWLINE || currentTok().m_id == TOKEN_SEMICOLON) {
             advanceTok();
         }
+        if (currentTok().m_id == TOKEN_ELSE) {
+            break;
+        }
         if (currentTok().m_id == TOKEN_END) {
-            advanceTok();
             break;
         }
     }
+    consumeNewlines();
     return body_res;
 }
 
@@ -668,7 +681,9 @@ std::shared_ptr<RecordType> Parser::parse_record_decl(std::string name) {
 
     auto record = std::make_shared<RecordType>(name);
     while (currentTok().m_id != TOKEN_END) {
+        consumeNewlines();
         record->m_fields.push_back(parse_variable_decl());
+        consumeNewlines();
     }
 
     advanceTok();
@@ -726,7 +741,6 @@ std::shared_ptr<Variable> Parser::parse_variable_decl() {
     }
     advanceTok();
     
-    std::shared_ptr<Variable> declaration;
     std::string type;
     switch (currentTok().m_id) {
         case TOKEN_BOOLEAN:
@@ -764,6 +778,7 @@ std::shared_ptr<If> Parser::parse_if_statement() {
         if (currentTok().m_id != TOKEN_END) {
             throw std::runtime_error("'else' or 'end' is expected as the begin of the false-block");
         } else {
+            advanceTok();
             result->m_else = nullptr;
             return result;
         }
@@ -772,9 +787,12 @@ std::shared_ptr<If> Parser::parse_if_statement() {
     advanceTok();
     result->m_else = parse_body();
 
+    consumeNewlines();
+
     if (currentTok().m_id != TOKEN_END) {
         throw std::runtime_error("'end' is expected as the end of the if-statement");
     }
+    advanceTok();
 
     return result;
 }
@@ -805,6 +823,7 @@ std::shared_ptr<For> Parser::parse_for_statement() {
     if (currentTok().m_id != TOKEN_END) {
         throw std::runtime_error("'end' is expected as the end of the for-loop");
     }
+    advanceTok();
 
     return result;
 }
@@ -854,6 +873,7 @@ std::shared_ptr<While> Parser::parse_while_statement() {
     if (currentTok().m_id != TOKEN_END) {
         throw std::runtime_error("'end' is expected as the end of the while-loop");
     }
+    advanceTok();
 
     return result;
 }
@@ -877,7 +897,7 @@ std::shared_ptr<Type> Parser::parse_type_decl() {
     advanceTok();
     switch (currentTok().m_id) {
         case TOKEN_RECORD:
-            return parse_record_decl(currentTok().m_value);
+            return parse_record_decl(name_of_the_type);
         case TOKEN_ARRAY:
             return parse_array_type();
         case TOKEN_BOOLEAN:
@@ -895,7 +915,7 @@ std::shared_ptr<Program> Parser::parse() {
     while (true) {
         auto token = currentTok();
 
-        if (currentTok().m_id == TOKEN_EOF) {
+        if (token.m_id == TOKEN_EOF) {
             break;
         }
 

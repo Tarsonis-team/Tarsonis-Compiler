@@ -129,6 +129,11 @@ class Range : public ASTNode {
 
 public:
     explicit Range() : ASTNode(GrammarUnit::RANGE), m_reverse(false) {}
+
+    void print() override {
+        std::cout << "Range: \n";
+    }
+
     bool m_reverse;
     std::shared_ptr<Expression> m_begin;
     std::shared_ptr<Expression> m_end;

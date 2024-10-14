@@ -5,19 +5,19 @@ end
 
 type Line is record
     var begin: Point
-    var end: Point
+    var wend: Point
 end
 
-routine new_point(x integer, y integer) -> Point is
+routine new_point(integer x, integer y) -> Point is
     var p: Point
     p.x := x
     p.y := y
-    return p
+
 end
 
-routine new_line(p1 Point, p2 Point) -> Line is
+routine new_line(Point p1, Point p2) -> Line is
     var pf: Pointf
     pf.begin := p1
-    pf.end := p2
-    return pf
+    pf.ende := p2
+
 end
