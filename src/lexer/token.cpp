@@ -17,9 +17,14 @@ Token Token::asReservedKeyword(const std::string& keyword)
     return { keyword, tokens.at(keyword) };
 }
 
-Token Token::asConstant(const std::string& cnst)
+Token Token::asIntConstant(const std::string& cnst)
 {
     return { cnst, -1 };
+}
+
+Token Token::asRealConstant(const std::string& cnst)
+{
+    return { cnst, -2 };
 }
 
 Token Token::asEndOfFile()

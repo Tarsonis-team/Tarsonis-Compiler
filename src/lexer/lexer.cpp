@@ -17,7 +17,7 @@ bool is_reserved_keyword(const std::string& sequence)
     return tokens.contains(sequence);
 }
 
-bool is_constant(const std::string& sequence)
+bool is_real_constant(const std::string& sequence)
 {
     uint8_t amount_of_dots = 0;  // dont forget there are also real numbers
     for (const auto ch : sequence) {
@@ -30,6 +30,16 @@ bool is_constant(const std::string& sequence)
         }
 
         if (!std::isdigit(ch)) {
+            return false;
+        }
+    }
+    return amount_of_dots == 1;
+}
+
+bool is_int_const(const std::string& sequence)
+{
+    for (const auto ch : sequence) {
+        if (!isdigit(ch)) {
             return false;
         }
     }
@@ -82,10 +92,16 @@ std::vector<Token> Lexer::parse()
             continue;
         }
 
-        if (is_constant(stripped))
+        if (is_int_const(stripped))
         {
-            res.push_back(Token::asConstant(stripped));
+            res.push_back(Token::asIntConstant(stripped));
             continue;
+        }
+
+        if (is_real_constant(stripped))
+        {
+            res.push_back(Token::asRealConstant(stripped));
+            continue; 
         }
 
         // there are cases like 'a:=4;' where there is no
@@ -124,8 +140,10 @@ std::vector<Token> Lexer::parse()
         {
             if (is_reserved_keyword(tok)) {
                 res.push_back(Token::asReservedKeyword(tok));
-            } else if (is_constant(tok)) {
-                res.push_back(Token::asConstant(tok));
+            } else if (is_int_const(tok)) {
+                res.push_back(Token::asIntConstant(tok));
+            } else if (is_real_constant(tok)) {
+                res.push_back(Token::asRealConstant(tok));
             } else {
                 if (isdigit(tok.at(0))) {
                     throw std::runtime_error("Identifier can not start with a digit: \"" + tok + "\"");
