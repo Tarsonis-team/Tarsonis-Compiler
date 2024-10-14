@@ -9,6 +9,7 @@ routine main() is
     a[0] := 3;
     var reals: array[3] real
     a[2]:=2.32;
+    a[3]:=false
     
     var p: Point
     p.x := 2;
