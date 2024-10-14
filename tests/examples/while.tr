@@ -1,8 +1,11 @@
-routine main() is
-    var n : integer is 10;
 
+routine main() is
     while n loop
         n := n - 1;
     end
+    
+    for i in 1 .. 5 loop
+
+    end 
 
 end

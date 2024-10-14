@@ -5,4 +5,7 @@ end
 
 routine main() is
     var c: integer is two();
+    two(1, 2);
+    two(two(3), 4);
 end
+

@@ -1,5 +1,5 @@
-routine main(a integer) is
-    if a > 4 then
+routine main(integer a) is
+    if a > 4 and true then
         a := 3
     else
         a := 5

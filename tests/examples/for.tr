@@ -1,4 +1,4 @@
-routine main(n integer) is
+routine main(integer n) is
     var result : integer is 0
 
     for i in 1 .. n + 1 loop

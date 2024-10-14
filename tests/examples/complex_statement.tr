@@ -1,9 +1,3 @@
-/*
-
-  The statement should be complex in terms of '(', ')'.
-
-*/
-
 routine main() is
     var a: integer
     var b: integer

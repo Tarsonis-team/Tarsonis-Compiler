@@ -86,21 +86,24 @@ public:
                                 break;
                             }
                         }
-                        if (some_condition_met)
+                        if (some_condition_met) {
                             continue;
+                        }
                     }
 
-                    if (i - last_token > 0)
+                    if (i - last_token > 0) {
                         result.push_back(m_to_break.substr(last_token, i - last_token));
-
+                    }
+                    
                     result.push_back(keywd);
                     last_token = i + keywd.size();
                     i += keywd.size() - 1;
                 }
             }
         }
-        if (last_token != m_to_break.size())
+        if (last_token != m_to_break.size()) {
             result.push_back(m_to_break.substr(last_token, m_to_break.size() - last_token));
+        }
 
         return result;
     }
