@@ -1,6 +1,7 @@
 #pragma once
 
 enum class GrammarUnit {
+    UNDEFINED,
     PROGRAM,
     BODY,
     RANGE,
@@ -36,5 +37,6 @@ enum class GrammarUnit {
     OR,
     XOR,
     TRUE,
-    FALSE
+    FALSE,
+    ROUTINE_CALL
 };

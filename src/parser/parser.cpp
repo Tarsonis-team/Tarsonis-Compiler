@@ -351,7 +351,9 @@ bool is_end_of_expression(int token_id) {
             TOKEN_LOOP,
 
             TOKEN_RPAREN,
-            TOKEN_RBRACKET
+            TOKEN_RBRACKET,
+
+            TOKEN_COMA
     };
 
     for (auto end_token: end_tokens) {
@@ -376,9 +378,19 @@ std::shared_ptr<Expression> Parser::parse_expression() {
         do_not_add_new_item = false;
 
         switch (currentTok().m_id) {
-            case TOKEN_IDENTIFIER:
+            case TOKEN_IDENTIFIER: {
+                if (peekNextToken().m_id == TOKEN_LPAREN) {
+                    auto routine_call_res = std::make_shared<RoutineCallResult>();
+                    routine_call_res->m_routine_call = parse_routine_call();
+
+                    item_to_add = routine_call_res;
+                    break;
+                }
+
+
                 item_to_add = std::make_shared<Modifiable>(currentTok().m_value);
                 break;
+            }
             case TOKEN_CONST_INT: {
                 int value = std::stoi(currentTok().m_value);
                 item_to_add = std::make_shared<Integer>(value);

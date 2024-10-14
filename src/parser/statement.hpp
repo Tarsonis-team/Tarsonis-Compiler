@@ -71,6 +71,16 @@ public:
     std::vector<std::shared_ptr<Expression>> m_parameters;
 };
 
+class RoutineCallResult : public Expression {
+
+public:
+    explicit RoutineCallResult() : Expression() {
+        this->m_grammar = GrammarUnit::ROUTINE_CALL;
+    }
+
+    std::shared_ptr<RoutineCall> m_routine_call;
+};
+
 class Assignment : public Statement {
 
 public:

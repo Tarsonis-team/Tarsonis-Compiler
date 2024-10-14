@@ -91,6 +91,10 @@ public:
     explicit Modifiable(std::string head) : Primary(), m_head_name(head) {
         this->m_grammar = GrammarUnit::IDENTIFIER;
     }
+    explicit Modifiable() : Primary() {
+        this->m_grammar = GrammarUnit::IDENTIFIER;
+    }
+
     std::vector<std::shared_ptr<Chained>> m_chain;
     std::string m_head_name;
 
