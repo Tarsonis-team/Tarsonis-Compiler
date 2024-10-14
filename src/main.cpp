@@ -16,8 +16,8 @@ int main(int argc, char* argv[])
     //     return EXIT_FAILURE;
     // }
     // std::string source_file_path = argv[1];
-    std::string source_file_path = "/home/max/vscdir/tarsonis/tests/examples/aplusb.tr";
-//    std::string source_file_path = "C:/Projects/C/C++/Compilers/Tarsonis-Compiler/tests/examples/arithmetics.tr";
+//    std::string source_file_path = "/home/max/vscdir/tarsonis/tests/examples/aplusb.tr";
+    std::string source_file_path = "C:/Projects/C/C++/Compilers/Tarsonis-Compiler/tests/examples/arithmetics.tr";
 
     if (!std::filesystem::exists(source_file_path)) {
         std::cerr << "Error: path to a source file is not valid\n";
@@ -35,6 +35,9 @@ int main(int argc, char* argv[])
     for (int i = 0; i < tokens.size(); ++i) {
         std::cout << i << ": \"" << (tokens[i].m_value == "\n" ? "newline" : tokens[i].m_value) << "\" " << tokens[i].m_id << "\n";
     }
+
+    std::cout << "\n";
+
     try {
         auto parser = parsing::Parser(tokens);
         auto program_ast = parser.parse();

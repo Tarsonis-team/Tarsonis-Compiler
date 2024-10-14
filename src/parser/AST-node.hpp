@@ -23,6 +23,48 @@ public:
         return this->m_grammar;
     };
 
+    std::string gr_to_str() {
+        switch (this->m_grammar) {
+            case GrammarUnit::PROGRAM: return "PROGRAM";
+            case GrammarUnit::BODY: return "BODY";
+            case GrammarUnit::RANGE: return "RANGE";
+            case GrammarUnit::IDENTIFIER: return "IDENTIFIER";
+            case GrammarUnit::VARIABLE: return "VARIABLE";
+            case GrammarUnit::ROUTINE: return "ROUTINE";
+            case GrammarUnit::PARAMETER: return "PARAMETER";
+            case GrammarUnit::RECORD: return "RECORD";
+            case GrammarUnit::TYPE: return "TYPE";
+            case GrammarUnit::ARRAY: return "ARRAY";
+            case GrammarUnit::IF: return "IF";
+            case GrammarUnit::FOR: return "FOR";
+            case GrammarUnit::WHILE: return "WHILE";
+            case GrammarUnit::CALL: return "CALL";
+            case GrammarUnit::ASSIGNMENT: return "ASSIGNMENT";
+            case GrammarUnit::INTEGER: return "INTEGER";
+            case GrammarUnit::BOOL: return "BOOL";
+            case GrammarUnit::REAL: return "REAL";
+            case GrammarUnit::ACCESS_ARRAY: return "ACCESS_ARRAY";
+            case GrammarUnit::ACCESS_RECORD: return "ACCESS_RECORD";
+            case GrammarUnit::PLUS: return "PLUS";
+            case GrammarUnit::MINUS: return "MINUS";
+            case GrammarUnit::MULTIPLICATE: return "MULTIPLICATE";
+            case GrammarUnit::DIVISION: return "DIVISION";
+            case GrammarUnit::MOD: return "MOD";
+            case GrammarUnit::GREATER: return "GREATER";
+            case GrammarUnit::LESS: return "LESS";
+            case GrammarUnit::GREATER_EQUAL: return "GREATER_EQUAL";
+            case GrammarUnit::LESS_EQUAL: return "LESS_EQUAL";
+            case GrammarUnit::EQUAL: return "EQUAL";
+            case GrammarUnit::NOT_EQUAL: return "NOT_EQUAL";
+            case GrammarUnit::AND: return "AND";
+            case GrammarUnit::OR: return "OR";
+            case GrammarUnit::XOR: return "XOR";
+            case GrammarUnit::TRUE: return "TRUE";
+            case GrammarUnit::FALSE: return "FALSE";
+            default: return "UNKNOWN";
+        }
+    }
+
 
     GrammarUnit m_grammar;
     std::weak_ptr<ASTNode> parent;

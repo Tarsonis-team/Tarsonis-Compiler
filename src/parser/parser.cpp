@@ -112,20 +112,6 @@ std::vector<T> take_subvector(const std::vector<T> &vec, int begin, int end) {
 }
 
 
-int look_for_next_item(const std::vector<std::shared_ptr<Expression>> &vec, int begin,
-                       std::vector<GrammarUnit> &units) {
-    for (int j = begin; j < vec.size(); ++j) {
-        for (auto unit: units) {
-            if (vec[j]->get_grammar() == unit) {
-                return j;
-            }
-        }
-
-    }
-
-    return int(vec.size());
-}
-
 using ExpressionParserBuilderPtr = std::shared_ptr<Expression> (*)(std::vector<std::shared_ptr<Expression>>);
 
 std::shared_ptr<Math> get_fork_in_expression(
@@ -162,7 +148,41 @@ std::shared_ptr<Math> get_fork_in_expression(
                     case GrammarUnit::MINUS:
                         fork = std::make_shared<Minus>();
                         break;
-                        // TODO: add for the rest of grammars
+                    case GrammarUnit::MULTIPLICATE:
+                        fork = std::make_shared<Multiplication>();
+                        break;
+                    case GrammarUnit::DIVISION:
+                        fork = std::make_shared<Division>();
+                        break;
+                    case GrammarUnit::MOD:
+                        fork = std::make_shared<Mod>();
+                        break;
+                    case GrammarUnit::GREATER:
+                        fork = std::make_shared<Greater>();
+                        break;
+                    case GrammarUnit::LESS:
+                        fork = std::make_shared<Less>();
+                        break;
+                    case GrammarUnit::GREATER_EQUAL:
+                        fork = std::make_shared<GreaterEqual>();
+                        break;
+                    case GrammarUnit::LESS_EQUAL:
+                        fork = std::make_shared<LessEqual>();
+                        break;
+                    case GrammarUnit::EQUAL:
+                        fork = std::make_shared<Equal>();
+                        break;
+                    case GrammarUnit::NOT_EQUAL:
+                        fork = std::make_shared<NotEqual>();
+                        break;
+                    case GrammarUnit::AND:
+                        fork = std::make_shared<And>();
+                    case GrammarUnit::OR:
+                        fork = std::make_shared<Or>();
+                        break;
+                    case GrammarUnit::XOR:
+                        fork = std::make_shared<Xor>();
+                        break;
                     default:
                         break;
                 }
@@ -174,7 +194,8 @@ std::shared_ptr<Math> get_fork_in_expression(
                     throw std::runtime_error("This item cannot be last term in expression");
                 }
 
-                int next_pos = look_for_next_item(expression_line, i + 1, units);
+//                int next_pos = look_for_next_item(expression_line, i + 1, units);
+                int next_pos = int(expression_line.size());
                 auto right_part = take_subvector(expression_line, i + 1, next_pos);
                 fork->m_right = function(right_part);
 

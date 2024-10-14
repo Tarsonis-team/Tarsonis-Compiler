@@ -2,7 +2,7 @@
 
 #include <memory>
 #include "AST-node.hpp"
-// #include "grammar-units.hpp"
+#include "grammar-units.hpp"
 
 namespace parsing {
 
@@ -16,33 +16,45 @@ public:
 class Integer : public Primary {
 
 public:
-    explicit Integer(int value) : Primary(), m_value(value) {}
+    explicit Integer(int value) : Primary(), m_value(value) {
+        this->m_grammar = GrammarUnit::INTEGER;
+    }
     int m_value;
     GrammarUnit get_grammar() const override {
         return GrammarUnit::INTEGER;
     }
     void print() override {
-        std::cout << "int_const:" << m_value;
+        std::cout << "INTEGER:" << this->m_value;
     }
 };
 
 class Boolean : public Primary {
 
 public:
-    explicit Boolean(bool value) : Primary(), m_value(value) {}
+    explicit Boolean(bool value) : Primary(), m_value(value) {
+        this->m_grammar = GrammarUnit::BOOL;
+    }
     bool m_value;
     GrammarUnit get_grammar() const override {
         return GrammarUnit::BOOL;
+    }
+    void print() override {
+        std::cout << "BOOL:" << this->m_value;
     }
 };
 
 class Real : public Primary {
 
 public:
-    explicit Real(double value) : Primary(), m_value(value) {}
+    explicit Real(double value) : Primary(), m_value(value) {
+        this->m_grammar = GrammarUnit::REAL;
+    }
     double m_value;
     GrammarUnit get_grammar() const override {
         return GrammarUnit::REAL;
+    }
+    void print() override {
+        std::cout << "REAL:" << this->m_value;
     }
 };
 
@@ -55,12 +67,19 @@ struct Chained {
 struct ArrayAccess : public Chained { ArrayAccess() = default; std::shared_ptr<Expression> access; };
 struct RecordAccess : public Chained { RecordAccess() = default; std::string identifier; };
 
-    explicit Modifiable(std::string head) : Primary(), m_head_name(head) {}
+    explicit Modifiable(std::string head) : Primary(), m_head_name(head) {
+        this->m_grammar = GrammarUnit::IDENTIFIER;
+    }
     std::vector<std::shared_ptr<Chained>> m_chain;
     std::string m_head_name;
 
     GrammarUnit get_grammar() const override {
         return GrammarUnit::IDENTIFIER;
+    }
+    void print() override {
+//        std::cout << get_str_representation(this->m_grammar) << " " << this->m_head_name << "\n";
+        std::cout << this->gr_to_str() << " " << this->m_head_name;
+        // TODO: print chain
     }
 };
 
@@ -71,32 +90,37 @@ public:
     explicit Math() : Expression() {}
     std::shared_ptr<Expression> m_left;
     std::shared_ptr<Expression> m_right;
+    void print() override {
+        std::cout << this->gr_to_str() << " with params: {\n";
+//        std::cout << std::to_string(int(this->m_grammar)) << " with params:\n";
+
+        std::cout << " ";
+        this->m_left->print();
+
+        std::cout << ", ";
+        this->m_right->print();
+
+        std::cout << "\n}";
+    }
 };
 
 class Plus : public Math {
 
 public:
-    explicit Plus() : Math() { this->m_grammar = GrammarUnit::PLUS; }
+    explicit Plus() : Math() {
+        this->m_grammar = GrammarUnit::PLUS;
+    }
     GrammarUnit get_grammar() const override {
         return GrammarUnit::PLUS;
-    }
-    void print() override {
-        std::cout << "Plus with params:\n";
-
-        std::cout << " ";
-        this->m_left->print();
-
-        std::cout << "\ns ";
-        this->m_right->print();
-
-        std::cout << "\n";
     }
 };
 
 class Minus : public Math {
 
 public:
-    explicit Minus() : Math() {}
+    explicit Minus() : Math() {
+        this->m_grammar = GrammarUnit::MINUS;
+    }
     GrammarUnit get_grammar() const override {
         return GrammarUnit::MINUS;
     }
