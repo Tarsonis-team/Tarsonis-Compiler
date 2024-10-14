@@ -25,7 +25,7 @@ void Parser::consumeNewlines() {
 }
 
 bool Parser::isCurrentRoutineCall() {
-    return peekNextToken().m_id == TOKEN_RPAREN;
+    return peekNextToken().m_id == TOKEN_LPAREN;
 }
 
 Token Parser::peekNextToken() {
@@ -61,7 +61,6 @@ std::shared_ptr<Routine> Parser::parse_routine_decl() {
         throw std::runtime_error("'(' expected");
     }
 
-    // карусель, карусель, это радость для нас ! парсим ебаные параметры
     // they can only be in form of [primitive_type | identifier_of_type] identifier 
     advanceTok();
     while (true) {
@@ -207,6 +206,7 @@ std::shared_ptr<Math> get_fork_in_expression(
                         break;
                     case GrammarUnit::AND:
                         fork = std::make_shared<And>();
+                        break;
                     case GrammarUnit::OR:
                         fork = std::make_shared<Or>();
                         break;
@@ -336,7 +336,7 @@ std::shared_ptr<Expression> expression_parser_builder(
 
     // Now, here are only numbers and identifiers
     if (expression_line.size() != 1) {
-        throw std::runtime_error("Two numbers/identifiers should be connected by some action (e.g. 5 2 -> 5 + 2");
+        throw std::runtime_error("Two numbers/identifiers should be connected by some action (e.g. 5 2 -> 5 + 2)");
     }
 
     return expression_line[0];
@@ -368,17 +368,17 @@ bool is_end_of_expression(int token_id) {
 } // namespace expressions
 
 std::shared_ptr<Expression> Parser::parse_expression() {
-    // TODO: function calls are not handled!
     std::vector<std::shared_ptr<Expression>> expression_line;
-
-    bool do_not_add_new_item = false;
 
     while (!expressions::is_end_of_expression(currentTok().m_id)) {
         std::shared_ptr<Expression> item_to_add = nullptr;
-        do_not_add_new_item = false;
+
+        bool do_not_take_token = false;
 
         switch (currentTok().m_id) {
             case TOKEN_IDENTIFIER: {
+                do_not_take_token = true;
+
                 if (peekNextToken().m_id == TOKEN_LPAREN) {
                     auto routine_call_res = std::make_shared<RoutineCallResult>();
                     routine_call_res->m_routine_call = parse_routine_call();
@@ -387,8 +387,7 @@ std::shared_ptr<Expression> Parser::parse_expression() {
                     break;
                 }
 
-
-                item_to_add = std::make_shared<Modifiable>(currentTok().m_value);
+                item_to_add = parse_modifiable_primary();
                 break;
             }
             case TOKEN_CONST_INT: {
@@ -451,60 +450,6 @@ std::shared_ptr<Expression> Parser::parse_expression() {
                 break;
 
             // More complex structures
-
-            case TOKEN_DOT: {
-                if (expression_line.empty()) {
-                    throw std::runtime_error("'.' is not expected at the beginning of an expression");
-                }
-
-                if (expression_line[expression_line.size() - 1]->get_grammar() != GrammarUnit::IDENTIFIER) {
-                    throw std::runtime_error("'.' is expected after an identifier");
-                }
-
-                const auto& access_record =
-                        std::dynamic_pointer_cast<Modifiable>(expression_line[expression_line.size() - 1]);
-
-                advanceTok();
-                if (currentTok().m_id != TOKEN_IDENTIFIER) {
-                    throw std::runtime_error("An identifier is expected after the . when access a record");
-                }
-
-
-                auto access_item = std::make_shared<Modifiable::RecordAccess>();
-                access_item->identifier = currentTok().m_value;
-
-                access_record->m_chain.push_back(access_item);
-
-//                expression_line.pop_back();
-                item_to_add = access_record;
-
-                do_not_add_new_item = true;
-                break;
-            }
-            case TOKEN_LBRACKET: {
-                if (expression_line.empty()) {
-                    throw std::runtime_error("'[ ... ]' is not expected at the beginning of an expression");
-                }
-
-                if (expression_line[expression_line.size() - 1]->get_grammar() != GrammarUnit::IDENTIFIER) {
-                    throw std::runtime_error("'[ ... ]' is expected after an identifier");
-                }
-
-                const auto& access_array =
-                        std::dynamic_pointer_cast<Modifiable>(expression_line[expression_line.size() - 1]);
-
-                advanceTok();
-
-                auto access_item = std::make_shared<Modifiable::ArrayAccess>();
-                access_item->access = parse_expression();
-
-                access_array->m_chain.push_back(access_item);
-
-//                expression_line.pop_back();
-                item_to_add = access_array;
-                do_not_add_new_item = true;
-                break;
-            }
             case TOKEN_LPAREN: {
                 advanceTok();
                 auto nested_expression = parse_expression();
@@ -526,10 +471,10 @@ std::shared_ptr<Expression> Parser::parse_expression() {
             throw std::runtime_error("Some item in expression was not recognised: " + currentTok().m_value);
         }
 
-        if (!do_not_add_new_item) {
-            expression_line.push_back(item_to_add);
+        expression_line.push_back(item_to_add);
+        if (!do_not_take_token) {
+            advanceTok();
         }
-        advanceTok();
     }
 
     // Building a tree based on a vector
@@ -601,7 +546,7 @@ std::shared_ptr<RoutineCall> Parser::parse_routine_call() {
     if (currentTok().m_id != TOKEN_IDENTIFIER) {
         throw std::runtime_error("no routine identifier");
     }
-    std::shared_ptr<RoutineCall> call;
+    std::shared_ptr<RoutineCall> call = std::make_shared<RoutineCall>(currentTok().m_value);
     advanceTok();
     
     if (currentTok().m_id != TOKEN_LPAREN) {
@@ -615,6 +560,8 @@ std::shared_ptr<RoutineCall> Parser::parse_routine_call() {
             advanceTok();
         }
     }
+
+    advanceTok();
 
     return call;
 }
@@ -657,6 +604,10 @@ std::shared_ptr<Body> Parser::parse_body() {
                 break;
             case TOKEN_ELSE:
             case TOKEN_END:
+                break;
+            case TOKEN_RETURN:
+                advanceTok();
+                body_res->m_return = parse_expression();
                 break;
             default:
                 throw std::runtime_error("Can't parse body !");
@@ -710,18 +661,16 @@ std::shared_ptr<ArrayType> Parser::parse_array_type() {
     }
 
     advanceTok();
-    switch (currentTok().m_id) {
-        case TOKEN_IDENTIFIER:
-            return std::make_shared<ArrayType>(currentTok().m_value, number_of_elements);
-        case TOKEN_BOOLEAN:
-            return std::make_shared<ArrayType>(currentTok().m_value, number_of_elements);
-        case TOKEN_INTEGER:
-            return std::make_shared<ArrayType>(currentTok().m_value, number_of_elements);
-        case TOKEN_REAL:
-            return std::make_shared<ArrayType>(currentTok().m_value, number_of_elements);
-        default:
-            throw std::runtime_error("Expected a type of the array !");
-    }    
+
+    if (currentTok().m_id != TOKEN_IDENTIFIER && currentTok().m_id != TOKEN_BOOLEAN
+            && currentTok().m_id != TOKEN_INTEGER && currentTok().m_id != TOKEN_REAL) {
+        throw std::runtime_error("Expected a type of the array !");
+    }
+
+    auto array_type = std::make_shared<ArrayType>(currentTok().m_value, number_of_elements);
+    advanceTok();
+
+    return array_type;
 }
 
 
@@ -912,8 +861,12 @@ std::shared_ptr<Type> Parser::parse_type_decl() {
         case TOKEN_BOOLEAN:
         case TOKEN_INTEGER:
         case TOKEN_REAL:
-        case TOKEN_IDENTIFIER:
-            return std::make_shared<TypeAliasing>(currentTok().m_value, name_of_the_type);
+        case TOKEN_IDENTIFIER: {
+            const auto& value = currentTok().m_value;
+            advanceTok();
+
+            return std::make_shared<TypeAliasing>(value, name_of_the_type);
+        }
         default:
             throw std::runtime_error("Specify the type being declared or aliased!");
     }

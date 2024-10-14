@@ -70,6 +70,13 @@ public:
     std::weak_ptr<ASTNode> parent;
 };
 
+class Expression : public ASTNode {
+
+public:
+    ~Expression() override = default;
+    explicit Expression() : ASTNode(GrammarUnit::DIVISION) {}
+};
+
 class Body : public ASTNode {
 
 public:
@@ -84,6 +91,7 @@ public:
     }
 
     std::vector<std::shared_ptr<ASTNode>> m_items;
+    std::shared_ptr<Expression> m_return;
 };
 
 
@@ -92,13 +100,6 @@ class Statement : public ASTNode {
 public:
     ~Statement() override = default;
     explicit Statement(GrammarUnit gr) : ASTNode(gr) {}
-};
-
-class Expression : public ASTNode {
-
-public:
-    ~Expression() override = default;
-    explicit Expression() : ASTNode(GrammarUnit::DIVISION) {}
 };
 
 class Declaration : public ASTNode {
@@ -131,7 +132,15 @@ public:
     explicit Range() : ASTNode(GrammarUnit::RANGE), m_reverse(false) {}
 
     void print() override {
-        std::cout << "Range: \n";
+        std::cout << "in range";
+        if (m_reverse) {
+            std::cout << " (reverse)";
+        }
+        std::cout << ": ";
+
+        m_begin->print();
+        std::cout << " .. ";
+        m_end->print();
     }
 
     bool m_reverse;

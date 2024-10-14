@@ -16,11 +16,19 @@ public:
     explicit If() : Statement(GrammarUnit::IF) {}
 
     void print() override {
-        std::cout << "If statement then\n";
+        std::cout << "If statement: condition:\n";
+        std::cout << " ";
+
+        m_condition->print();
+
+        std::cout << "\nthen:\n";
         m_then->print();
+
         if (m_else.get()) {
-            std::cout << "else\n";
+            std::cout << "\nelse:\n";
             m_else->print();
+        } else {
+            std::cout << "\nno else-part\n";
         }
     }
 
@@ -35,11 +43,16 @@ public:
     explicit For() : Statement(GrammarUnit::FOR) {}
 
     void print() override {
-        std::cout << "For";
+        std::cout << "For ";
+        m_identifier->print();
+
+        std::cout << " ";
         m_range->print();
-        
+
+        cout << "\n";
+
         m_body->print();
-        std::cout << "End of While statement\n";
+        std::cout << "End of For statement\n";
     }
 
     std::shared_ptr<Range> m_range;
@@ -55,6 +68,7 @@ public:
     void print() override {
         std::cout << "While statement cond:\n";
         m_condition->print();
+        std::cout << "\n";
         m_body->print();
         std::cout << "End of While statement\n";
     }
@@ -66,9 +80,18 @@ public:
 class RoutineCall : public Statement {
 
 public:
-    explicit RoutineCall() : Statement(GrammarUnit::CALL) {}
-    std::shared_ptr<Routine> m_routine;
+    explicit RoutineCall(std::string name) : Statement(GrammarUnit::CALL), m_routine_name(std::move(name)) {}
+    std::string m_routine_name;
     std::vector<std::shared_ptr<Expression>> m_parameters;
+    void print() override {
+        cout << "Calling routine: " << m_routine_name << " with params: ( ";
+
+        for (auto& par : m_parameters) {
+            par->print();
+            cout << ",";
+        }
+        cout << ") ";
+    }
 };
 
 class RoutineCallResult : public Expression {
@@ -79,6 +102,9 @@ public:
     }
 
     std::shared_ptr<RoutineCall> m_routine_call;
+    void print() override {
+        m_routine_call->print();
+    }
 };
 
 class Assignment : public Statement {
@@ -89,8 +115,9 @@ public:
     void print() override {
         std::cout << "Assignment ";
         m_modifiable->print();
-        std::cout << " to ";
+        std::cout << " to\n";
         m_expression->print();
+        std::cout << "\n";
     }
 
     std::shared_ptr<Modifiable> m_modifiable;
