@@ -153,7 +153,8 @@ public:
 
     void print() override
     {
-        std::cout << this->gr_to_str() << " with params: {" << std::to_string(static_cast<int>(this->m_grammar)) << "::\n";
+        std::cout << this->gr_to_str() << " with params: {" << std::to_string(static_cast<int>(this->m_grammar))
+                  << "::\n";
 
         std::cout << " ";
         this->m_left->print();

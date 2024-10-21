@@ -4,6 +4,8 @@
 #include "expression.hpp"
 #include "lexer/token.hpp"
 #include "statement.hpp"
+#include <algorithm>
+#include <array>
 #include <memory>
 #include <stdexcept>
 #include <vector>
@@ -129,6 +131,9 @@ std::shared_ptr<Routine> Parser::parse_routine_decl()
 namespace expressions
 {
 
+std::shared_ptr<Expression>
+expression_parser_builder(std::vector<std::shared_ptr<Expression>> expression_line, bool return_zero);
+
 template <typename T>
 std::vector<T> take_subvector(const std::vector<T>& vec, int begin, int end)
 {
@@ -146,7 +151,6 @@ using ExpressionParserBuilderPtr = std::shared_ptr<Expression> (*)(std::vector<s
 std::shared_ptr<Math> get_fork_in_expression(
     const std::vector<std::shared_ptr<Expression>>& expression_line,
     std::vector<GrammarUnit>& units,
-    ExpressionParserBuilderPtr function,
     std::shared_ptr<Math>& fork,
     bool& achieved)
 {
@@ -167,7 +171,6 @@ std::shared_ptr<Math> get_fork_in_expression(
             {
                 break;
             }
-
 
             throw std::runtime_error(
                 "Unexpected item at the beginning of an expression: " + expression_line[0]->gr_to_str());
@@ -260,11 +263,11 @@ std::shared_ptr<Math> get_fork_in_expression(
                             "Unexpected token in a expression: " + expression_line[i + 1]->gr_to_str());
                     }
 
-                    fork->m_left = function(left_part, true);
+                    fork->m_left = expression_parser_builder(left_part, true);
                 }
                 else
                 {
-                    fork->m_left = function(left_part, false);
+                    fork->m_left = expression_parser_builder(left_part, false);
                 }
 
 
@@ -275,7 +278,7 @@ std::shared_ptr<Math> get_fork_in_expression(
 
                 int next_pos = expression_line.size();
                 auto right_part = take_subvector(expression_line, i + 1, next_pos);
-                fork->m_right = function(right_part, false);
+                fork->m_right = expression_parser_builder(right_part, false);
 
                 need_to_break = true;
                 break;
@@ -303,7 +306,7 @@ expression_parser_builder(std::vector<std::shared_ptr<Expression>> expression_li
 
     // or
     grammar_units.push_back(GrammarUnit::OR);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
+    fork = get_fork_in_expression(expression_line, grammar_units, fork, was_achieved);
     if (was_achieved)
     {
         return fork;
@@ -312,7 +315,7 @@ expression_parser_builder(std::vector<std::shared_ptr<Expression>> expression_li
 
     // and
     grammar_units.push_back(GrammarUnit::AND);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
+    fork = get_fork_in_expression(expression_line, grammar_units, fork, was_achieved);
     if (was_achieved)
     {
         return fork;
@@ -321,7 +324,7 @@ expression_parser_builder(std::vector<std::shared_ptr<Expression>> expression_li
 
     // xor
     grammar_units.push_back(GrammarUnit::XOR);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
+    fork = get_fork_in_expression(expression_line, grammar_units, fork, was_achieved);
     if (was_achieved)
     {
         return fork;
@@ -331,7 +334,7 @@ expression_parser_builder(std::vector<std::shared_ptr<Expression>> expression_li
     // = /=
     grammar_units.push_back(GrammarUnit::EQUAL);
     grammar_units.push_back(GrammarUnit::NOT_EQUAL);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
+    fork = get_fork_in_expression(expression_line, grammar_units, fork, was_achieved);
     if (was_achieved)
     {
         return fork;
@@ -345,7 +348,7 @@ expression_parser_builder(std::vector<std::shared_ptr<Expression>> expression_li
     grammar_units.push_back(GrammarUnit::GREATER_EQUAL);
     grammar_units.push_back(GrammarUnit::EQUAL);
     grammar_units.push_back(GrammarUnit::NOT_EQUAL);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
+    fork = get_fork_in_expression(expression_line, grammar_units, fork, was_achieved);
     if (was_achieved)
     {
         return fork;
@@ -355,7 +358,7 @@ expression_parser_builder(std::vector<std::shared_ptr<Expression>> expression_li
     // + -
     grammar_units.push_back(GrammarUnit::PLUS);
     grammar_units.push_back(GrammarUnit::MINUS);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
+    fork = get_fork_in_expression(expression_line, grammar_units, fork, was_achieved);
     if (was_achieved)
     {
         return fork;
@@ -366,7 +369,7 @@ expression_parser_builder(std::vector<std::shared_ptr<Expression>> expression_li
     grammar_units.push_back(GrammarUnit::MULTIPLICATE);
     grammar_units.push_back(GrammarUnit::DIVISION);
     grammar_units.push_back(GrammarUnit::MOD);
-    fork = get_fork_in_expression(expression_line, grammar_units, expression_parser_builder, fork, was_achieved);
+    fork = get_fork_in_expression(expression_line, grammar_units, fork, was_achieved);
     if (was_achieved)
     {
         return fork;
@@ -384,21 +387,20 @@ expression_parser_builder(std::vector<std::shared_ptr<Expression>> expression_li
 
 bool is_end_of_expression(int token_id)
 {
-    int end_tokens[] = { TOKEN_NEWLINE, TOKEN_THEN,     TOKEN_DOTDOT, TOKEN_SEMICOLON, TOKEN_LOOP,
+    // clang-format off
+    std::array end_tokens {
+        TOKEN_NEWLINE,
+        TOKEN_THEN,
+        TOKEN_DOTDOT,
+        TOKEN_SEMICOLON,
+        TOKEN_LOOP,
+        TOKEN_RPAREN,
+        TOKEN_RBRACKET,
+        TOKEN_COMA
+    };
+    // clang-format on
 
-                         TOKEN_RPAREN,  TOKEN_RBRACKET,
-
-                         TOKEN_COMA };
-
-    for (auto end_token : end_tokens)
-    {
-        if (end_token == token_id)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return std::any_of(end_tokens.begin(), end_tokens.end(), [token_id](int val) { return val == token_id; });
 }
 
 } // namespace expressions
@@ -773,7 +775,6 @@ std::shared_ptr<Variable> Parser::parse_variable_decl()
     advanceTok();
 
     std::string type;
-    // std::shared_ptr<Variable> declared;
     switch (currentTok().m_id)
     {
         case TOKEN_BOOLEAN:
