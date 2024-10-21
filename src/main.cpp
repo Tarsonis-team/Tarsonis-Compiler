@@ -4,6 +4,12 @@
 #include <iostream>
 #include <vector>
 
+#include "analyzer/strategies/check-types.hpp"
+#include "analyzer/strategies/check-undeclared-symbols.hpp"
+#include "analyzer/strategies/remove-unreachable.hpp"
+#include "analyzer/strategies/remove-unused.hpp"
+
+#include "analyzer/analyzer.hpp"
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
 
@@ -40,7 +46,6 @@ int main(int argc, char* argv[])
         std::cout << i << ": \"" << (tokens[i].m_value == "\n" ? "newline" : tokens[i].m_value) << "\" "
                   << tokens[i].m_id << "\n";
     }
-
     std::cout << "\n";
 
     try
@@ -48,6 +53,12 @@ int main(int argc, char* argv[])
         auto parser = parsing::Parser(tokens);
         auto program_ast = parser.parse();
         program_ast->print();
+
+        Analyzer(program_ast)
+            .withCheckOf<CheckUndeclaredSymbols>()
+            .withCheckOf<CheckTypes>()
+            .withOptimizationOf<RemoveUnreachableCode>()
+            .withOptimizationOf<RemoveUnusedDeclarations>();
     }
     catch (const std::exception& err)
     {
