@@ -46,14 +46,6 @@ Checks: [
   '-darwin-*',
 
   '-fuchsia-*',
-
-#   '-google-build-using-namespace',
-#   '-google-readability-braces-around-statements',
-#   '-google-readability-casting',
-#   '-google-readability-function-size',
-#   '-google-readability-namespace-comments',
-#   '-google-readability-todo',
-
   '-hicpp-avoid-c-arrays',
   '-hicpp-avoid-goto',
   '-hicpp-braces-around-statements',

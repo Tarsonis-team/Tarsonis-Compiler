@@ -1,21 +1,24 @@
 #pragma once
 
-#include <iostream>
-#include <memory>
-#include <vector>
 #include "AST-node.hpp"
 #include "declaration.hpp"
 #include "expression.hpp"
+#include <iostream>
+#include <memory>
+#include <vector>
 
+namespace parsing
+{
 
-namespace parsing {
-
-class If : public Statement {
-
+class If : public Statement
+{
 public:
-    explicit If() : Statement(GrammarUnit::IF) {}
+    explicit If() : Statement(GrammarUnit::IF)
+    {
+    }
 
-    void print() override {
+    void print() override
+    {
         std::cout << "If statement: condition:\n";
         std::cout << " ";
 
@@ -24,10 +27,13 @@ public:
         std::cout << "\nthen:\n";
         m_then->print();
 
-        if (m_else.get()) {
+        if (m_else.get())
+        {
             std::cout << "\nelse:\n";
             m_else->print();
-        } else {
+        }
+        else
+        {
             std::cout << "\nno else-part\n";
         }
     }
@@ -37,12 +43,15 @@ public:
     std::shared_ptr<Body> m_else;
 };
 
-class For : public Statement {
-
+class For : public Statement
+{
 public:
-    explicit For() : Statement(GrammarUnit::FOR) {}
+    explicit For() : Statement(GrammarUnit::FOR)
+    {
+    }
 
-    void print() override {
+    void print() override
+    {
         std::cout << "For ";
         m_identifier->print();
 
@@ -60,12 +69,15 @@ public:
     std::shared_ptr<Variable> m_identifier;
 };
 
-class While : public Statement {
-
+class While : public Statement
+{
 public:
-    explicit While() : Statement(GrammarUnit::WHILE) {}
+    explicit While() : Statement(GrammarUnit::WHILE)
+    {
+    }
 
-    void print() override {
+    void print() override
+    {
         std::cout << "While statement cond:\n";
         m_condition->print();
         std::cout << "\n";
@@ -77,16 +89,22 @@ public:
     std::shared_ptr<Expression> m_condition;
 };
 
-class RoutineCall : public Statement {
-
+class RoutineCall : public Statement
+{
 public:
-    explicit RoutineCall(std::string name) : Statement(GrammarUnit::CALL), m_routine_name(std::move(name)) {}
+    explicit RoutineCall(std::string name) : Statement(GrammarUnit::CALL), m_routine_name(std::move(name))
+    {
+    }
+
     std::string m_routine_name;
     std::vector<std::shared_ptr<Expression>> m_parameters;
-    void print() override {
+
+    void print() override
+    {
         cout << "Calling routine: " << m_routine_name << " with params: ( ";
 
-        for (auto& par : m_parameters) {
+        for (auto& par : m_parameters)
+        {
             par->print();
             cout << ",";
         }
@@ -94,25 +112,31 @@ public:
     }
 };
 
-class RoutineCallResult : public Expression {
-
+class RoutineCallResult : public Expression
+{
 public:
-    explicit RoutineCallResult() : Expression() {
+    explicit RoutineCallResult() : Expression()
+    {
         this->m_grammar = GrammarUnit::ROUTINE_CALL;
     }
 
     std::shared_ptr<RoutineCall> m_routine_call;
-    void print() override {
+
+    void print() override
+    {
         m_routine_call->print();
     }
 };
 
-class Assignment : public Statement {
-
+class Assignment : public Statement
+{
 public:
-    explicit Assignment() : Statement(GrammarUnit::ASSIGNMENT) {}
+    explicit Assignment() : Statement(GrammarUnit::ASSIGNMENT)
+    {
+    }
 
-    void print() override {
+    void print() override
+    {
         std::cout << "Assignment ";
         m_modifiable->print();
         std::cout << " to\n";
@@ -124,4 +148,4 @@ public:
     std::shared_ptr<Expression> m_expression;
 };
 
-}  // namespace parsing
+} // namespace parsing
