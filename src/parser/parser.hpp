@@ -3,18 +3,20 @@
 #include <memory>
 #include <vector>
 
-#include "expression.hpp"
-#include "lexer/token.hpp"
 #include "AST-node.hpp"
 #include "declaration.hpp"
+#include "expression.hpp"
+#include "lexer/token.hpp"
 #include "statement.hpp"
 
-namespace parsing {
+namespace parsing
+{
 class Parser
 {
 public:
     explicit Parser(const std::vector<Token>& tokens) : m_tokens(tokens) {};
     std::shared_ptr<Program> parse();
+
 private:
     Token currentTok();
     Token peekNextToken();
@@ -45,4 +47,4 @@ private:
     const std::vector<Token>& m_tokens;
 };
 
-}  // namespace parsing
+} // namespace parsing

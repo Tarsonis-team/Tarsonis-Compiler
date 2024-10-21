@@ -1,6 +1,7 @@
 #pragma once
 
-enum class GrammarUnit {
+enum class GrammarUnit
+{
     UNDEFINED,
     PROGRAM,
     BODY,
