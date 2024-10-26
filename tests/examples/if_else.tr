@@ -1,4 +1,5 @@
 routine main(integer a) is
+    
     if a > 4 and true then
         a := 3
     else

@@ -47,6 +47,7 @@ public:
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         for (auto& param : m_params) {
             param->checkUndeclared(table);
+            table.emplace(param->m_name, table.at(param->m_type));
         }
 
         if (!return_type.empty() && !table.contains(return_type)) {
@@ -56,6 +57,10 @@ public:
         table.insert({m_name,  std::static_pointer_cast<Declaration>(shared_from_this())});
 
         m_body->checkUndeclared(table);
+
+        for (auto& param : m_params) {
+            table.erase(param->m_name);
+        }
     }
 
     void print() override
