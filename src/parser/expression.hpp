@@ -202,6 +202,12 @@ public:
     {
     }
 
+
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        m_left->checkUndeclared(table);
+        m_right->checkUndeclared(table);
+    }
+
     std::shared_ptr<Expression> m_left;
     std::shared_ptr<Expression> m_right;
 
