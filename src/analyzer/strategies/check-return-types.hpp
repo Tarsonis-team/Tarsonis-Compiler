@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-struct CheckTypes
+struct CheckReturnTypes
 {
-    explicit CheckTypes(std::shared_ptr<parsing::Program> program) : m_ast(program) {}
+    explicit CheckReturnTypes(std::shared_ptr<parsing::Program> program) : m_ast(program) {}
 
     std::vector<std::string> checkErrors()
     {

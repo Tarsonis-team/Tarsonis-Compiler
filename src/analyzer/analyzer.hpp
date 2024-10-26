@@ -26,6 +26,7 @@ public:
         {
             for (auto& err : errors)
             {
+                std::cout << err << '\n';
                 m_errors.push_back(err);
             }
         }

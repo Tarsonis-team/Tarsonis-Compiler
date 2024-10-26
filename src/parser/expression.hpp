@@ -1,8 +1,10 @@
 #pragma once
 
 #include "AST-node.hpp"
+#include "declaration.hpp"
 #include "grammar-units.hpp"
 #include <memory>
+#include <stdexcept>
 
 namespace parsing
 {
@@ -34,7 +36,7 @@ public:
 
     void print() override
     {
-        std::cout << "INTEGER:" << this->m_value;
+        std::cout << "INTEGER:" << this->m_value << " ";
     }
 };
 
@@ -85,6 +87,7 @@ class Modifiable : public Primary
 public:
     struct Chained
     {
+        virtual void check_has_field(std::shared_ptr<Declaration> current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>> table) = 0;
         virtual ~Chained() = default;
         virtual void print() = 0;
     };
@@ -93,6 +96,11 @@ public:
     {
         ArrayAccess() = default;
         std::shared_ptr<Expression> access;
+
+        void check_has_field(std::shared_ptr<Declaration> current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>> table) override {
+            // skip, it is just an array access, the array 
+            // identifier was before.
+        }
 
         void print() override
         {
@@ -104,6 +112,27 @@ public:
 
     struct RecordAccess : public Chained
     {
+        void check_has_field(std::shared_ptr<Declaration> current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>> table) override {
+            // a.b
+            // so we are supposedly at 'a' now (in current type variable)
+            // and b is the identifier
+            try {
+                RecordType* record = dynamic_cast<RecordType*>(current_type.get());
+                // check that record REALLY has that name
+                for (auto& field : record->m_fields) {
+                    if (field->m_name == identifier) {
+                        current_type = field;
+                        return;
+                    }
+                }
+                throw std::runtime_error("the field with name " + identifier +
+                                                " is not found in record " + record->m_name);
+            } catch (const std::bad_cast& e) {
+                std::cout << "Accessed field is not a record: " + identifier;
+                throw;
+            }
+        }
+    
         void print() override
         {
             std::cout << "." + identifier;
@@ -112,6 +141,22 @@ public:
         RecordAccess() = default;
         std::string identifier;
     };
+
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        if (!table.contains(m_head_name)) {
+            throw std::runtime_error("unknown identifier: " + m_head_name);
+        }
+
+        if (m_chain.empty()) {
+            return;
+        }
+
+        auto& type = table.at(m_head_name);
+        // dealing with records.... or an array access... or both (
+        for (auto& access : m_chain) {
+            access->check_has_field(type, table);
+        }
+    }
 
     void print() override
     {

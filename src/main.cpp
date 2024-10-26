@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 
-#include "analyzer/strategies/check-types.hpp"
+#include "analyzer/strategies/check-return-types.hpp"
 #include "analyzer/strategies/check-undeclared-symbols.hpp"
 #include "analyzer/strategies/remove-unreachable.hpp"
 #include "analyzer/strategies/remove-unused.hpp"
@@ -55,10 +55,10 @@ int main(int argc, char* argv[])
         program_ast->print();
 
         Analyzer(program_ast)
-            .withCheckOf<CheckUndeclaredSymbols>()
-            .withCheckOf<CheckTypes>()
-            .withOptimizationOf<RemoveUnreachableCode>()
-            .withOptimizationOf<RemoveUnusedDeclarations>();
+            .withCheckOf<CheckUndeclaredSymbols>();
+            // .withCheckOf<CheckReturnTypes>()
+            // .withOptimizationOf<RemoveUnreachableCode>()
+            // .withOptimizationOf<RemoveUnusedDeclarations>();
     }
     catch (const std::exception& err)
     {

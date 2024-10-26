@@ -5,9 +5,7 @@
 
 struct RemoveUnreachableCode
 {
-
     explicit RemoveUnreachableCode(std::shared_ptr<parsing::Program> program) : m_ast(program) {}
-
 
     void apply()
     {

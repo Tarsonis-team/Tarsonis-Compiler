@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "grammar-units.hpp"
@@ -10,8 +11,9 @@ namespace parsing
 {
 
 using std::cout;
+class Declaration;
 
-class ASTNode
+class ASTNode : public virtual std::enable_shared_from_this<ASTNode>
 {
 public:
     explicit ASTNode(GrammarUnit gr) : m_grammar(gr)
@@ -20,6 +22,10 @@ public:
 
     ASTNode(ASTNode&& node) = default;
     virtual ~ASTNode() = default;
+
+    virtual void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) {
+
+    }
 
     virtual void print()
     {
@@ -143,6 +149,12 @@ public:
         std::cout << "End of Body\n";
     }
 
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        for (auto& stmt : m_items) {
+            stmt->checkUndeclared(table);
+        }
+    }
+
     std::vector<std::shared_ptr<ASTNode>> m_items;
     std::shared_ptr<Expression> m_return;
 };
@@ -164,6 +176,7 @@ public:
 
     explicit Declaration(GrammarUnit gr, std::string name) : ASTNode(gr), m_name(std::move(name))
     {
+
     }
 
     Declaration(Declaration&&) = default;
@@ -182,6 +195,17 @@ public:
         }
         cout << "End of the program\n";
     }
+
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        for (auto& node : m_declarations) {
+            node->checkUndeclared(table);
+        }
+    }
+
+    void checkTypes() {
+
+    }
+
 
     explicit Program() : ASTNode(GrammarUnit::PROGRAM)
     {

@@ -741,12 +741,21 @@ std::shared_ptr<ArrayType> Parser::parse_array_type()
     advanceTok();
 
     if (currentTok().m_id != TOKEN_IDENTIFIER && currentTok().m_id != TOKEN_BOOLEAN
-        && currentTok().m_id != TOKEN_INTEGER && currentTok().m_id != TOKEN_REAL)
+        && currentTok().m_id != TOKEN_INTEGER && currentTok().m_id != TOKEN_REAL 
+        && currentTok().m_id != TOKEN_ARRAY)
     {
         throw std::runtime_error("Expected a type of the array !");
     }
 
-    auto array_type = std::make_shared<ArrayType>(currentTok().m_value, number_of_elements);
+    std::shared_ptr<ArrayType> array_type;
+
+    if (currentTok().m_id == TOKEN_ARRAY) {
+        array_type = std::make_shared<ArrayType>(parse_array_type(), number_of_elements);
+    } else {
+        auto type = std::make_shared<PrimitiveType>(currentTok().m_value);
+        array_type = std::make_shared<ArrayType>(type, number_of_elements);
+    }
+
     advanceTok();
 
     return array_type;
@@ -774,14 +783,14 @@ std::shared_ptr<Variable> Parser::parse_variable_decl()
     }
     advanceTok();
 
-    std::string type;
+    std::shared_ptr<Type> type;
     switch (currentTok().m_id)
     {
         case TOKEN_BOOLEAN:
         case TOKEN_INTEGER:
         case TOKEN_IDENTIFIER:
         case TOKEN_REAL:
-            type = currentTok().m_value;
+            type = std::make_shared<PrimitiveType>(currentTok().m_value);
             advanceTok();
             if (currentTok().m_id == TOKEN_IS)
             {
@@ -858,7 +867,7 @@ std::shared_ptr<For> Parser::parse_for_statement()
     {
         throw std::runtime_error("identifier is expected at the for-loop!");
     }
-    result->m_identifier = std::make_shared<PrimitiveVariable>(currentTok().m_value, "integer");
+    result->m_identifier = std::make_shared<PrimitiveVariable>(currentTok().m_value, std::make_shared<PrimitiveType>("integer"));
 
     advanceTok();
     result->m_range = parse_range();

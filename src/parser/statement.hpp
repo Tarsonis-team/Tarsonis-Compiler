@@ -5,6 +5,7 @@
 #include "expression.hpp"
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 namespace parsing
@@ -15,6 +16,11 @@ class If : public Statement
 public:
     explicit If() : Statement(GrammarUnit::IF)
     {
+    }
+
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        m_then->checkUndeclared(table);
+        m_else->checkUndeclared(table);
     }
 
     void print() override
@@ -50,6 +56,10 @@ public:
     {
     }
 
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        m_body->checkUndeclared(table);
+    }
+
     void print() override
     {
         std::cout << "For ";
@@ -76,6 +86,11 @@ public:
     {
     }
 
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        m_condition->checkUndeclared(table);
+        m_body->checkUndeclared(table);
+    }
+
     void print() override
     {
         std::cout << "While statement cond:\n";
@@ -99,6 +114,15 @@ public:
     std::string m_routine_name;
     std::vector<std::shared_ptr<Expression>> m_parameters;
 
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        if (!table.contains(m_routine_name)) {
+            throw std::runtime_error("undeclared function is called: " + m_routine_name);
+        }
+        for (auto& param : m_parameters) {
+            param->checkUndeclared(table);
+        }
+    }
+
     void print() override
     {
         cout << "Calling routine: " << m_routine_name << " with params: ( ";
@@ -115,6 +139,10 @@ public:
 class RoutineCallResult : public Expression
 {
 public:
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        m_routine_call->checkUndeclared(table);
+    }
+
     explicit RoutineCallResult() : Expression()
     {
         this->m_grammar = GrammarUnit::ROUTINE_CALL;
@@ -133,6 +161,10 @@ class Assignment : public Statement
 public:
     explicit Assignment() : Statement(GrammarUnit::ASSIGNMENT)
     {
+    }
+
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        m_modifiable->checkUndeclared(table);
     }
 
     void print() override
