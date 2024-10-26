@@ -4,20 +4,18 @@ type Point is record
 end
 
 type Line is record
-    var begin: Point
-    var wend: Point
+    var _begin: Point
+    var _end: Point
 end
 
 routine new_point(integer x, integer y) -> Point is
     var p: Point
     p.x := x
     p.y := y
-
 end
 
 routine new_line(Point p1, Point p2) -> Line is
-    var pf: Pointf
-    pf.begin := p1
-    pf.ende := p2
-
+    var pf: Line
+    pf._begin := p1
+    pf._end := p2
 end

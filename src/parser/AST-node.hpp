@@ -149,10 +149,16 @@ public:
         std::cout << "End of Body\n";
     }
 
-    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+    void checkUndecalredWithCopy(std::unordered_map<std::string, std::shared_ptr<Declaration>> table) {
         for (auto& stmt : m_items) {
             stmt->checkUndeclared(table);
         }
+    }
+
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        // we make copy, because symbols declared in a particular body cant be seen 
+        // outside
+        checkUndecalredWithCopy(table);
     }
 
     std::vector<std::shared_ptr<ASTNode>> m_items;
