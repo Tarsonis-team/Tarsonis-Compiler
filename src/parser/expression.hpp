@@ -87,7 +87,7 @@ class Modifiable : public Primary
 public:
     struct Chained
     {
-        virtual void check_has_field(std::shared_ptr<Declaration> current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>> table) = 0;
+        virtual void check_has_field(std::shared_ptr<Declaration>& current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>> table) = 0;
         virtual ~Chained() = default;
         virtual void print() = 0;
     };
@@ -97,9 +97,17 @@ public:
         ArrayAccess() = default;
         std::shared_ptr<Expression> access;
 
-        void check_has_field(std::shared_ptr<Declaration> current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>> table) override {
+        void check_has_field(std::shared_ptr<Declaration>& current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>> table) override {
             // skip, it is just an array access, the array 
             // identifier was before.
+            // But we need to check that this is really an array...
+            try {
+                ArrayType& array = dynamic_cast<ArrayType&>(*current_type);
+                current_type = array.m_type;
+            } catch (const std::bad_cast& e) {
+                std::cout << "Accessed type is not an array: " + current_type->m_name << '\n';
+                throw;
+            }
         }
 
         void print() override
@@ -112,21 +120,22 @@ public:
 
     struct RecordAccess : public Chained
     {
-        void check_has_field(std::shared_ptr<Declaration> current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>> table) override {
+        void check_has_field(std::shared_ptr<Declaration>& current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>> table) override {
             // a.b
             // so we are supposedly at 'a' now (in current type variable)
             // and b is the identifier
             try {
-                RecordType* record = dynamic_cast<RecordType*>(current_type.get());
+                RecordType& record = dynamic_cast<RecordType&>(*current_type);
                 // check that record REALLY has that name
-                for (auto& field : record->m_fields) {
-                    if (field->m_name == identifier) {
-                        current_type = field;
+                for (auto& field : record.m_fields) {
+                    Variable& var = dynamic_cast<Variable&>(*field);
+                    if (var.m_name == identifier) {
+                        current_type = table.at(var.m_type->m_name);
                         return;
                     }
                 }
                 throw std::runtime_error("the field with name " + identifier +
-                                                " is not found in record " + record->m_name);
+                                                " is not found in record " + record.m_name);
             } catch (const std::bad_cast& e) {
                 std::cout << "Accessed field is not a record: " + identifier;
                 throw;
@@ -151,7 +160,7 @@ public:
             return;
         }
 
-        auto& type = table.at(m_head_name);
+        auto type = table.at(m_head_name);
         // dealing with records.... or an array access... or both (
         for (auto& access : m_chain) {
             access->check_has_field(type, table);

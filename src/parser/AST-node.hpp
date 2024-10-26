@@ -185,6 +185,10 @@ public:
 
     }
 
+    virtual bool isArray() {
+        return false;
+    }
+
     Declaration(Declaration&&) = default;
     std::string m_name;
 };

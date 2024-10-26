@@ -234,6 +234,9 @@ public:
         if (!table.contains(m_type->m_name)) {
             throw std::runtime_error("Unknown type: " + m_type->m_name);
         }
+        if (m_assigned.get()) {
+            m_assigned->checkUndeclared(table);
+        }
         table.emplace(m_name, table.at(m_type->m_name));
     }
 
@@ -260,7 +263,7 @@ public:
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         auto array_type = m_type->m_type;
         m_type->checkUndeclared(table);
-        table.emplace(m_name, std::static_pointer_cast<Declaration>(shared_from_this()));
+        table.emplace(m_name, std::static_pointer_cast<ArrayType>(m_type));
     }
 
     std::shared_ptr<ArrayType> m_type;

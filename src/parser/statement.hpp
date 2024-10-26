@@ -165,6 +165,7 @@ public:
 
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         m_modifiable->checkUndeclared(table);
+        m_expression->checkUndeclared(table);
     }
 
     void print() override
