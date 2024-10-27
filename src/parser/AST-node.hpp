@@ -12,6 +12,7 @@ namespace parsing
 
 using std::cout;
 class Declaration;
+class Type;
 
 class ASTNode : public virtual std::enable_shared_from_this<ASTNode>
 {
@@ -134,6 +135,9 @@ public:
     explicit Expression() : ASTNode(GrammarUnit::DIVISION)
     {
     }
+
+    virtual std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) = 0;
+
 };
 
 class Statement : public ASTNode
@@ -154,10 +158,6 @@ public:
     explicit Declaration(GrammarUnit gr, std::string name) : ASTNode(gr), m_name(std::move(name))
     {
 
-    }
-
-    virtual bool isArray() {
-        return false;
     }
 
     Declaration(Declaration&&) = default;

@@ -48,6 +48,38 @@ public:
     {
         cout << "TYPE:" << m_name << "\n";
     }
+
+    virtual bool isRecord() {
+        return false;
+    }
+
+    virtual bool isPrimitive() {
+        return false;
+    }
+
+    virtual bool isArray() {
+        return false;
+    }
+
+    virtual bool operator==(Type& other) {
+        if (isArray() && other.isArray()) {
+            return *this == other;
+        }
+
+        if (isRecord() && other.isRecord()) {
+            return m_name == other.m_name;
+        }
+
+        if (isPrimitive() && other.isPrimitive()) {
+            return true;  // conversions, it's ok
+        }
+
+        return false;
+    }
+
+    virtual bool operator!=(Type& other) {
+        return !(*this == other);
+    }
 };
 
 class Variable : public Declaration
@@ -63,6 +95,11 @@ public:
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         if (!table.contains(m_type->m_name)) {
             throw std::runtime_error("unknown type of the variable or record field: " + m_type->m_name);
+        }
+
+        auto assigned_type = m_value->deduceType(table);
+        if (assigned_type != m_type) {
+            throw std::runtime_error("declared type and assigned values do not match: " + assigned_type->m_name + " " + m_type->m_name);
         }
     }
 
@@ -95,6 +132,10 @@ public:
 
     std::vector<std::shared_ptr<Declaration>> m_fields;
 
+    bool isRecord() override {
+        return true;
+    }
+
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         for (auto& field : m_fields) {
             auto* var = dynamic_cast<Variable*>(field.get());
@@ -125,6 +166,11 @@ class PrimitiveType : public Type
     explicit PrimitiveType(std::string type) : Type(std::move(type)) {
 
     }
+
+    bool isPrimitive() override {
+        return true;
+    }
+
 };
 
 class ArrayType : public Type
@@ -143,6 +189,10 @@ public:
 
     std::shared_ptr<Type> m_type;
     std::shared_ptr<Expression> m_size;
+
+    bool isArray() override {
+        return true;
+    }
 
     void print() override
     {
@@ -163,7 +213,7 @@ public:
         if (!table.contains(m_from)) {
             throw std::runtime_error("unknown type: " + m_from);
         }
-        table.emplace(m_to, std::static_pointer_cast<Declaration>(shared_from_this()));
+        table.emplace(m_to, std::static_pointer_cast<Declaration>(table.at(m_from)));
     }
 
     std::string m_from;

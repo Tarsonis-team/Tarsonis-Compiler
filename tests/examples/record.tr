@@ -12,5 +12,5 @@ routine new_line(Point p1, Point p2) -> Line is
     var pf: Line
     pf._begin := p1
     pf._end := p2
-    pf._begin.z := 1;
+    pf := 1;
 end

@@ -4,6 +4,7 @@
 #include "body.hpp"
 #include "declaration.hpp"
 #include "expression.hpp"
+#include "routine.hpp"
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -168,6 +169,11 @@ public:
         m_routine_call->removeUnused(outer_table);
     }
 
+    std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        auto routine = std::static_pointer_cast<Routine>(table.at(m_routine_call->m_routine_name));
+        return std::static_pointer_cast<Type>(table.at(routine->return_type));
+    }
+
     explicit RoutineCallResult() : Expression()
     {
         this->m_grammar = GrammarUnit::ROUTINE_CALL;
@@ -191,6 +197,13 @@ public:
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         m_modifiable->checkUndeclared(table);
         m_expression->checkUndeclared(table);
+
+        auto modif_type = m_modifiable->deduceType(table);
+        auto exp_type = m_expression->deduceType(table);
+
+        if (*modif_type != *exp_type) {
+            throw std::runtime_error("The assigned type does not match declared: " + modif_type->m_name + " is not " + exp_type->m_name);
+        }
     }
 
     void removeUnused(std::unordered_map<std::string, int>& outer_table) override {
