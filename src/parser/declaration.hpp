@@ -44,7 +44,7 @@ public:
 
     void print() override
     {
-        cout << "VAR_PAR:" << m_name;
+        cout << "VAR_PAR:" << m_name << " of type " << m_type;
     }
 };
 
@@ -59,6 +59,15 @@ public:
     {
         cout << "Routine declaration, name: " << m_name << " -> " << (return_type.empty() ? "void" : return_type)
              << '\n';
+        cout << "Params:\n";
+        if (m_params.empty()) {
+            cout << "<no params>\n";
+        }
+        for (auto& par : m_params) {
+            par->print();
+            std::cout << "\n";
+        }
+
         m_body->print();
 
         if (m_body->m_return.get())
