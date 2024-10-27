@@ -81,7 +81,7 @@ public:
         }
 
         cout << "\n";
-        cout << "End of routine declaration\n";
+        cout << "End of routine declaration\n\n";
     }
 
     std::shared_ptr<Body> m_body;
@@ -109,6 +109,7 @@ class RecordType : public Type
 public:
     explicit RecordType(std::string name) : Type(std::move(name))
     {
+        this->m_grammar = GrammarUnit::RECORD_TYPE;
     }
 
     std::vector<std::shared_ptr<Declaration>> m_fields;
@@ -128,9 +129,10 @@ public:
 class ArrayType : public Type
 {
 public:
-    explicit ArrayType(std::string type, std::shared_ptr<Expression> size)
-        : Type("array"), m_type(std::move(type)), m_size(size)
+    explicit ArrayType(std::string name, std::string type, std::shared_ptr<Expression> size)
+        : Type(std::move(name)), m_type(std::move(type)), m_size(size)
     {
+        this->m_grammar = GrammarUnit::ARRAY_TYPE;
     }
 
     std::string m_type;
@@ -138,8 +140,9 @@ public:
 
     void print() override
     {
-        std::cout << "type: " << m_type << " size: ";
+        std::cout << "array-type of type: " << m_type << " size: ";
         m_size->print();
+        std::cout << "\n";
     }
 };
 
@@ -148,6 +151,7 @@ class TypeAliasing : public Type
 public:
     explicit TypeAliasing(std::string from, std::string to) : Type(to), m_from(std::move(from)), m_to(std::move(to))
     {
+        this->m_grammar = GrammarUnit::ALIAS;
     }
 
     std::string m_from;
@@ -170,6 +174,7 @@ public:
 
     explicit PrimitiveVariable(std::string name, std::string type) : Variable(std::move(name)), m_type(std::move(type))
     {
+        this->m_grammar = GrammarUnit::VARIABLE;
     }
 
     PrimitiveVariable(std::string name, std::string type, std::shared_ptr<Expression> expr)
@@ -187,6 +192,7 @@ public:
     explicit ArrayVariable(std::string name, std::shared_ptr<ArrayType> type)
         : Variable(std::move(name)), m_type(std::move(type))
     {
+        this->m_grammar = GrammarUnit::ARRAY;
     }
 
     std::shared_ptr<ArrayType> m_type;

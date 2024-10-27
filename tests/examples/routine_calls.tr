@@ -1,8 +1,6 @@
-type Array is array[5] integer
 
-routine two(integer x, Array lst) -> integer is
-    var a: integer;
-    return 2 + a;
+routine two() -> integer is
+    return 2;
 end
 
 routine main() is
@@ -10,4 +8,3 @@ routine main() is
     two(1, 2);
     two(two(3), 4);
 end
-

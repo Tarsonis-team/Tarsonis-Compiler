@@ -107,6 +107,12 @@ public:
                 return "TRUE";
             case GrammarUnit::FALSE:
                 return "FALSE";
+            case GrammarUnit::ARRAY_TYPE:
+                return "ARRAY_TYPE";
+            case GrammarUnit::RECORD_TYPE:
+                return "RECORD_TYPE";
+            case GrammarUnit::ALIAS:
+                return "ALIAS";
             default:
                 return "UNKNOWN";
         }

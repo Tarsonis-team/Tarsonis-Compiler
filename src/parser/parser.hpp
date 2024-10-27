@@ -30,7 +30,7 @@ private:
     std::shared_ptr<Type> parse_type_decl();
     std::shared_ptr<RoutineParameter> parse_routine_parameter();
     std::shared_ptr<RecordType> parse_record_decl(std::string name);
-    std::shared_ptr<ArrayType> parse_array_type();
+    std::shared_ptr<ArrayType> parse_array_type(std::string name);
     std::shared_ptr<ArrayVariable> parse_array_variable();
     std::shared_ptr<Expression> parse_expression();
     std::shared_ptr<Statement> parse_statement();
