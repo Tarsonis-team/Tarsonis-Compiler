@@ -8,6 +8,7 @@
 #include "expression.hpp"
 #include "lexer/token.hpp"
 #include "statement.hpp"
+#include "routine.hpp"
 
 namespace parsing
 {

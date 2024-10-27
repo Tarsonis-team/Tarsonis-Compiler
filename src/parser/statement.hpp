@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AST-node.hpp"
+#include "body.hpp"
 #include "declaration.hpp"
 #include "expression.hpp"
 #include <iostream>
@@ -21,6 +22,11 @@ public:
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         m_then->checkUndeclared(table);
         m_else->checkUndeclared(table);
+    }
+
+    void removeUnused(std::unordered_map<std::string, int>& outer_table) override {
+        m_then->removeUnused(outer_table);
+        m_else->removeUnused(outer_table);
     }
 
     void print() override
@@ -60,6 +66,10 @@ public:
         m_body->checkUndeclared(table);
     }
 
+    void removeUnused(std::unordered_map<std::string, int>& outer_table) override {
+        m_body->removeUnused(outer_table);
+    }
+
     void print() override
     {
         std::cout << "For ";
@@ -89,6 +99,11 @@ public:
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         m_condition->checkUndeclared(table);
         m_body->checkUndeclared(table);
+    }
+
+    void removeUnused(std::unordered_map<std::string, int>& outer_table) override {
+        m_condition->removeUnused(outer_table);
+        m_body->removeUnused(outer_table);
     }
 
     void print() override
@@ -123,6 +138,12 @@ public:
         }
     }
 
+    void removeUnused(std::unordered_map<std::string, int>& outer_table) override {
+        for (const auto& param: m_parameters) {
+            param->removeUnused(outer_table);
+        }
+    }
+
     void print() override
     {
         cout << "Calling routine: " << m_routine_name << " with params: ( ";
@@ -141,6 +162,10 @@ class RoutineCallResult : public Expression
 public:
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         m_routine_call->checkUndeclared(table);
+    }
+
+    void removeUnused(std::unordered_map<std::string, int>& outer_table) override {
+        m_routine_call->removeUnused(outer_table);
     }
 
     explicit RoutineCallResult() : Expression()
@@ -166,6 +191,11 @@ public:
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         m_modifiable->checkUndeclared(table);
         m_expression->checkUndeclared(table);
+    }
+
+    void removeUnused(std::unordered_map<std::string, int>& outer_table) override {
+        m_modifiable->removeUnused(outer_table);
+        m_expression->removeUnused(outer_table);
     }
 
     void print() override

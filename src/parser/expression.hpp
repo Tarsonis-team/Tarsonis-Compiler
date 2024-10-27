@@ -151,6 +151,10 @@ public:
         std::string identifier;
     };
 
+    void removeUnused(std::unordered_map<std::string, int>& outer_table) override {
+        outer_table[m_head_name] += 1;
+    }
+
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         if (!table.contains(m_head_name)) {
             throw std::runtime_error("unknown identifier: " + m_head_name);
@@ -202,10 +206,14 @@ public:
     {
     }
 
-
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         m_left->checkUndeclared(table);
         m_right->checkUndeclared(table);
+    }
+
+    void removeUnused(std::unordered_map<std::string, int>& table) override {
+        m_left->removeUnused(table);
+        m_right->removeUnused(table);
     }
 
     std::shared_ptr<Expression> m_left;

@@ -23,9 +23,13 @@ public:
     ASTNode(ASTNode&& node) = default;
     virtual ~ASTNode() = default;
 
-    virtual void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) {
+    virtual void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) {}
 
+    virtual bool isVariableDecl() {
+        return false;
     }
+
+    virtual void removeUnused(std::unordered_map<std::string, int>& table) {}
 
     virtual void print()
     {
@@ -132,39 +136,6 @@ public:
     }
 };
 
-class Body : public ASTNode
-{
-public:
-    explicit Body() : ASTNode(GrammarUnit::BODY)
-    {
-    }
-
-    void print() override
-    {
-        std::cout << "Body:\n";
-        for (auto& item : m_items)
-        {
-            item->print();
-        }
-        std::cout << "End of Body\n";
-    }
-
-    void checkUndecalredWithCopy(std::unordered_map<std::string, std::shared_ptr<Declaration>> table) {
-        for (auto& stmt : m_items) {
-            stmt->checkUndeclared(table);
-        }
-    }
-
-    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
-        // we make copy, because symbols declared in a particular body cant be seen 
-        // outside
-        checkUndecalredWithCopy(table);
-    }
-
-    std::vector<std::shared_ptr<ASTNode>> m_items;
-    std::shared_ptr<Expression> m_return;
-};
-
 class Statement : public ASTNode
 {
 public:
@@ -216,6 +187,11 @@ public:
 
     }
 
+    void removeUnused(std::unordered_map<std::string, int>& table) override {
+        for (auto& entity : m_declarations) {
+            entity->removeUnused(table);
+        }
+    }
 
     explicit Program() : ASTNode(GrammarUnit::PROGRAM)
     {
