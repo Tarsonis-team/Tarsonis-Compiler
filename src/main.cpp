@@ -4,8 +4,7 @@
 #include <iostream>
 #include <vector>
 
-#include "analyzer/strategies/check-return-types.hpp"
-#include "analyzer/strategies/check-undeclared-symbols.hpp"
+#include "analyzer/strategies/type-check.hpp"
 #include "analyzer/strategies/remove-unreachable.hpp"
 #include "analyzer/strategies/remove-unused.hpp"
 
@@ -15,13 +14,13 @@
 
 int main(int argc, char* argv[])
 {
-    // if (argc < 2)
-    // {
-    //     std::cerr << "Error: path to a source file is not provided\n";
-    //     return EXIT_FAILURE;
-    // }
-    // std::string source_file_path = argv[1];
-    std::string source_file_path = "/home/max/vscdir/tarsonis/tests/examples/arrays.tr";
+    if (argc < 2)
+    {
+        std::cerr << "Error: path to a source file is not provided\n";
+        return EXIT_FAILURE;
+    }
+    std::string source_file_path = argv[1];
+    // std::string source_file_path = "/home/max/vscdir/tarsonis/tests/examples/arrays.tr";
     //  std::string source_file_path = "C:/Projects/C/C++/Compilers/Tarsonis-Compiler/tests/examples/arrays.tr";
 
     if (!std::filesystem::exists(source_file_path))
@@ -55,9 +54,8 @@ int main(int argc, char* argv[])
         program_ast->print();
 
         Analyzer(program_ast)
-            .withCheckOf<CheckUndeclaredSymbols>()
-            // .withCheckOf<CheckReturnTypes>()
-            // .withOptimizationOf<RemoveUnreachableCode>()
+            .withCheckOf<TypeCheck>()
+            .withOptimizationOf<RemoveUnreachableCode>()
             .withOptimizationOf<RemoveUnusedDeclarations>();
 
         std::cout << "\n AFTER OPTIMIZATIONS: \n";

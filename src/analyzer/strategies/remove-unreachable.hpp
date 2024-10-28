@@ -9,6 +9,7 @@ struct RemoveUnreachableCode
 
     void apply()
     {
+        m_ast->removeUnreachable();
     }
 
     std::shared_ptr<parsing::Program> m_ast;

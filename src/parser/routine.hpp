@@ -29,7 +29,7 @@ public:
         if (!return_type.empty()) {
             m_body->checkReturnCoincides(std::static_pointer_cast<Type>(table.at(return_type)), table);
         }
-        
+
         for (auto& param : m_params) {
             table.erase(param->m_name);
         }
@@ -38,6 +38,11 @@ public:
     void removeUnused(std::unordered_map<std::string, int>& table) override {
         m_body->removeUnused(table);
     }
+
+    void removeUnreachable() override {
+        m_body->removeUnreachable();
+    };
+
 
     void print() override
     {

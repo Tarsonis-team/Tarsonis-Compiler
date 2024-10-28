@@ -197,6 +197,12 @@ public:
         }
     }
 
+    void removeUnreachable() override {
+        for (auto& entity : m_declarations) {
+            entity->removeUnreachable();
+        }
+    };
+
     explicit Program() : ASTNode(GrammarUnit::PROGRAM)
     {
     }

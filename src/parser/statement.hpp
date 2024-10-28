@@ -26,6 +26,13 @@ public:
             m_else->checkReturnCoincides(type, table);
         }
     }
+    
+    void removeUnreachable() override {
+        m_then->removeUnreachable();
+        if (m_else.get()) {
+            m_else->removeUnreachable();
+        }
+    };
 
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         m_then->checkUndeclared(table);
@@ -86,6 +93,10 @@ public:
         m_body->removeUnused(outer_table);
     }
 
+    void removeUnreachable() override {
+        m_body->removeUnreachable();
+    };
+
     void print() override
     {
         std::cout << "For ";
@@ -125,6 +136,10 @@ public:
         m_condition->removeUnused(outer_table);
         m_body->removeUnused(outer_table);
     }
+
+    void removeUnreachable() override {
+        m_body->removeUnreachable();
+    };
 
     void print() override
     {

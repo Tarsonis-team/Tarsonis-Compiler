@@ -7,9 +7,9 @@
 #include <string>
 #include <vector>
 
-struct CheckUndeclaredSymbols
+struct TypeCheck
 {
-    explicit CheckUndeclaredSymbols(std::shared_ptr<parsing::Program> program) : m_ast(program) {}
+    explicit TypeCheck(std::shared_ptr<parsing::Program> program) : m_ast(program) {}
 
     std::vector<std::string> checkErrors()
     {
@@ -29,7 +29,7 @@ struct CheckUndeclaredSymbols
             throw ;
             return { err.what() };
         }
-        std::cout << "CheckUndeclaredSymbols reports no errors.\n";
+        std::cout << "TypeCheck reports no errors.\n";
         return { };
     }
 

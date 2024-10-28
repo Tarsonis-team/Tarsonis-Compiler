@@ -27,6 +27,10 @@ public:
         m_expr->removeUnused(table);
     }
 
+    void print() override {
+        std::cout << "RETURN "; m_expr->print(); std::cout << "\n";
+    }
+
     std::shared_ptr<Expression> m_expr;
 };
 
