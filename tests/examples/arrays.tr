@@ -4,14 +4,21 @@ type Point is record
     var y: integer
 end
 
+type SockFD is integer;
+type P is Point;
+
+routine two(SockFD a) -> SockFD is
+    if a > 3 then
+        var c: integer;
+        return c;
+        var l : real;
+        return l;
+    end;
+end
+
 routine main() is
-    var a: array[5] integer
-    a[0] := 3;
-    var reals: array[3] real
-    a[2]:=2.32;
-    a[3]:=false
-    
-    var p: Point
-    p.x := 2;
-    a[2]:=p.x;
+    var a: array[2] P;
+    var b: array[2] array[3] integer;
+
+    b[0][1] := two(2) + a[0].x;
 end

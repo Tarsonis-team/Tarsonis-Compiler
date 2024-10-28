@@ -1,7 +1,7 @@
 
 type Weapon is record
     var max_ammo: integer
-    var cur_ammo: integer
+    var cur_ammo: array [4] integer
 end
 
 type socketFD is integer;

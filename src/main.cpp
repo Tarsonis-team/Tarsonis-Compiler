@@ -4,6 +4,11 @@
 #include <iostream>
 #include <vector>
 
+#include "analyzer/strategies/type-check.hpp"
+#include "analyzer/strategies/remove-unreachable.hpp"
+#include "analyzer/strategies/remove-unused.hpp"
+
+#include "analyzer/analyzer.hpp"
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
 
@@ -40,13 +45,20 @@ int main(int argc, char* argv[])
         std::cout << i << ": \"" << (tokens[i].m_value == "\n" ? "newline" : tokens[i].m_value) << "\" "
                   << tokens[i].m_id << "\n";
     }
-
     std::cout << "\n";
 
     try
     {
         auto parser = parsing::Parser(tokens);
         auto program_ast = parser.parse();
+        program_ast->print();
+
+        Analyzer(program_ast)
+            .withCheckOf<TypeCheck>()
+            .withOptimizationOf<RemoveUnreachableCode>()
+            .withOptimizationOf<RemoveUnusedDeclarations>();
+
+        std::cout << "\n AFTER OPTIMIZATIONS: \n";
         program_ast->print();
     }
     catch (const std::exception& err)

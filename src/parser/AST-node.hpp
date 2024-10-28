@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "grammar-units.hpp"
@@ -10,8 +11,10 @@ namespace parsing
 {
 
 using std::cout;
+class Declaration;
+class Type;
 
-class ASTNode
+class ASTNode : public virtual std::enable_shared_from_this<ASTNode>
 {
 public:
     explicit ASTNode(GrammarUnit gr) : m_grammar(gr)
@@ -20,6 +23,18 @@ public:
 
     ASTNode(ASTNode&& node) = default;
     virtual ~ASTNode() = default;
+
+    virtual void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) {}
+
+    virtual bool isVariableDecl() {
+        return false;
+    }
+
+    virtual void checkReturnCoincides(std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) {}
+
+    virtual void removeUnused(std::unordered_map<std::string, int>& table) {}
+
+    virtual void removeUnreachable() {};
 
     virtual void print()
     {
@@ -124,27 +139,9 @@ public:
     explicit Expression() : ASTNode(GrammarUnit::DIVISION)
     {
     }
-};
 
-class Body : public ASTNode
-{
-public:
-    explicit Body() : ASTNode(GrammarUnit::BODY)
-    {
-    }
+    virtual std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) = 0;
 
-    void print() override
-    {
-        std::cout << "Body:\n";
-        for (auto& item : m_items)
-        {
-            item->print();
-        }
-        std::cout << "End of Body\n";
-    }
-
-    std::vector<std::shared_ptr<ASTNode>> m_items;
-    std::shared_ptr<Expression> m_return;
 };
 
 class Statement : public ASTNode
@@ -164,6 +161,7 @@ public:
 
     explicit Declaration(GrammarUnit gr, std::string name) : ASTNode(gr), m_name(std::move(name))
     {
+
     }
 
     Declaration(Declaration&&) = default;
@@ -182,6 +180,28 @@ public:
         }
         cout << "End of the program\n";
     }
+
+    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        for (auto& node : m_declarations) {
+            node->checkUndeclared(table);
+        }
+    }
+
+    void checkTypes() {
+
+    }
+
+    void removeUnused(std::unordered_map<std::string, int>& table) override {
+        for (auto& entity : m_declarations) {
+            entity->removeUnused(table);
+        }
+    }
+
+    void removeUnreachable() override {
+        for (auto& entity : m_declarations) {
+            entity->removeUnreachable();
+        }
+    };
 
     explicit Program() : ASTNode(GrammarUnit::PROGRAM)
     {
