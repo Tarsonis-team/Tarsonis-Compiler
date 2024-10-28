@@ -23,10 +23,11 @@ routine two(integer x, Array lst) -> integer is
     var ar2: array[5] Array;
     var p: Point;
     a := 6;
+    var b: integer is 7;
 
     p := get_point();
 
-    return 2 + a - p.x[5] + ar2[3][2] + one();
+    return 2 + a - p.x[5] + ar2[3][2] + one() - b;
 end
 
 routine main() is

@@ -112,6 +112,20 @@ void CheckTypes::write_out_types(std::vector<std::shared_ptr<parsing::ASTNode>>&
         if (code_node->get_grammar() == GrammarUnit::VARIABLE) {
             auto variable = std::dynamic_pointer_cast<parsing::PrimitiveVariable>(code_node);
             m_var_map[variable->m_name] = convert(variable->m_type);
+
+            if (variable->m_assigned.get()) {
+                // Check for correctness of assignments
+                std::cout << "Checking initializing of " + variable->m_name + " (" + variable->m_type + ")...\n";
+                auto result_type = get_expression_type(variable->m_assigned);
+                result_type->print();
+
+                // TODO: compare results
+                if (result_type->m_name != variable->m_type) {
+                    print_error("Invalid initializing of " + variable->m_name + " (" + variable->m_type + ")");
+                }
+                std::cout << "Initializing is valid\n";
+            }
+
         }
         if (code_node->get_grammar() == GrammarUnit::ARRAY) {
             auto arr = std::dynamic_pointer_cast<parsing::ArrayVariable>(code_node);
@@ -119,10 +133,20 @@ void CheckTypes::write_out_types(std::vector<std::shared_ptr<parsing::ASTNode>>&
         }
 
         // Check for correctness of assignments
-//        if (code_node->get_grammar() == GrammarUnit::ASSIGNMENT) {
-//            auto assignment = std::dynamic_pointer_cast<parsing::Assignment>(code_node);
-//            auto result_type = get_expression_type(a)
-//        }
+        if (code_node->get_grammar() == GrammarUnit::ASSIGNMENT) {
+            auto assignment = std::dynamic_pointer_cast<parsing::Assignment>(code_node);
+            auto result_type = get_expression_type(assignment->m_expression);
+
+            auto id_name = assignment->m_modifiable->m_head_name;
+            std::cout << "Checking assignment to var " + id_name + " ...\n";
+            result_type->print();
+
+            // TODO: compare results
+            if (m_var_map.count(id_name) == 0 || result_type->m_name != m_var_map[id_name]->m_name) {
+                print_error("Invalid assignment at " + id_name);
+            }
+            std::cout << "Assignment is valid\n";
+        }
     }
 }
 
