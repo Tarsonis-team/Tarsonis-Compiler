@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     //     return EXIT_FAILURE;
     // }
     // std::string source_file_path = argv[1];
-    std::string source_file_path = "/home/max/vscdir/tarsonis/tests/examples/record.tr";
+    std::string source_file_path = "/home/max/vscdir/tarsonis/tests/examples/arrays.tr";
     //  std::string source_file_path = "C:/Projects/C/C++/Compilers/Tarsonis-Compiler/tests/examples/arrays.tr";
 
     if (!std::filesystem::exists(source_file_path))

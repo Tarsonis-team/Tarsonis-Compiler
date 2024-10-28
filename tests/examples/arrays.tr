@@ -4,15 +4,14 @@ type Point is record
     var y: integer
 end
 
+routine two(integer a) -> integer is
+
+end
+
+
 routine main() is
-    var a: array[5] integer
-    var m2d: array[3] array[2] integer;
-    a[0] := 3;
-    var reals: array[3] real
-    a[2]:=2.32;
-    a[3]:=false
-    
-    var p: Point
-    p.x := 2;
-    a[2]:=p.x;
+    var a: array[2] integer;
+    var b: array[2] integer;
+
+    b := two(1);
 end

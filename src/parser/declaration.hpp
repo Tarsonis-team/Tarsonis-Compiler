@@ -7,6 +7,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <typeinfo>
 #include <vector>
 
 namespace parsing
@@ -96,9 +97,11 @@ public:
         if (!table.contains(m_type->m_name)) {
             throw std::runtime_error("unknown type of the variable or record field: " + m_type->m_name);
         }
+        table.emplace(m_name, table.at(m_type->m_name));
 
         auto assigned_type = m_value->deduceType(table);
-        if (assigned_type != m_type) {
+        auto actual_type = std::static_pointer_cast<Type>(table.at(m_type->m_name));
+        if (*assigned_type != *actual_type) {
             throw std::runtime_error("declared type and assigned values do not match: " + assigned_type->m_name + " " + m_type->m_name);
         }
     }
@@ -193,6 +196,17 @@ public:
     bool isArray() override {
         return true;
     }
+
+    bool operator==(Type& other) override {
+        try {
+            auto& other_type = dynamic_cast<ArrayType&>(other);
+            return *m_type == *other_type.m_type;
+        } 
+        catch (const std::bad_cast& err) {
+            std::cout << "attempt to assign non-array to an array: " + m_type->m_name + " " + " to " + other.m_name + "\n";
+            throw;
+        }
+    }    
 
     void print() override
     {

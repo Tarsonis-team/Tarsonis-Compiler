@@ -163,6 +163,21 @@ class RoutineCallResult : public Expression
 public:
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         m_routine_call->checkUndeclared(table);
+
+        // okay, after that check, we know this routine exists in the table.
+        auto actual_routine = std::static_pointer_cast<Routine>(table.at(m_routine_call->m_routine_name));
+        auto actual_parameters = actual_routine->m_params;
+
+        if (actual_parameters.size() != m_routine_call->m_parameters.size()) {
+            throw std::runtime_error("function signature mismatch: " + actual_routine->m_name);
+        }
+
+        for (size_t idx = 0; idx < actual_parameters.size(); ++idx) {
+            auto type = std::static_pointer_cast<Type>(table.at(actual_parameters[idx]->m_type));
+            if (*m_routine_call->m_parameters[idx]->deduceType(table) != *type) {
+                throw std::runtime_error("function signature mismatch: " + actual_routine->m_name);
+            }
+        }
     }
 
     void removeUnused(std::unordered_map<std::string, int>& outer_table) override {

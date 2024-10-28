@@ -1,5 +1,5 @@
 
-routine two() -> integer is
+routine two(integer a) -> integer is
     return 2;
 end
 

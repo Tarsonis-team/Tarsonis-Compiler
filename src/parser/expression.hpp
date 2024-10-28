@@ -110,13 +110,13 @@ public:
         ArrayAccess() = default;
         std::shared_ptr<Expression> access;
 
-        void check_has_field(std::shared_ptr<Declaration>& current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>&) override {
+        void check_has_field(std::shared_ptr<Declaration>& current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>&table) override {
             // skip, it is just an array access, the array 
             // identifier was before.
             // But we need to check that this is really an array...
             try {
                 ArrayType& array = dynamic_cast<ArrayType&>(*current_type);
-                current_type = array.m_type;
+                current_type = table.at(array.m_type->m_name);
             } catch (const std::bad_cast& e) {
                 std::cout << "Accessed type is not an array: " + current_type->m_name << '\n';
                 throw;
@@ -161,12 +161,12 @@ public:
         }
 
         std::shared_ptr<Type> deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
-            RecordType& record = dynamic_cast<RecordType&>(*cur_type);
+            RecordType& record = static_cast<RecordType&>(*table.at(cur_type->m_name));
             // check that record REALLY has that name
             for (auto& field : record.m_fields) {
                 Variable& var = dynamic_cast<Variable&>(*field);
                 if (var.m_name == identifier) {
-                    return std::static_pointer_cast<Type>(table.at(var.m_type->m_name));
+                    return std::dynamic_pointer_cast<Type>(table.at(var.m_type->m_name));
                 }
             }
             throw std::runtime_error("field not found !");
@@ -182,14 +182,14 @@ public:
     };
 
     std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
-        std::shared_ptr<Type> cur_type = std::static_pointer_cast<Type>(table.at(m_head_name));
+        std::shared_ptr<Type> cur_type = std::dynamic_pointer_cast<Type>(table.at(m_head_name));
         if (m_chain.empty()) {
             return cur_type;
         }
         for (auto& access : m_chain) {
             cur_type = access->deduceType(cur_type, table);
         }
-        return cur_type;
+        return std::dynamic_pointer_cast<Type>(table.at(cur_type->m_name));
     }
 
     void removeUnused(std::unordered_map<std::string, int>& outer_table) override {
