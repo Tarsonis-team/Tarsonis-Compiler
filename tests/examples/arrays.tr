@@ -4,14 +4,20 @@ type Point is record
     var y: integer
 end
 
-routine two(integer a) -> integer is
+type Array is array[4] integer;
 
+routine two(integer a) -> integer is
+    if a > 3 then
+        var c: integer;
+        return c;
+        var l : real;
+        return l;
+    end;
 end
 
-
 routine main() is
-    var a: array[2] integer;
-    var b: array[2] integer;
+    var a: array[2] Point;
+    var b: array[2] array[3] integer;
 
-    b := two(1);
+    b[0][1] := two(2);
 end

@@ -2,6 +2,7 @@
 
 #include "declaration.hpp"
 #include "body.hpp"
+#include <memory>
 
 namespace parsing {
 
@@ -25,7 +26,10 @@ public:
         table.insert({m_name, std::static_pointer_cast<Declaration>(shared_from_this())});
 
         m_body->checkUndeclared(table);
-
+        if (!return_type.empty()) {
+            m_body->checkReturnCoincides(std::static_pointer_cast<Type>(table.at(return_type)), table);
+        }
+        
         for (auto& param : m_params) {
             table.erase(param->m_name);
         }
@@ -40,17 +44,6 @@ public:
         cout << "Routine declaration, name: " << m_name << " -> " << (return_type.empty() ? "void" : return_type)
              << '\n';
         m_body->print();
-
-        if (m_body->m_return.get())
-        {
-            cout << "Returns: ";
-            m_body->m_return->print();
-        }
-        else
-        {
-            cout << "Returns nothing";
-        }
-
         cout << "\n";
         cout << "End of routine declaration\n";
     }

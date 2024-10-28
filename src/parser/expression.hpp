@@ -116,14 +116,18 @@ public:
             // But we need to check that this is really an array...
             try {
                 ArrayType& array = dynamic_cast<ArrayType&>(*current_type);
-                current_type = table.at(array.m_type->m_name);
+                if (array.m_type->m_name == "array") {
+                    current_type = array.m_type;
+                } else {
+                    current_type = table.at(array.m_type->m_name);
+                }
             } catch (const std::bad_cast& e) {
                 std::cout << "Accessed type is not an array: " + current_type->m_name << '\n';
                 throw;
             }
         }
 
-        std::shared_ptr<Type> deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        std::shared_ptr<Type> deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>&) override {
             ArrayType& array = dynamic_cast<ArrayType&>(*cur_type);
             return array.m_type;
         }

@@ -30,7 +30,11 @@ public:
         return false;
     }
 
+    virtual void checkReturnCoincides(std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) {}
+
     virtual void removeUnused(std::unordered_map<std::string, int>& table) {}
+
+    virtual void removeUnreachable() {};
 
     virtual void print()
     {

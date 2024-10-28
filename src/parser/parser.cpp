@@ -3,6 +3,7 @@
 #include "declaration.hpp"
 #include "expression.hpp"
 #include "lexer/token.hpp"
+#include "return.hpp"
 #include "statement.hpp"
 #include <algorithm>
 #include <array>
@@ -673,9 +674,13 @@ std::shared_ptr<Body> Parser::parse_body()
             case TOKEN_ELSE:
             case TOKEN_END:
                 break;
-            case TOKEN_RETURN:
-                advanceTok();
-                body_res->m_return = parse_expression();
+            case TOKEN_RETURN: 
+                {
+                    advanceTok();
+                    auto expr = parse_expression();
+                    auto returns = std::make_shared<ReturnStatement>(expr);
+                    body_res->m_items.push_back(returns);
+                }
                 break;
             default:
                 throw std::runtime_error("Can't parse body !");

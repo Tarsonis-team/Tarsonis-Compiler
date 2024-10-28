@@ -2,6 +2,10 @@
 
 #include "AST-node.hpp"
 #include "declaration.hpp"
+#include "grammar-units.hpp"
+#include "return.hpp"
+#include <memory>
+#include <stdexcept>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -28,6 +32,16 @@ public:
     void checkUndecalredWithCopy(std::unordered_map<std::string, std::shared_ptr<Declaration>> table) {
         for (auto& stmt : m_items) {
             stmt->checkUndeclared(table);
+        }
+    }
+
+    void checkReturnCoincides(std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        auto vars = table;
+        for (auto& stmt : m_items) {
+            stmt->checkUndeclared(vars);
+        }
+        for (const auto& stmt : m_items) {
+            stmt->checkReturnCoincides(type, vars);
         }
     }
 
@@ -81,7 +95,6 @@ public:
     }
 
     std::vector<std::shared_ptr<ASTNode>> m_items;
-    std::shared_ptr<Expression> m_return;
 };
 
 }  // namespace parsing

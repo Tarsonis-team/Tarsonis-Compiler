@@ -39,5 +39,6 @@ enum class GrammarUnit
     XOR,
     TRUE,
     FALSE,
-    ROUTINE_CALL
+    ROUTINE_CALL,
+    RETURN
 };

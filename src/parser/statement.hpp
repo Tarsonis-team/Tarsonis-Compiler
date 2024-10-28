@@ -20,14 +20,25 @@ public:
     {
     }
 
+    void checkReturnCoincides(std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        m_then->checkReturnCoincides(type, table);
+        if (m_else.get()) {
+            m_else->checkReturnCoincides(type, table);
+        }
+    }
+
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         m_then->checkUndeclared(table);
-        m_else->checkUndeclared(table);
+        if (m_else.get()) {
+            m_else->checkUndeclared(table);
+        }
     }
 
     void removeUnused(std::unordered_map<std::string, int>& outer_table) override {
         m_then->removeUnused(outer_table);
-        m_else->removeUnused(outer_table);
+        if (m_else.get()) {
+            m_else->removeUnused(outer_table);
+        }
     }
 
     void print() override
@@ -61,6 +72,10 @@ class For : public Statement
 public:
     explicit For() : Statement(GrammarUnit::FOR)
     {
+    }
+
+    void checkReturnCoincides(std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        m_body->checkReturnCoincides(type, table);
     }
 
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
@@ -100,6 +115,10 @@ public:
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         m_condition->checkUndeclared(table);
         m_body->checkUndeclared(table);
+    }
+
+    void checkReturnCoincides(std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        m_body->checkReturnCoincides(type, table);
     }
 
     void removeUnused(std::unordered_map<std::string, int>& outer_table) override {
