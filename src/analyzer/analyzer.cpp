@@ -80,7 +80,8 @@ void CheckTypes::check_tree() {
         m_var_map[routine->m_name] = return_type;
 
         // Compare two results
-        if (return_type->m_name == routine->return_type) {
+        if (return_type->m_name == routine->return_type
+            || is_primitive(return_type->m_name) && is_primitive(routine->return_type)) {
             std::cout << "<< they are equal";
         } else {
             std::cout << "<< they are not equal";
@@ -119,9 +120,10 @@ void CheckTypes::write_out_types(std::vector<std::shared_ptr<parsing::ASTNode>>&
                 auto result_type = get_expression_type(variable->m_assigned);
                 result_type->print();
 
-                // TODO: compare results
                 if (result_type->m_name != variable->m_type) {
-                    print_error("Invalid initializing of " + variable->m_name + " (" + variable->m_type + ")");
+                    if (!is_primitive(result_type->m_name) || !is_primitive(variable->m_type)) {
+                        print_error("Invalid initializing of " + variable->m_name + " (" + variable->m_type + ")");
+                    }
                 }
                 std::cout << "Initializing is valid\n";
             }
@@ -141,9 +143,10 @@ void CheckTypes::write_out_types(std::vector<std::shared_ptr<parsing::ASTNode>>&
             std::cout << "Checking assignment to var " + id_name + " ...\n";
             result_type->print();
 
-            // TODO: compare results
             if (m_var_map.count(id_name) == 0 || result_type->m_name != m_var_map[id_name]->m_name) {
-                print_error("Invalid assignment at " + id_name);
+                if (!is_primitive(result_type->m_name) || !is_primitive(m_var_map[id_name]->m_name)) {
+                    print_error("Invalid assignment at " + id_name);
+                }
             }
             std::cout << "Assignment is valid\n";
         }
@@ -272,8 +275,10 @@ std::shared_ptr<parsing::Type> CheckTypes::get_expression_type(std::shared_ptr<p
             auto left_type = get_expression_type(math->m_left);
             auto right_type = get_expression_type(math->m_right);
 
-            // TODO: check if the two parts are not equal
-            if (left_type->get_grammar() != right_type->get_grammar()) {
+            if (left_type->get_grammar() != right_type->get_grammar()
+                || (left_type->m_name != right_type->m_name
+                    && (!is_primitive(left_type->m_name) || !is_primitive(right_type->m_name)))) {
+
                 std::cout << "Left part:\n";
                 left_type->print();
 
