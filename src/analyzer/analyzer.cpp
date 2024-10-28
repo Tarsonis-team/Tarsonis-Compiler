@@ -122,7 +122,7 @@ void CheckTypes::write_out_types(std::vector<std::shared_ptr<parsing::ASTNode>>&
 //        if (code_node->get_grammar() == GrammarUnit::ASSIGNMENT) {
 //            auto assignment = std::dynamic_pointer_cast<parsing::Assignment>(code_node);
 //            auto result_type = get_expression_type(a)
-        }
+//        }
     }
 }
 
