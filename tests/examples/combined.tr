@@ -1,0 +1,41 @@
+type Array is array[3] integer
+type Point is record
+    var x: Array
+    var y: real
+    var arr: array[5] bool
+end
+type Line is record
+    var length: real
+end
+type Alias is integer;
+
+routine get_point() -> Point is
+    var p: Point;
+    var l: Line;
+    return p;
+end
+
+
+routine one() -> integer is
+    var p: Point;
+    return 1;
+end
+
+routine two(integer x, Array lst) -> integer is
+    var a: integer;
+    var ar1: Array;
+    var ar2: array[5] Array;
+    var p: Point;
+    a := 6;
+    var b: integer is 7;
+
+    p := get_point();
+
+    return 2 + a - p.x[2] + ar2[3][2] + one() - b;
+end
+
+routine main() is
+    var c: integer is two();
+    two(1, 2);
+    two(two(3), 4);
+end

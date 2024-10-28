@@ -41,7 +41,7 @@ class Type : public Declaration
 public:
     ~Type() override = default;
 
-    explicit Type(std::string typename_) : Declaration(GrammarUnit::TYPE, std::move(typename_))
+    explicit Type(std::string typename_) : Declaration(GrammarUnit::DEFAULT_TYPE, std::move(typename_))
     {
     }
 
@@ -131,6 +131,7 @@ class RecordType : public Type
 public:
     explicit RecordType(std::string name) : Type(std::move(name))
     {
+        this->m_grammar = GrammarUnit::RECORD_TYPE;
     }
 
     std::vector<std::shared_ptr<Declaration>> m_fields;
@@ -179,9 +180,10 @@ class PrimitiveType : public Type
 class ArrayType : public Type
 {
 public:
-    explicit ArrayType(std::shared_ptr<Type> type, std::shared_ptr<Expression> size)
-        : Type("array"), m_type(std::move(type)), m_size(size)
+    explicit ArrayType(std::string name, std::shared_ptr<Type> type, std::shared_ptr<Expression> size)
+        : Type(std::move(name)), m_type(std::move(type)), m_size(size)
     {
+        this->m_grammar = GrammarUnit::ARRAY_TYPE;
     }
 
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
@@ -221,6 +223,7 @@ class TypeAliasing : public Type
 public:
     explicit TypeAliasing(std::string from, std::string to) : Type(to), m_from(std::move(from)), m_to(std::move(to))
     {
+        this->m_grammar = GrammarUnit::ALIAS;
     }
 
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
@@ -281,6 +284,7 @@ public:
     explicit ArrayVariable(std::string name, std::shared_ptr<ArrayType> type)
         : Variable(std::move(name), type->m_type), m_type(type)
     {
+        this->m_grammar = GrammarUnit::ARRAY;
     }
 
     void removeUnused(std::unordered_map<std::string, int>& table) override {

@@ -717,7 +717,7 @@ std::shared_ptr<RecordType> Parser::parse_record_decl(std::string name)
     return record;
 }
 
-std::shared_ptr<ArrayType> Parser::parse_array_type()
+std::shared_ptr<ArrayType> Parser::parse_array_type(std::string name)
 {
     if (currentTok().m_id != TOKEN_ARRAY)
     {
@@ -750,10 +750,10 @@ std::shared_ptr<ArrayType> Parser::parse_array_type()
     std::shared_ptr<ArrayType> array_type;
 
     if (currentTok().m_id == TOKEN_ARRAY) {
-        array_type = std::make_shared<ArrayType>(parse_array_type(), number_of_elements);
+        array_type = std::make_shared<ArrayType>(name, parse_array_type(name), number_of_elements);
     } else {
         auto type = std::make_shared<PrimitiveType>(currentTok().m_value);
-        array_type = std::make_shared<ArrayType>(type, number_of_elements);
+        array_type = std::make_shared<ArrayType>(name, type, number_of_elements);
     }
 
     advanceTok();
@@ -799,7 +799,7 @@ std::shared_ptr<Variable> Parser::parse_variable_decl()
             }
             return make_shared<PrimitiveVariable>(var_name, type);
         case TOKEN_ARRAY:
-            return std::make_shared<ArrayVariable>(var_name, parse_array_type());
+            return std::make_shared<ArrayVariable>(var_name, parse_array_type("array"));
         default:
             throw std::runtime_error("type of variable is expected !");
     }
@@ -973,7 +973,7 @@ std::shared_ptr<Type> Parser::parse_type_decl()
         case TOKEN_RECORD:
             return parse_record_decl(name_of_the_type);
         case TOKEN_ARRAY:
-            return parse_array_type();
+            return parse_array_type(name_of_the_type);
         case TOKEN_BOOLEAN:
         case TOKEN_INTEGER:
         case TOKEN_REAL:
