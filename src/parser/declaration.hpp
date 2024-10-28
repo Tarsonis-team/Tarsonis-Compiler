@@ -94,8 +94,9 @@ class Type : public Declaration
 public:
     ~Type() override = default;
 
-    explicit Type(std::string name) : Declaration(GrammarUnit::TYPE, std::move(name))
+    explicit Type(std::string name) : Declaration(GrammarUnit::DEFAULT_TYPE, std::move(name))
     {
+        this->m_grammar = GrammarUnit::DEFAULT_TYPE;
     }
 
     void print() override

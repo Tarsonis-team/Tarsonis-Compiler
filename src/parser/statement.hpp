@@ -133,6 +133,7 @@ class Assignment : public Statement
 public:
     explicit Assignment() : Statement(GrammarUnit::ASSIGNMENT)
     {
+        this->m_grammar = GrammarUnit::ASSIGNMENT;
     }
 
     void print() override

@@ -20,30 +20,17 @@ void CheckTypes::check_tree() {
             switch (decl->get_grammar()) {
                 case GrammarUnit::ALIAS: {
                     auto alias = std::dynamic_pointer_cast<parsing::TypeAliasing>(decl);
-                    m_alias_map[alias->m_to] = std::make_shared<PrimitiveReturn>(alias->m_from);
+                    m_alias_map[alias->m_to] = std::make_shared<parsing::Type>(alias->m_from);
                     break;
                 }
                 case GrammarUnit::ARRAY_TYPE: {
                     auto arr_type = std::dynamic_pointer_cast<parsing::ArrayType>(decl);
-                    m_alias_map[arr_type->m_name] = std::make_shared<ArrayReturn>(arr_type->m_type);
+                    m_alias_map[arr_type->m_name] = arr_type;
                     break;
                 }
                 case GrammarUnit::RECORD_TYPE: {
-                    auto record = std::dynamic_pointer_cast<parsing::RecordType>(decl);
-                    auto record_type = std::make_shared<RecordTypeReturn>(record->m_name);
-
-                    for (auto& field : record->m_fields) {
-                        if (field->get_grammar() == GrammarUnit::ARRAY) {
-                            auto field_array = std::dynamic_pointer_cast<parsing::ArrayVariable>(field);
-                            auto entry = std::make_shared<ArrayReturn>(field_array->m_type->m_type);
-                            record_type->m_fields[field->m_name] = entry;
-                        } else {
-                            auto field_var = std::dynamic_pointer_cast<parsing::PrimitiveVariable>(field);
-                            record_type->m_fields[field->m_name] = convert(field_var->m_type);
-                        }
-                    }
-
-                    m_alias_map[record->m_name] = record_type;
+                    auto record_type = std::dynamic_pointer_cast<parsing::RecordType>(decl);
+                    m_alias_map[record_type->m_name] = record_type;
                     break;
                 }
 
@@ -73,7 +60,7 @@ void CheckTypes::check_tree() {
         for (auto& parameter : routine->m_params) {
             if (parameter->get_grammar() == GrammarUnit::ARRAY) {
                 auto arr = std::dynamic_pointer_cast<parsing::ArrayVariable>(parameter);
-                m_var_map[arr->m_name] = std::make_shared<ArrayReturn>(arr->m_type->m_type);
+                m_var_map[arr->m_name] = arr->m_type;
             } else {
                 m_var_map[parameter->m_name] = convert(parameter->m_type);
             }
@@ -92,11 +79,12 @@ void CheckTypes::check_tree() {
         return_type->print();
         m_var_map[routine->m_name] = return_type;
 
-        if (return_type->equal_to(routine->return_type)) {
+        // Compare two results
+        if (return_type->m_name == routine->return_type) {
             std::cout << "<< they are equal";
         } else {
             std::cout << "<< they are not equal";
-            return_type_error(routine->m_name, routine->return_type, return_type->get_string());
+            return_type_error(routine->m_name, routine->return_type, return_type->gr_to_str());
         }
         std::cout << "\n\n";
     }
@@ -106,9 +94,9 @@ void CheckTypes::check_tree() {
 //    print_map();
 }
 
-std::shared_ptr<ReturnType> CheckTypes::convert(std::string& type) {
+std::shared_ptr<parsing::Type> CheckTypes::convert(std::string& type) {
     if (is_primitive(type)) {
-        return std::make_shared<PrimitiveReturn>(type);
+        return std::make_shared<parsing::Type>(type);
     } else {
         if (m_alias_map.count(type) > 0) {
             return m_alias_map[type];
@@ -127,50 +115,75 @@ void CheckTypes::write_out_types(std::vector<std::shared_ptr<parsing::ASTNode>>&
         }
         if (code_node->get_grammar() == GrammarUnit::ARRAY) {
             auto arr = std::dynamic_pointer_cast<parsing::ArrayVariable>(code_node);
-            m_var_map[arr->m_name] = std::make_shared<ArrayReturn>(arr->m_type->m_type);
+            m_var_map[arr->m_name] = arr->m_type;
+        }
+
+        // Check for correctness of assignments
+//        if (code_node->get_grammar() == GrammarUnit::ASSIGNMENT) {
+//            auto assignment = std::dynamic_pointer_cast<parsing::Assignment>(code_node);
+//            auto result_type = get_expression_type(a)
         }
     }
 }
 
-std::shared_ptr<ReturnType> CheckTypes::get_expression_type(std::shared_ptr<parsing::Expression> &expression) {
+std::shared_ptr<parsing::Type> CheckTypes::get_expression_type(std::shared_ptr<parsing::Expression> &expression) {
     switch (expression->get_grammar()) {
         case GrammarUnit::INTEGER:
-            return std::make_shared<PrimitiveReturn>("integer");
+            return std::make_shared<parsing::Type>("integer");
         case GrammarUnit::REAL:
-            return std::make_shared<PrimitiveReturn>("real");
+            return std::make_shared<parsing::Type>("real");
         case GrammarUnit::TRUE:
         case GrammarUnit::FALSE:
         case GrammarUnit::BOOL:
-            return std::make_shared<PrimitiveReturn>("bool");
+            return std::make_shared<parsing::Type>("bool");
         case GrammarUnit::IDENTIFIER: {
             auto variable = std::dynamic_pointer_cast<parsing::Modifiable>(expression);
 
-            std::shared_ptr<ReturnType> cur_item = m_var_map[variable->m_head_name];
+            std::shared_ptr<parsing::Type> cur_type = m_var_map[variable->m_head_name];
 
             for (auto& node : variable->m_chain) {
                 bool aliasing_case = true;
                 while (aliasing_case) {
                     aliasing_case = false;
 
-                    switch (cur_item->get_format()) {
-                        case ReturnTypeFormat::RECORD: {
+                    switch (cur_type->get_grammar()) {
+                        case GrammarUnit::RECORD_TYPE: {
                             auto access = std::dynamic_pointer_cast<parsing::Modifiable::RecordAccess>(node);
                             if (access == nullptr) {
                                 print_error("Invalid accessing a record: " + variable->m_head_name);
                                 return nullptr;
                             }
 
-                            auto record = std::dynamic_pointer_cast<RecordTypeReturn>(cur_item);
+                            auto record = std::dynamic_pointer_cast<parsing::RecordType>(cur_type);
 
-                            if (record->m_fields.count(access->identifier) == 0) {
-                                print_error("Record " + record->m_record_name + " has no attribute " + access->identifier);
+                            bool field_found = false;
+                            for (auto& field : record->m_fields) {
+                                if (field->m_name == access->identifier) {
+                                    field_found = true;
+
+                                    if (field->get_grammar() == GrammarUnit::VARIABLE) {
+                                        auto var_field = std::dynamic_pointer_cast<parsing::PrimitiveVariable>(field);
+                                        cur_type = std::make_shared<parsing::Type>(var_field->m_type);
+                                    } else if (field->get_grammar() == GrammarUnit::ARRAY) {
+                                        auto var_field = std::dynamic_pointer_cast<parsing::ArrayVariable>(field);
+                                        cur_type = var_field->m_type;
+                                    } else {
+                                        print_error("Unknown type of a field in record: " + field->m_name);
+                                        return nullptr;
+                                    }
+
+                                    break;
+                                }
+                            }
+
+                            if (!field_found) {
+                                print_error("Record " + record->m_name + " has no attribute " + access->identifier);
                                 return nullptr;
                             }
 
-                            cur_item = record->m_fields[access->identifier];
                             break;
                         }
-                        case ReturnTypeFormat::ARRAY: {
+                        case GrammarUnit::ARRAY_TYPE: {
                             auto access = std::dynamic_pointer_cast<parsing::Modifiable::ArrayAccess>(node);
                             if (access == nullptr) {
                                 print_error("Invalid accessing an array: " + variable->m_head_name);
@@ -178,36 +191,45 @@ std::shared_ptr<ReturnType> CheckTypes::get_expression_type(std::shared_ptr<pars
                             }
 
                             // Check whether accessing is performed with integer or not
-                            auto access_type = std::dynamic_pointer_cast<PrimitiveReturn>(get_expression_type(access->access));
-                            if (access_type == nullptr || access_type->m_type != "integer") {
-                                print_error("Impossible to access an array with non-integer value: " + access_type->m_type);
+                            auto access_type = get_expression_type(access->access);
+                            if (access_type->m_name != "integer") {
+                                print_error("Impossible to access an array with non-integer value: " + access_type->m_name);
                                 return nullptr;
                             }
 
-                            auto array = std::dynamic_pointer_cast<ArrayReturn>(cur_item);
-                            cur_item = std::make_shared<PrimitiveReturn>(array->m_item_type);
+                            auto array = std::dynamic_pointer_cast<parsing::ArrayType>(cur_type);
+                            cur_type = std::make_shared<parsing::Type>(array->m_type);
 
                             break;
                         }
-                        case ReturnTypeFormat::PRIMITIVE: {
-                            auto identifier = std::dynamic_pointer_cast<PrimitiveReturn>(cur_item);
+                        case GrammarUnit::DEFAULT_TYPE:
+                        case GrammarUnit::VARIABLE: {
+                            auto identifier = cur_type;
 
-                            if (is_primitive(identifier->m_type)) {
+                            if (is_primitive(identifier->m_name)) {
                                 print_error("Impossible to access [ ] or . a primitive variable: " + variable->m_head_name);
                                 return nullptr;
                             }
 
-                            cur_item = convert(identifier->m_type);
-                            aliasing_case = true;
+                            cur_type = convert(identifier->m_name);
+
                             break;
                         }
                         default:
                             print_error("Error in chain of identifier");
                     }
+
+                    if (!is_primitive(cur_type->m_name)) {
+                        aliasing_case = true;
+                    }
+
+                    if (cur_type->get_grammar() == GrammarUnit::ARRAY_TYPE || cur_type->get_grammar() == GrammarUnit::RECORD_TYPE) {
+                        aliasing_case = false;
+                    }
                 }
             }
 
-            return cur_item;
+            return cur_type;
         }
         case GrammarUnit::ROUTINE_CALL: {
             auto call = std::dynamic_pointer_cast<parsing::RoutineCallResult>(expression);
@@ -226,7 +248,8 @@ std::shared_ptr<ReturnType> CheckTypes::get_expression_type(std::shared_ptr<pars
             auto left_type = get_expression_type(math->m_left);
             auto right_type = get_expression_type(math->m_right);
 
-            if (!left_type->equal_to(right_type)) {
+            // TODO: check if the two parts are not equal
+            if (left_type->get_grammar() != right_type->get_grammar()) {
                 std::cout << "Left part:\n";
                 left_type->print();
 
@@ -237,7 +260,7 @@ std::shared_ptr<ReturnType> CheckTypes::get_expression_type(std::shared_ptr<pars
                 return nullptr;
             }
 
-            if (left_type->get_format() != ReturnTypeFormat::PRIMITIVE) {
+            if (left_type->get_grammar() != GrammarUnit::DEFAULT_TYPE) {
                 std::cout << "Invalid node at an expression:\n";
                 left_type->print();
 

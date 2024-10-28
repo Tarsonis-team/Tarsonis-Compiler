@@ -49,10 +49,6 @@ public:
                 return "ROUTINE";
             case GrammarUnit::PARAMETER:
                 return "PARAMETER";
-            case GrammarUnit::RECORD:
-                return "RECORD";
-            case GrammarUnit::TYPE:
-                return "TYPE";
             case GrammarUnit::ARRAY:
                 return "ARRAY";
             case GrammarUnit::IF:
@@ -111,6 +107,8 @@ public:
                 return "ARRAY_TYPE";
             case GrammarUnit::RECORD_TYPE:
                 return "RECORD_TYPE";
+            case GrammarUnit::DEFAULT_TYPE:
+                return "DEFAULT_TYPE";
             case GrammarUnit::ALIAS:
                 return "ALIAS";
             default:
