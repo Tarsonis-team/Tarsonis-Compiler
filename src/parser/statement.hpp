@@ -86,7 +86,9 @@ public:
     }
 
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        m_identifier->checkUndeclared(table);
         m_body->checkUndeclared(table);
+        table.erase(m_identifier->m_name);
     }
 
     void removeUnused(std::unordered_map<std::string, int>& outer_table) override {

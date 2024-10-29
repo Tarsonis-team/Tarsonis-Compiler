@@ -55,10 +55,16 @@ public:
     }
 
     virtual bool isPrimitive() {
+        if (m_name == "array") {
+            return false;
+        }
         return false;
     }
 
     virtual bool isArray() {
+        if (m_name == "array") {
+            return true;
+        }
         return false;
     }
 
@@ -171,6 +177,9 @@ class PrimitiveType : public Type
     }
 
     bool isPrimitive() override {
+        if (m_name == "array") {
+            return false;
+        }
         return true;
     }
 

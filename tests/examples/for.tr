@@ -3,6 +3,7 @@ routine main(integer n) is
 
     for i in 1 .. n + 1 loop
         result := result
+        result := i - 1;
     end
 
     for i in reverse n .. 1 loop

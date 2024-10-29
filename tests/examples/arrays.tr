@@ -16,9 +16,11 @@ routine two(SockFD a) -> SockFD is
     end;
 end
 
-routine main() is
+routine main() -> SockFD is
     var a: array[2] P;
-    var b: array[2] array[3] integer;
+    var b: array[2] array[3] P;
 
-    b[0][1] := two(2) + a[0].x;
+    b[0][1].x := two(2) + b[0][0].x;
+
+    return b[0][0].x + a[0].y;
 end
