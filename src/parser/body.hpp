@@ -24,20 +24,6 @@ public:
     {
     }
 
-    void removeUnreachable() override {
-        size_t idx_of_return = m_items.size();
-        for (size_t idx = 0; idx < m_items.size(); ++idx) {
-            if (m_items[idx]->m_grammar == GrammarUnit::RETURN) {
-                idx_of_return = idx + 1;
-                break;
-            }
-            m_items[idx]->removeUnreachable();
-        }
-
-        m_items.erase(m_items.begin() + idx_of_return, m_items.end());
-    };
-
-
     void checkUndecalredWithCopy(std::unordered_map<std::string, std::shared_ptr<Declaration>> table) {
         for (auto& stmt : m_items) {
             stmt->checkUndeclared(table);

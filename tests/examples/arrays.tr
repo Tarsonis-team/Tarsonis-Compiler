@@ -8,6 +8,8 @@ type SockFD is integer;
 type P is Point;
 
 routine two(integer a) -> P is
+    var p: P;
+    return p;
     if a > 3 then
         var c: Point;
         return c;

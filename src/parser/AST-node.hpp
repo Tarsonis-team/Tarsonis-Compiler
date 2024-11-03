@@ -46,8 +46,6 @@ public:
 
     virtual void removeUnused(std::unordered_map<std::string, int>& table) {}
 
-    virtual void removeUnreachable() {};
-
     virtual GrammarUnit get_grammar() const
     {
         return this->m_grammar;
@@ -229,12 +227,6 @@ public:
             entity->removeUnused(table);
         }
     }
-
-    void removeUnreachable() override {
-        for (auto& entity : m_declarations) {
-            entity->removeUnreachable();
-        }
-    };
 
     explicit Program() : ASTNode(GrammarUnit::PROGRAM)
     {

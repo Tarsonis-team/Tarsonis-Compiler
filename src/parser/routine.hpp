@@ -47,10 +47,6 @@ public:
         m_body->removeUnused(table);
     }
 
-    void removeUnreachable() override {
-        m_body->removeUnreachable();
-    };
-
     std::shared_ptr<Body> m_body;
     std::vector<std::shared_ptr<RoutineParameter>> m_params;
     std::string return_type;
