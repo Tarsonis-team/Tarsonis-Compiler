@@ -16,6 +16,14 @@ namespace parsing
 class RoutineParameter : public Declaration
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     RoutineParameter(std::string name, std::string type)
         : Declaration(GrammarUnit::PARAMETER, std::move(name)), m_type(std::move(type))
     {
@@ -29,25 +37,22 @@ public:
 
     RoutineParameter(RoutineParameter&& param) = default;
     std::string m_type;
-
-    void print() override
-    {
-        cout << "VAR_PAR:" << m_name;
-    }
 };
 
 class Type : public Declaration
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
     ~Type() override = default;
 
     explicit Type(std::string typename_) : Declaration(GrammarUnit::TYPE, std::move(typename_))
     {
-    }
-
-    void print() override
-    {
-        cout << "TYPE:" << m_name << "\n";
     }
 
     virtual bool isRecord() {
@@ -92,6 +97,13 @@ public:
 class Variable : public Declaration
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
     explicit Variable(std::string name, std::shared_ptr<Type> type) : Declaration(GrammarUnit::VARIABLE, std::move(name)), m_type(std::move(type))
     {
     }
@@ -119,22 +131,19 @@ public:
     void removeUnused(std::unordered_map<std::string, int>& table) override {
 
     }
-
-    void print() override
-    {
-        cout << "VAR:" << m_name << " ";
-        if (m_value.get())
-        {
-            cout << "value: ";
-            m_value->print();
-        }
-        cout << "\n";
-    }
 };
 
 class RecordType : public Type
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     explicit RecordType(std::string name) : Type(std::move(name))
     {
     }
@@ -154,16 +163,6 @@ public:
         table.emplace(m_name, std::static_pointer_cast<Declaration>(shared_from_this()));
     }
 
-    void print() override
-    {
-        cout << "TYPE_RECORD:" << m_name << ":\n";
-        for (auto& field : m_fields)
-        {
-            cout << " ";
-            field->print();
-        }
-        cout << "\n";
-    }
 };
 
 /*
@@ -172,6 +171,14 @@ public:
 class PrimitiveType : public Type
 {
     public:
+        void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     explicit PrimitiveType(std::string type) : Type(std::move(type)) {
 
     }
@@ -188,6 +195,14 @@ class PrimitiveType : public Type
 class ArrayType : public Type
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     explicit ArrayType(std::shared_ptr<Type> type, std::shared_ptr<Expression> size)
         : Type("array"), m_type(std::move(type)), m_size(size)
     {
@@ -215,19 +230,19 @@ public:
             std::cout << "attempt to assign non-array to an array: " + m_type->m_name + " " + " to " + other.m_name + "\n";
             throw;
         }
-    }    
-
-    void print() override
-    {
-        std::cout << " size: ";
-        m_size->print();
-        m_type->print();
     }
 };
 
 class TypeAliasing : public Type
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
     explicit TypeAliasing(std::string from, std::string to) : Type(to), m_from(std::move(from)), m_to(std::move(to))
     {
     }
@@ -247,15 +262,12 @@ public:
 class PrimitiveVariable : public Variable
 {
 public:
-    void print() override
-    {
-        std::cout << "varname: " << m_name << " " << "type: " << m_type->m_name;
-        if (m_assigned.get())
-        {
-            std::cout << " assigned ";
-            m_assigned->print();
-        }
-        std::cout << "\n";
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
     }
 
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
@@ -287,6 +299,14 @@ public:
 class ArrayVariable : public Variable
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     explicit ArrayVariable(std::string name, std::shared_ptr<ArrayType> type)
         : Variable(std::move(name), type->m_type), m_type(type)
     {
@@ -303,13 +323,6 @@ public:
     }
 
     std::shared_ptr<ArrayType> m_type;
-
-    void print() override
-    {
-        std::cout << "Array " << m_name << " ";
-        m_type->print();
-        std::cout << "\n";
-    }
 };
 
 } // namespace parsing

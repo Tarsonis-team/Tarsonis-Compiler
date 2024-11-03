@@ -9,6 +9,14 @@ namespace parsing {
 class Routine : public Declaration
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     explicit Routine(std::string name) : Declaration(GrammarUnit::ROUTINE, std::move(name))
     {
     }
@@ -42,16 +50,6 @@ public:
     void removeUnreachable() override {
         m_body->removeUnreachable();
     };
-
-
-    void print() override
-    {
-        cout << "Routine declaration, name: " << m_name << " -> " << (return_type.empty() ? "void" : return_type)
-             << '\n';
-        m_body->print();
-        cout << "\n";
-        cout << "End of routine declaration\n";
-    }
 
     std::shared_ptr<Body> m_body;
     std::vector<std::shared_ptr<RoutineParameter>> m_params;

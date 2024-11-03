@@ -11,16 +11,17 @@
 #include "analyzer/analyzer.hpp"
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
+#include "parser/visitor/print-visitor.hpp"
 
 int main(int argc, char* argv[])
 {
-    // if (argc < 2)
-    // {
-    //     std::cerr << "Error: path to a source file is not provided\n";
-    //     return EXIT_FAILURE;
-    // }
-    // std::string source_file_path = argv[1];
-    std::string source_file_path = "/home/max/vscdir/tarsonis/tests/examples/arrays.tr";
+    if (argc < 2)
+    {
+        std::cerr << "Error: path to a source file is not provided\n";
+        return EXIT_FAILURE;
+    }
+    std::string source_file_path = argv[1];
+    // std::string source_file_path = "/home/max/vscdir/tarsonis/tests/examples/arrays.tr";
     //  std::string source_file_path = "C:/Projects/C/C++/Compilers/Tarsonis-Compiler/tests/examples/arrays.tr";
 
     if (!std::filesystem::exists(source_file_path))
@@ -51,7 +52,7 @@ int main(int argc, char* argv[])
     {
         auto parser = parsing::Parser(tokens);
         auto program_ast = parser.parse();
-        program_ast->print();
+        program_ast->accept(parsing::Printer{});
 
         Analyzer(program_ast)
             .withCheckOf<TypeCheck>()
@@ -59,7 +60,7 @@ int main(int argc, char* argv[])
             .withOptimizationOf<RemoveUnusedDeclarations>();
 
         std::cout << "\n AFTER OPTIMIZATIONS: \n";
-        program_ast->print();
+        program_ast->accept(parsing::Printer{});
     }
     catch (const std::exception& err)
     {

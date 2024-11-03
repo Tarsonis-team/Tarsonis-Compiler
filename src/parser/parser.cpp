@@ -546,7 +546,7 @@ std::shared_ptr<Modifiable> Parser::parse_modifiable_primary()
         if (curtk.m_id == TOKEN_DOT)
         {
             advanceTok();
-            auto field = std::make_shared<Modifiable::RecordAccess>();
+            auto field = std::make_shared<RecordAccess>();
             if (currentTok().m_id != TOKEN_IDENTIFIER)
             {
                 throw std::runtime_error("identifier expected !");
@@ -566,7 +566,7 @@ std::shared_ptr<Modifiable> Parser::parse_modifiable_primary()
                 throw std::runtime_error("']' expected !");
             }
 
-            auto array_acc = std::make_shared<Modifiable::ArrayAccess>();
+            auto array_acc = std::make_shared<ArrayAccess>();
             array_acc->access = expr;
             modif_primary->m_chain.push_back(array_acc);
             advanceTok();

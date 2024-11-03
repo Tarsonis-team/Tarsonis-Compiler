@@ -10,6 +10,14 @@ namespace parsing {
 
 class ReturnStatement : public Statement {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     explicit ReturnStatement(std::shared_ptr<Expression> expr) : Statement(GrammarUnit::RETURN), m_expr(expr) {}
 
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
@@ -25,10 +33,6 @@ public:
 
     void removeUnused(std::unordered_map<std::string, int>& table) override {
         m_expr->removeUnused(table);
-    }
-
-    void print() override {
-        std::cout << "RETURN "; m_expr->print(); std::cout << "\n";
     }
 
     std::shared_ptr<Expression> m_expr;

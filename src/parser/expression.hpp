@@ -8,6 +8,7 @@
 
 namespace parsing
 {
+struct IVisitor;
 
 class Primary : public Expression
 {
@@ -22,6 +23,14 @@ public:
 class Integer : public Primary
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     explicit Integer(int value) : Primary(), m_value(value)
     {
         this->m_grammar = GrammarUnit::INTEGER;
@@ -38,15 +47,19 @@ public:
         return std::static_pointer_cast<PrimitiveType>(table.at("integer"));
     }
 
-    void print() override
-    {
-        std::cout << "INTEGER:" << this->m_value << " ";
-    }
 };
 
 class Boolean : public Primary
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     explicit Boolean(bool value) : Primary(), m_value(value)
     {
         this->m_grammar = GrammarUnit::BOOL;
@@ -63,15 +76,19 @@ public:
         return std::static_pointer_cast<PrimitiveType>(table.at("boolean"));
     }
 
-    void print() override
-    {
-        std::cout << "BOOL:" << this->m_value;
-    }
 };
 
 class Real : public Primary
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     explicit Real(double value) : Primary(), m_value(value)
     {
         this->m_grammar = GrammarUnit::REAL;
@@ -88,102 +105,107 @@ public:
         return std::static_pointer_cast<PrimitiveType>(table.at("real"));
     }
 
-    void print() override
-    {
-        std::cout << "REAL:" << this->m_value;
+};
+
+struct Chained : public ASTNode
+{
+    Chained() : ASTNode(GrammarUnit::ACCESS_RECORD) {}
+    virtual void check_has_field(std::shared_ptr<Declaration>& current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) = 0;
+    virtual std::shared_ptr<Type> deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) = 0;
+};
+
+struct ArrayAccess : public Chained
+{
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
     }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
+    std::shared_ptr<Expression> access;
+
+    void check_has_field(std::shared_ptr<Declaration>& current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>&table) override {
+        // skip, it is just an array access, the array 
+        // identifier was before.
+        // But we need to check that this is really an array...
+        try {
+            ArrayType& array = dynamic_cast<ArrayType&>(*current_type);
+            if (array.m_type->m_name == "array") {
+                current_type = array.m_type;
+            } else {
+                current_type = table.at(array.m_type->m_name);
+            }
+        } catch (const std::bad_cast& e) {
+            std::cout << "Accessed type is not an array: " + current_type->m_name << '\n';
+            throw;
+        }
+    }
+
+    std::shared_ptr<Type> deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>&) override {
+        ArrayType& array = dynamic_cast<ArrayType&>(*cur_type);
+        return array.m_type;
+    }
+};
+
+struct RecordAccess : public Chained
+{
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void check_has_field(std::shared_ptr<Declaration>& current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        // a.b
+        // so we are supposedly at 'a' now (in current type variable)
+        // and b is the identifier
+        try {
+            RecordType& record = dynamic_cast<RecordType&>(*current_type);
+            // check that record REALLY has that name
+            for (auto& field : record.m_fields) {
+                Variable& var = dynamic_cast<Variable&>(*field);
+                if (var.m_name == identifier) {
+                    current_type = table.at(var.m_type->m_name);
+                    return;
+                }
+            }
+            throw std::runtime_error("the field with name " + identifier +
+                                            " is not found in record " + record.m_name);
+        } catch (const std::bad_cast& e) {
+            std::cout << "Accessed field is not a record: " + identifier;
+            throw;
+        }
+    }
+
+    std::shared_ptr<Type> deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
+        RecordType& record = static_cast<RecordType&>(*table.at(cur_type->m_name));
+        // check that record REALLY has that name
+        for (auto& field : record.m_fields) {
+            Variable& var = dynamic_cast<Variable&>(*field);
+            if (var.m_name == identifier) {
+                return std::dynamic_pointer_cast<Type>(table.at(var.m_type->m_name));
+            }
+        }
+        throw std::runtime_error("field not found !");
+    }
+
+    std::string identifier;
 };
 
 class Modifiable : public Primary
 {
 public:
-    struct Chained
-    {
-        virtual void check_has_field(std::shared_ptr<Declaration>& current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) = 0;
-        virtual ~Chained() = default;
-        virtual void print() = 0;
-        virtual std::shared_ptr<Type> deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) = 0;
-    };
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
 
-    struct ArrayAccess : public Chained
-    {
-        ArrayAccess() = default;
-        std::shared_ptr<Expression> access;
-
-        void check_has_field(std::shared_ptr<Declaration>& current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>&table) override {
-            // skip, it is just an array access, the array 
-            // identifier was before.
-            // But we need to check that this is really an array...
-            try {
-                ArrayType& array = dynamic_cast<ArrayType&>(*current_type);
-                if (array.m_type->m_name == "array") {
-                    current_type = array.m_type;
-                } else {
-                    current_type = table.at(array.m_type->m_name);
-                }
-            } catch (const std::bad_cast& e) {
-                std::cout << "Accessed type is not an array: " + current_type->m_name << '\n';
-                throw;
-            }
-        }
-
-        std::shared_ptr<Type> deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>&) override {
-            ArrayType& array = dynamic_cast<ArrayType&>(*cur_type);
-            return array.m_type;
-        }
-
-        void print() override
-        {
-            std::cout << "[ ";
-            access->print();
-            std::cout << " ]";
-        }
-    };
-
-    struct RecordAccess : public Chained
-    {
-        void check_has_field(std::shared_ptr<Declaration>& current_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
-            // a.b
-            // so we are supposedly at 'a' now (in current type variable)
-            // and b is the identifier
-            try {
-                RecordType& record = dynamic_cast<RecordType&>(*current_type);
-                // check that record REALLY has that name
-                for (auto& field : record.m_fields) {
-                    Variable& var = dynamic_cast<Variable&>(*field);
-                    if (var.m_name == identifier) {
-                        current_type = table.at(var.m_type->m_name);
-                        return;
-                    }
-                }
-                throw std::runtime_error("the field with name " + identifier +
-                                                " is not found in record " + record.m_name);
-            } catch (const std::bad_cast& e) {
-                std::cout << "Accessed field is not a record: " + identifier;
-                throw;
-            }
-        }
-
-        std::shared_ptr<Type> deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
-            RecordType& record = static_cast<RecordType&>(*table.at(cur_type->m_name));
-            // check that record REALLY has that name
-            for (auto& field : record.m_fields) {
-                Variable& var = dynamic_cast<Variable&>(*field);
-                if (var.m_name == identifier) {
-                    return std::dynamic_pointer_cast<Type>(table.at(var.m_type->m_name));
-                }
-            }
-            throw std::runtime_error("field not found !");
-        }
-
-        void print() override
-        {
-            std::cout << "." + identifier;
-        }
-
-        RecordAccess() = default;
-        std::string identifier;
-    };
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
 
     std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
         std::shared_ptr<Type> cur_type = std::dynamic_pointer_cast<Type>(table.at(m_head_name));
@@ -216,15 +238,6 @@ public:
         }
     }
 
-    void print() override
-    {
-        std::cout << m_head_name;
-        for (auto& chain : m_chain)
-        {
-            chain->print();
-        }
-    }
-
     explicit Modifiable(std::string head) : Primary(), m_head_name(head)
     {
         this->m_grammar = GrammarUnit::IDENTIFIER;
@@ -247,6 +260,14 @@ public:
 class Math : public Expression
 {
 public:
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     explicit Math() : Expression()
     {
     }
@@ -274,19 +295,6 @@ public:
     std::shared_ptr<Expression> m_left;
     std::shared_ptr<Expression> m_right;
 
-    void print() override
-    {
-        std::cout << this->gr_to_str() << " with params: {" << std::to_string(static_cast<int>(this->m_grammar))
-                  << "::\n";
-
-        std::cout << " ";
-        this->m_left->print();
-
-        std::cout << ", ";
-        this->m_right->print();
-
-        std::cout << " ::" << std::to_string(static_cast<int>(this->m_grammar)) << "}";
-    }
 };
 
 class Plus : public Math
@@ -403,10 +411,6 @@ public:
         return GrammarUnit::TRUE;
     }
 
-    void print() override
-    {
-        cout << "TRUE ";
-    }
 };
 
 class False : public Boolean
@@ -422,10 +426,6 @@ public:
         return GrammarUnit::FALSE;
     }
 
-    void print() override
-    {
-        cout << "FALSE ";
-    }
 };
 
 class Relation : public Math

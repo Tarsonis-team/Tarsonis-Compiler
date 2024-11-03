@@ -6,6 +6,6 @@ end
 routine main() is
     var c: integer is two(1);
     two(1);
-    two(two(3));
+    two(3, 4);
 end
 

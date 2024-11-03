@@ -10,21 +10,18 @@
 
 namespace parsing {
 
-class Body : public ASTNode
-{
+class Body : public ASTNode {
 public:
-    explicit Body() : ASTNode(GrammarUnit::BODY)
-    {
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
     }
 
-    void print() override
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
+    explicit Body() : ASTNode(GrammarUnit::BODY)
     {
-        std::cout << "Body:\n";
-        for (auto& item : m_items)
-        {
-            item->print();
-        }
-        std::cout << "End of Body\n";
     }
 
     void removeUnreachable() override {

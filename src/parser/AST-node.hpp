@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -6,9 +7,12 @@
 #include <vector>
 
 #include "grammar-units.hpp"
+#include "visitor/abstract-visitor.hpp"
 
 namespace parsing
 {
+
+struct IVisitor;
 
 using std::cout;
 class Declaration;
@@ -30,16 +34,19 @@ public:
         return false;
     }
 
+    virtual void accept(IVisitor& visitor) {
+        visitor.visit(*this);
+    }
+
+    virtual void accept(IVisitor&& visitor) {
+        visitor.visit(*this);
+    }
+
     virtual void checkReturnCoincides(std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) {}
 
     virtual void removeUnused(std::unordered_map<std::string, int>& table) {}
 
     virtual void removeUnreachable() {};
-
-    virtual void print()
-    {
-        cout << "Some AST-Node, the default print function\n";
-    };
 
     virtual GrammarUnit get_grammar() const
     {
@@ -134,6 +141,15 @@ public:
 class Expression : public ASTNode
 {
 public:
+
+     void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+     void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     ~Expression() override = default;
 
     explicit Expression() : ASTNode(GrammarUnit::DIVISION)
@@ -147,6 +163,15 @@ public:
 class Statement : public ASTNode
 {
 public:
+
+     void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+     void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     ~Statement() override = default;
 
     explicit Statement(GrammarUnit gr) : ASTNode(gr)
@@ -157,6 +182,15 @@ public:
 class Declaration : public ASTNode
 {
 public:
+
+     void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+     void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
+
     ~Declaration() override = default;
 
     explicit Declaration(GrammarUnit gr, std::string name) : ASTNode(gr), m_name(std::move(name))
@@ -171,14 +205,13 @@ public:
 class Program : public ASTNode
 {
 public:
-    void print() override
-    {
-        cout << "Beginning of the Program:\n";
-        for (auto& declaration : m_declarations)
-        {
-            declaration->print();
-        }
-        cout << "End of the program\n";
+
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
     }
 
     void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
@@ -213,22 +246,16 @@ public:
 class Range : public ASTNode
 {
 public:
-    explicit Range() : ASTNode(GrammarUnit::RANGE), m_reverse(false)
-    {
+    void accept(IVisitor& visitor) override {
+        visitor.visit(*this);
     }
 
-    void print() override
-    {
-        std::cout << "in range";
-        if (m_reverse)
-        {
-            std::cout << " (reverse)";
-        }
-        std::cout << ": ";
+    void accept(IVisitor&& visitor) override {
+        visitor.visit(*this);
+    }
 
-        m_begin->print();
-        std::cout << " .. ";
-        m_end->print();
+    explicit Range() : ASTNode(GrammarUnit::RANGE), m_reverse(false)
+    {
     }
 
     bool m_reverse;
