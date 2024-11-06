@@ -7,27 +7,21 @@ end
 type SockFD is integer;
 type P is Point;
 
-routine two(integer a) -> P is
-    var p: P;
-    return p;
-    if a > 3 then
-        var c: Point;
-        return c;
-        var l : Point;
-        return l;
-    else 
-        var c: P;
-    end
+routine two() -> integer is
+
 end
 
-routine main() -> SockFD is
+routine main() -> P is
     var a: array[2] Point;
     var b: array[2] array[3] P;
 
     b[0][1].x := b[0][0].y;
-    b[0][0] := two(b[0][0].y);
+    b[0][0].x := two() + 2;
     
-    two(1);
+    var k: P;
+    k.x := 2;
 
-    return b[0][0].x
+    var nonc: array[2] boolean;
+
+    return b[0][0]
 end

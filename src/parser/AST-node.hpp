@@ -25,26 +25,31 @@ public:
     {
     }
 
-    ASTNode(ASTNode&& node) = default;
     virtual ~ASTNode() = default;
 
-    virtual void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) {}
-
-    virtual bool isVariableDecl() {
+    virtual bool isVariableDecl()
+    {
         return false;
     }
 
-    virtual void accept(IVisitor& visitor) {
+    virtual void accept(IVisitor& visitor)
+    {
         visitor.visit(*this);
     }
 
-    virtual void accept(IVisitor&& visitor) {
+    virtual void accept(IVisitor&& visitor)
+    {
         visitor.visit(*this);
     }
 
-    virtual void checkReturnCoincides(std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) {}
+    virtual void checkReturnCoincides(
+        std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table)
+    {
+    }
 
-    virtual void removeUnused(std::unordered_map<std::string, int>& table) {}
+    virtual void removeUnused(std::unordered_map<std::string, int>& table)
+    {
+    }
 
     virtual GrammarUnit get_grammar() const
     {
@@ -139,12 +144,13 @@ public:
 class Expression : public ASTNode
 {
 public:
-
-     void accept(IVisitor& visitor) override {
+    void accept(IVisitor& visitor) override
+    {
         visitor.visit(*this);
     }
 
-     void accept(IVisitor&& visitor) override {
+    void accept(IVisitor&& visitor) override
+    {
         visitor.visit(*this);
     }
 
@@ -154,19 +160,24 @@ public:
     {
     }
 
-    virtual std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) = 0;
+    virtual bool isConst() {
+        return false;
+    }
 
+    virtual std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& var_table,
+    std::unordered_map<std::string, std::shared_ptr<Declaration>>& type_table) = 0;
 };
 
 class Statement : public ASTNode
 {
 public:
-
-     void accept(IVisitor& visitor) override {
+    void accept(IVisitor& visitor) override
+    {
         visitor.visit(*this);
     }
 
-     void accept(IVisitor&& visitor) override {
+    void accept(IVisitor&& visitor) override
+    {
         visitor.visit(*this);
     }
 
@@ -180,50 +191,44 @@ public:
 class Declaration : public ASTNode
 {
 public:
-
-     void accept(IVisitor& visitor) override {
+    void accept(IVisitor& visitor) override
+    {
         visitor.visit(*this);
     }
 
-     void accept(IVisitor&& visitor) override {
+    void accept(IVisitor&& visitor) override
+    {
         visitor.visit(*this);
     }
-
-    ~Declaration() override = default;
 
     explicit Declaration(GrammarUnit gr, std::string name) : ASTNode(gr), m_name(std::move(name))
     {
-
     }
 
-    Declaration(Declaration&&) = default;
     std::string m_name;
 };
 
 class Program : public ASTNode
 {
 public:
-
-    void accept(IVisitor& visitor) override {
+    void accept(IVisitor& visitor) override
+    {
         visitor.visit(*this);
     }
 
-    void accept(IVisitor&& visitor) override {
+    void accept(IVisitor&& visitor) override
+    {
         visitor.visit(*this);
     }
 
-    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
-        for (auto& node : m_declarations) {
-            node->checkUndeclared(table);
-        }
+    void checkTypes()
+    {
     }
 
-    void checkTypes() {
-
-    }
-
-    void removeUnused(std::unordered_map<std::string, int>& table) override {
-        for (auto& entity : m_declarations) {
+    void removeUnused(std::unordered_map<std::string, int>& table) override
+    {
+        for (auto& entity : m_declarations)
+        {
             entity->removeUnused(table);
         }
     }
@@ -238,11 +243,13 @@ public:
 class Range : public ASTNode
 {
 public:
-    void accept(IVisitor& visitor) override {
+    void accept(IVisitor& visitor) override
+    {
         visitor.visit(*this);
     }
 
-    void accept(IVisitor&& visitor) override {
+    void accept(IVisitor&& visitor) override
+    {
         visitor.visit(*this);
     }
 

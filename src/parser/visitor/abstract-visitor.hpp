@@ -33,6 +33,7 @@ struct Integer;
 struct RecordAccess;
 struct ArrayAccess;
 struct TypeAliasing;
+struct Variable;
 
 struct IVisitor {
 
@@ -41,6 +42,7 @@ struct IVisitor {
     virtual void visit(Type& node) = 0;
     virtual void visit(RecordType& node) = 0;
     virtual void visit(ArrayType& node) = 0;
+    virtual void visit(Variable& node) = 0;
     virtual void visit(ArrayVariable& node) = 0;
     virtual void visit(PrimitiveVariable& node) = 0;
     virtual void visit(Body& node) = 0;

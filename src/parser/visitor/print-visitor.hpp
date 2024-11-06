@@ -72,6 +72,10 @@ void visit(ArrayType& node) override {
     cout << "]";
 }
 
+void visit(Variable& node) override {
+    
+}
+
 void visit(ArrayVariable& node) override {
     std::cout << m_nest << node.m_name << " ";
     node.m_type->accept(*this);
