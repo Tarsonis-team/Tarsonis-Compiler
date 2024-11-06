@@ -2,6 +2,4 @@
 routine main() -> integer is
     var a: integer
     var b: integer is 1 + 2
-    var vara: integer is a[2];
-
 end

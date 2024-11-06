@@ -1,4 +1,6 @@
 routine main(integer a) is
+
+    var c: integer is (a + b + (a - b) - (a + b) * 2);
     
     if a > 4 and true then
         a := 3

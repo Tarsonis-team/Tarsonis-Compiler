@@ -1,0 +1,135 @@
+#include "generator.hpp"
+
+namespace generator {
+
+    // TODO: translate AST nodes to LLVM nodes
+
+    void Generator::visit(parsing::ASTNode& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Declaration& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Type& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::RecordType& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::ArrayType& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Variable& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::ArrayVariable& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::PrimitiveVariable& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Body& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Routine& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::RoutineCall& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::RoutineCallResult& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::RoutineParameter& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Statement& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Expression& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Modifiable& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::ReturnStatement& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Range& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::For& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::While& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::If& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Assignment& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Program& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::True& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::False& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Math& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Real& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Boolean& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::Integer& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::ArrayAccess& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::RecordAccess& node) {
+        // Target llvm:: ...
+    }
+
+    void Generator::visit(parsing::TypeAliasing& node) {
+        // Target llvm:: ...
+    }
+
+} // namespace generator
