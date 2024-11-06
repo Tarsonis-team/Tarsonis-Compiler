@@ -546,7 +546,7 @@ std::shared_ptr<Modifiable> Parser::parse_modifiable_primary()
         if (curtk.m_id == TOKEN_DOT)
         {
             advanceTok();
-            auto field = std::make_shared<Modifiable::RecordAccess>();
+            auto field = std::make_shared<RecordAccess>();
             if (currentTok().m_id != TOKEN_IDENTIFIER)
             {
                 throw std::runtime_error("identifier expected !");
@@ -566,7 +566,7 @@ std::shared_ptr<Modifiable> Parser::parse_modifiable_primary()
                 throw std::runtime_error("']' expected !");
             }
 
-            auto array_acc = std::make_shared<Modifiable::ArrayAccess>();
+            auto array_acc = std::make_shared<ArrayAccess>();
             array_acc->access = expr;
             modif_primary->m_chain.push_back(array_acc);
             advanceTok();
@@ -674,14 +674,13 @@ std::shared_ptr<Body> Parser::parse_body()
             case TOKEN_ELSE:
             case TOKEN_END:
                 break;
-            case TOKEN_RETURN: 
-                {
-                    advanceTok();
-                    auto expr = parse_expression();
-                    auto returns = std::make_shared<ReturnStatement>(expr);
-                    body_res->m_items.push_back(returns);
-                }
-                break;
+            case TOKEN_RETURN: {
+                advanceTok();
+                auto expr = parse_expression();
+                auto returns = std::make_shared<ReturnStatement>(expr);
+                body_res->m_items.push_back(returns);
+            }
+            break;
             default:
                 throw std::runtime_error("Can't parse body !");
         }
@@ -746,17 +745,19 @@ std::shared_ptr<ArrayType> Parser::parse_array_type()
     advanceTok();
 
     if (currentTok().m_id != TOKEN_IDENTIFIER && currentTok().m_id != TOKEN_BOOLEAN
-        && currentTok().m_id != TOKEN_INTEGER && currentTok().m_id != TOKEN_REAL 
-        && currentTok().m_id != TOKEN_ARRAY)
+        && currentTok().m_id != TOKEN_INTEGER && currentTok().m_id != TOKEN_REAL && currentTok().m_id != TOKEN_ARRAY)
     {
         throw std::runtime_error("Expected a type of the array !");
     }
 
     std::shared_ptr<ArrayType> array_type;
 
-    if (currentTok().m_id == TOKEN_ARRAY) {
+    if (currentTok().m_id == TOKEN_ARRAY)
+    {
         array_type = std::make_shared<ArrayType>(parse_array_type(), number_of_elements);
-    } else {
+    }
+    else
+    {
         auto type = std::make_shared<PrimitiveType>(currentTok().m_value);
         array_type = std::make_shared<ArrayType>(type, number_of_elements);
     }
@@ -872,7 +873,8 @@ std::shared_ptr<For> Parser::parse_for_statement()
     {
         throw std::runtime_error("identifier is expected at the for-loop!");
     }
-    result->m_identifier = std::make_shared<PrimitiveVariable>(currentTok().m_value, std::make_shared<PrimitiveType>("integer"));
+    result->m_identifier
+        = std::make_shared<PrimitiveVariable>(currentTok().m_value, std::make_shared<PrimitiveType>("integer"));
 
     advanceTok();
     result->m_range = parse_range();
@@ -977,16 +979,17 @@ std::shared_ptr<Type> Parser::parse_type_decl()
     {
         case TOKEN_RECORD:
             return parse_record_decl(name_of_the_type);
-        case TOKEN_ARRAY:
-            return parse_array_type();
+        case TOKEN_ARRAY: {
+            auto array_type = parse_array_type();
+            return std::make_shared<TypeAliasing>(array_type, name_of_the_type);
+        }
         case TOKEN_BOOLEAN:
         case TOKEN_INTEGER:
         case TOKEN_REAL:
         case TOKEN_IDENTIFIER: {
             const auto& value = currentTok().m_value;
             advanceTok();
-
-            return std::make_shared<TypeAliasing>(value, name_of_the_type);
+            return std::make_shared<TypeAliasing>(std::make_shared<PrimitiveType>(value), name_of_the_type);
         }
         default:
             throw std::runtime_error("Specify the type being declared or aliased!");

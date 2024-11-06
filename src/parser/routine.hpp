@@ -1,56 +1,32 @@
 #pragma once
 
-#include "declaration.hpp"
 #include "body.hpp"
+#include "declaration.hpp"
 #include <memory>
 
-namespace parsing {
+namespace parsing
+{
 
 class Routine : public Declaration
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Routine(std::string name) : Declaration(GrammarUnit::ROUTINE, std::move(name))
     {
     }
 
-    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
-        for (auto& param : m_params) {
-            param->checkUndeclared(table);
-            table.emplace(param->m_name, table.at(param->m_type));
-        }
-
-        if (!return_type.empty() && !table.contains(return_type)) {
-            throw std::runtime_error("function returns an unknown type: " + return_type);
-        }
-
-        table.insert({m_name, std::static_pointer_cast<Declaration>(shared_from_this())});
-
-        m_body->checkUndeclared(table);
-        if (!return_type.empty()) {
-            m_body->checkReturnCoincides(std::static_pointer_cast<Type>(table.at(return_type)), table);
-        }
-
-        for (auto& param : m_params) {
-            table.erase(param->m_name);
-        }
-    }
-
-    void removeUnused(std::unordered_map<std::string, int>& table) override {
-        m_body->removeUnused(table);
-    }
-
-    void removeUnreachable() override {
-        m_body->removeUnreachable();
-    };
-
-
-    void print() override
+    void removeUnused(std::unordered_map<std::string, int>& table) override
     {
-        cout << "Routine declaration, name: " << m_name << " -> " << (return_type.empty() ? "void" : return_type)
-             << '\n';
-        m_body->print();
-        cout << "\n";
-        cout << "End of routine declaration\n";
+        m_body->removeUnused(table);
     }
 
     std::shared_ptr<Body> m_body;
@@ -58,4 +34,4 @@ public:
     std::string return_type;
 };
 
-}  // namespace parsing
+} // namespace parsing

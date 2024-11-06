@@ -4,13 +4,14 @@
 #include <iostream>
 #include <vector>
 
-#include "analyzer/strategies/type-check.hpp"
 #include "analyzer/strategies/remove-unreachable.hpp"
 #include "analyzer/strategies/remove-unused.hpp"
+#include "analyzer/strategies/type-check.hpp"
 
 #include "analyzer/analyzer.hpp"
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
+#include "parser/visitor/print-visitor.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -51,7 +52,7 @@ int main(int argc, char* argv[])
     {
         auto parser = parsing::Parser(tokens);
         auto program_ast = parser.parse();
-        program_ast->print();
+        program_ast->accept(parsing::Printer{});
 
         Analyzer(program_ast)
             .withCheckOf<TypeCheck>()
@@ -59,7 +60,7 @@ int main(int argc, char* argv[])
             .withOptimizationOf<RemoveUnusedDeclarations>();
 
         std::cout << "\n AFTER OPTIMIZATIONS: \n";
-        program_ast->print();
+        program_ast->accept(parsing::Printer{});
     }
     catch (const std::exception& err)
     {

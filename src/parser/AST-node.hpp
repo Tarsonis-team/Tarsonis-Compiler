@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -6,9 +7,12 @@
 #include <vector>
 
 #include "grammar-units.hpp"
+#include "visitor/abstract-visitor.hpp"
 
 namespace parsing
 {
+
+struct IVisitor;
 
 using std::cout;
 class Declaration;
@@ -21,25 +25,31 @@ public:
     {
     }
 
-    ASTNode(ASTNode&& node) = default;
     virtual ~ASTNode() = default;
 
-    virtual void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) {}
-
-    virtual bool isVariableDecl() {
+    virtual bool isVariableDecl()
+    {
         return false;
     }
 
-    virtual void checkReturnCoincides(std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) {}
-
-    virtual void removeUnused(std::unordered_map<std::string, int>& table) {}
-
-    virtual void removeUnreachable() {};
-
-    virtual void print()
+    virtual void accept(IVisitor& visitor)
     {
-        cout << "Some AST-Node, the default print function\n";
-    };
+        visitor.visit(*this);
+    }
+
+    virtual void accept(IVisitor&& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    virtual void checkReturnCoincides(
+        std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table)
+    {
+    }
+
+    virtual void removeUnused(std::unordered_map<std::string, int>& table)
+    {
+    }
 
     virtual GrammarUnit get_grammar() const
     {
@@ -134,19 +144,43 @@ public:
 class Expression : public ASTNode
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     ~Expression() override = default;
 
     explicit Expression() : ASTNode(GrammarUnit::DIVISION)
     {
     }
 
-    virtual std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) = 0;
+    virtual bool isConst() {
+        return false;
+    }
 
+    virtual std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& var_table,
+    std::unordered_map<std::string, std::shared_ptr<Declaration>>& type_table) = 0;
 };
 
 class Statement : public ASTNode
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     ~Statement() override = default;
 
     explicit Statement(GrammarUnit gr) : ASTNode(gr)
@@ -157,51 +191,47 @@ public:
 class Declaration : public ASTNode
 {
 public:
-    ~Declaration() override = default;
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
 
     explicit Declaration(GrammarUnit gr, std::string name) : ASTNode(gr), m_name(std::move(name))
     {
-
     }
 
-    Declaration(Declaration&&) = default;
     std::string m_name;
 };
 
 class Program : public ASTNode
 {
 public:
-    void print() override
+    void accept(IVisitor& visitor) override
     {
-        cout << "Beginning of the Program:\n";
-        for (auto& declaration : m_declarations)
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void checkTypes()
+    {
+    }
+
+    void removeUnused(std::unordered_map<std::string, int>& table) override
+    {
+        for (auto& entity : m_declarations)
         {
-            declaration->print();
-        }
-        cout << "End of the program\n";
-    }
-
-    void checkUndeclared(std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override {
-        for (auto& node : m_declarations) {
-            node->checkUndeclared(table);
-        }
-    }
-
-    void checkTypes() {
-
-    }
-
-    void removeUnused(std::unordered_map<std::string, int>& table) override {
-        for (auto& entity : m_declarations) {
             entity->removeUnused(table);
         }
     }
-
-    void removeUnreachable() override {
-        for (auto& entity : m_declarations) {
-            entity->removeUnreachable();
-        }
-    };
 
     explicit Program() : ASTNode(GrammarUnit::PROGRAM)
     {
@@ -213,22 +243,18 @@ public:
 class Range : public ASTNode
 {
 public:
-    explicit Range() : ASTNode(GrammarUnit::RANGE), m_reverse(false)
+    void accept(IVisitor& visitor) override
     {
+        visitor.visit(*this);
     }
 
-    void print() override
+    void accept(IVisitor&& visitor) override
     {
-        std::cout << "in range";
-        if (m_reverse)
-        {
-            std::cout << " (reverse)";
-        }
-        std::cout << ": ";
+        visitor.visit(*this);
+    }
 
-        m_begin->print();
-        std::cout << " .. ";
-        m_end->print();
+    explicit Range() : ASTNode(GrammarUnit::RANGE), m_reverse(false)
+    {
     }
 
     bool m_reverse;

@@ -5,8 +5,10 @@
 
 struct RemoveUnusedDeclarations
 {
-    explicit RemoveUnusedDeclarations(std::shared_ptr<parsing::Program> program) : m_ast(program) {}
-    
+    explicit RemoveUnusedDeclarations(std::shared_ptr<parsing::Program> program) : m_ast(program)
+    {
+    }
+
     void apply()
     {
         std::unordered_map<std::string, int> table;
