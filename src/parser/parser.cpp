@@ -979,16 +979,17 @@ std::shared_ptr<Type> Parser::parse_type_decl()
     {
         case TOKEN_RECORD:
             return parse_record_decl(name_of_the_type);
-        case TOKEN_ARRAY:
-            return parse_array_type();
+        case TOKEN_ARRAY: {
+            auto array_type = parse_array_type();
+            return std::make_shared<TypeAliasing>(array_type, name_of_the_type);
+        }
         case TOKEN_BOOLEAN:
         case TOKEN_INTEGER:
         case TOKEN_REAL:
         case TOKEN_IDENTIFIER: {
             const auto& value = currentTok().m_value;
             advanceTok();
-
-            return std::make_shared<TypeAliasing>(value, name_of_the_type);
+            return std::make_shared<TypeAliasing>(std::make_shared<PrimitiveType>(value), name_of_the_type);
         }
         default:
             throw std::runtime_error("Specify the type being declared or aliased!");

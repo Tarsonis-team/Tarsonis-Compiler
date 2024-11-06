@@ -62,7 +62,7 @@ void visit(Type& node) override {
 }
 
 void visit(TypeAliasing& node) override {
-    cout << m_nest << "type: " << node.m_from << " as " << node.m_to << '\n';
+    cout << m_nest << "type: " << node.m_from->m_name << " as " << node.m_to << '\n';
 }
 
 void visit(ArrayType& node) override {

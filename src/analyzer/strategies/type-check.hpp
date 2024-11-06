@@ -69,11 +69,14 @@ struct TypeCheck : parsing::IVisitor
 
     void visit(parsing::TypeAliasing& node) override
     {
-        if (!m_type_table.contains(node.m_from))
+        if (!m_type_table.contains(node.m_from->m_name))
         {
-            throw std::runtime_error("unknown type: " + node.m_from);
+            throw std::runtime_error("unknown type: " + node.m_from->m_name);
         }
-        m_type_table.emplace(node.m_to, m_type_table.at(node.m_from));
+        if (node.m_from->m_name == "array") {
+            m_type_table.emplace(node.m_to, node.m_from);
+        }
+        m_type_table.emplace(node.m_to, m_type_table.at(node.m_from->m_name));
     }
 
     void visit(parsing::ArrayType& node) override

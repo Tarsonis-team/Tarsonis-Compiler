@@ -81,7 +81,7 @@ public:
     {
         if (isArray() && other.isArray())
         {
-            return *this == other;
+            return false;
         }
 
         if (isRecord() && other.isRecord())
@@ -244,11 +244,11 @@ public:
         visitor.visit(*this);
     }
 
-    explicit TypeAliasing(std::string from, std::string to) : Type(to), m_from(std::move(from)), m_to(std::move(to))
+    explicit TypeAliasing(std::shared_ptr<Type> from, std::string to) : Type(to), m_from(from), m_to(std::move(to))
     {
     }
 
-    std::string m_from;
+    std::shared_ptr<Type> m_from;
     std::string m_to;
 };
 

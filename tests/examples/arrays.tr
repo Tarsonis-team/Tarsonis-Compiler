@@ -11,17 +11,19 @@ routine two() -> integer is
 
 end
 
-routine main() -> P is
+type arr is array[2] integer;
+
+routine main() -> arr is
     var a: array[2] Point;
     var b: array[2] array[3] P;
 
     b[0][1].x := b[0][0].y;
     b[0][0].x := two() + 2;
     
-    var k: P;
-    k.x := 2;
+    var k: arr;
+    k[2] := b[0][0].x;
 
     var nonc: array[2] boolean;
 
-    return b[0][0]
+    return k
 end
