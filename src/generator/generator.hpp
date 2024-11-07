@@ -1,11 +1,30 @@
 #include "parser/visitor/abstract-visitor.hpp"
 
-namespace generator {
-    struct Generator : parsing::IVisitor {
-        // TODO: map<string, llvm::Type> m_type_table
-        // TODO: map<string, llvm::Value> m_var_table
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Type.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/Value.h>
 
-        // TODO: vector<llvm::Block> m_cfg
+#include <memory>
+#include <unordered_map>
+
+namespace generator {
+    struct Generator : public parsing::IVisitor {
+        llvm::LLVMContext context;
+        std::shared_ptr<llvm::Module> module;
+
+        // Something like Control Flow Graph
+        llvm::IRBuilder<> builder;
+
+        std::unordered_map<std::string, std::shared_ptr<llvm::Type>> m_type_table;
+        std::unordered_map<std::string, std::shared_ptr<llvm::Value>> m_var_table;
+
+        explicit Generator() : module(std::make_unique<llvm::Module>("I_module", context)), builder(context) {}
+
+        llvm::Value generateExpression(parsing::Expression& expression) override;
 
         void visit(parsing::ASTNode& node) override;
         void visit(parsing::Declaration& node) override;

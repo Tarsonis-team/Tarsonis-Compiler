@@ -1,8 +1,45 @@
 #include "generator.hpp"
 
+#include "parser/visitor/abstract-visitor.hpp"
+#include "parser/statement.hpp"
+
 namespace generator {
 
+    llvm::Value generateExpression(parsing::Expression& expression) {
+        // TODO: generate expression code for an expression node
+    }
+
     // TODO: translate AST nodes to LLVM nodes
+
+    void Generator::visit(parsing::If& node) {
+        // Go the parent function (last point) inside CFG
+        std::shared_ptr<llvm::Function> parent_func = builder.GetInsertBlock()->getParent();
+
+        std::shared_ptr<llvm::Value> cond = generateExpression(node.m_condition);
+
+        std::shared_ptr<llvm::BasicBlock> thenBB = llvm::BasicBlock::Create(context, "then", parent_func);
+        std::shared_ptr<llvm::BasicBlock> elseBB = llvm::BasicBlock::Create(context, "else");
+        std::shared_ptr<llvm::BasicBlock> contBB = llvm::BasicBlock::Create(context, "ifcont");
+
+        // Creating IF branch
+        builder.CreateCondBr(cond, thenBB, elseBB);
+
+        // THEN part
+        builder.SetInsertPoint(thenBB);
+        node.m_then->accept(*this);
+        builder.CreateBr(contBB);
+
+        // ELSE part
+        parent_func->getBasicBlockList().push_back(elseBB);
+        builder.SetInsertPoint(elseBB);
+        if (node.m_else) {
+            node.m_else->accept(*this);
+        }
+        builder.CreateBr(contBB);
+
+        parent_func->getBasicBlockList().push_back(contBB);
+        builder.SetInsertPoint(contBB);
+    }
 
     void Generator::visit(parsing::ASTNode& node) {
         // Target llvm:: ...
@@ -81,10 +118,6 @@ namespace generator {
     }
 
     void Generator::visit(parsing::While& node) {
-        // Target llvm:: ...
-    }
-
-    void Generator::visit(parsing::If& node) {
         // Target llvm:: ...
     }
 
