@@ -7,7 +7,6 @@ namespace generator {
 
         // TODO: vector<llvm::Block> m_cfg
 
-
         void visit(parsing::ASTNode& node) override;
         void visit(parsing::Declaration& node) override;
         void visit(parsing::Type& node) override;
