@@ -1,14 +1,17 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
 add_library(
         GENERATOR STATIC
         generator.cpp
 )
 
-set(LLVM_DIR "C:/Program Files/LLVM/lib/cmake/llvm")
-set(CMAKE_PREFIX_PATH "C:/Program Files/LLVM/lib/cmake/llvm" CACHE STRING "LLVM installation path")
+target_include_directories(GENERATOR PRIVATE 
+                        ${CMAKE_CURRENT_SOURCE_DIR} 
+                        ${CMAKE_SOURCE_DIR}/src)
 
 find_package(LLVM REQUIRED CONFIG)
 
-target_include_directories(GENERATOR PRIVATE ${CMAKE_SOURCE_DIR}/src ${LLVM_INCLUDE_DIRS})
-target_link_libraries(GENERATOR LLVM)
+include_directories(${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+
+# llvm_map_components_to_libnames(llvm_libs core irreader)
+target_link_libraries(GENERATOR ${llvm_libs})
+
