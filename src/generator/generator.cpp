@@ -5,21 +5,23 @@
 
 namespace generator {
 
-    llvm::Value generateExpression(parsing::Expression& expression) {
+    llvm::Value* Generator::generateExpression(std::shared_ptr<parsing::Expression> expression) {
         // TODO: generate expression code for an expression node
+
+        return llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 1);
     }
 
     // TODO: translate AST nodes to LLVM nodes
 
     void Generator::visit(parsing::If& node) {
         // Go the parent function (last point) inside CFG
-        std::shared_ptr<llvm::Function> parent_func = builder.GetInsertBlock()->getParent();
+        llvm::Function* parent_func = builder.GetInsertBlock()->getParent();
 
-        std::shared_ptr<llvm::Value> cond = generateExpression(node.m_condition);
+        llvm::Value* cond = generateExpression(node.m_condition);
 
-        std::shared_ptr<llvm::BasicBlock> thenBB = llvm::BasicBlock::Create(context, "then", parent_func);
-        std::shared_ptr<llvm::BasicBlock> elseBB = llvm::BasicBlock::Create(context, "else");
-        std::shared_ptr<llvm::BasicBlock> contBB = llvm::BasicBlock::Create(context, "ifcont");
+        llvm::BasicBlock* thenBB = llvm::BasicBlock::Create(context, "then", parent_func);
+        llvm::BasicBlock* elseBB = llvm::BasicBlock::Create(context, "else");
+        llvm::BasicBlock* contBB = llvm::BasicBlock::Create(context, "ifcont");
 
         // Creating IF branch
         builder.CreateCondBr(cond, thenBB, elseBB);

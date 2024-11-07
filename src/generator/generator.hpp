@@ -19,12 +19,12 @@ namespace generator {
         // Something like Control Flow Graph
         llvm::IRBuilder<> builder;
 
-        std::unordered_map<std::string, std::shared_ptr<llvm::Type>> m_type_table;
-        std::unordered_map<std::string, std::shared_ptr<llvm::Value>> m_var_table;
+        std::unordered_map<std::string, llvm::Type*> m_type_table;
+        std::unordered_map<std::string, llvm::Value*> m_var_table;
 
-        explicit Generator() : module(std::make_unique<llvm::Module>("I_module", context)), builder(context) {}
+        explicit Generator() : module(std::make_shared<llvm::Module>("I_module", context)), builder(context) {}
 
-        llvm::Value generateExpression(parsing::Expression& expression) override;
+        llvm::Value* generateExpression(std::shared_ptr<parsing::Expression> expression);
 
         void visit(parsing::ASTNode& node) override;
         void visit(parsing::Declaration& node) override;
