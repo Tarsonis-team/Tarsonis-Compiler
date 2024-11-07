@@ -1,23 +1,21 @@
 #include "generator.hpp"
+#include "parser/grammar-units.hpp"
 
 #include "parser/visitor/abstract-visitor.hpp"
 #include "parser/statement.hpp"
 
 namespace generator {
-
-    llvm::Value* Generator::generateExpression(std::shared_ptr<parsing::Expression> expression) {
-        // TODO: generate expression code for an expression node
-
-        return llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 1);
-    }
-
     // TODO: translate AST nodes to LLVM nodes
 
     void Generator::visit(parsing::If& node) {
+        // Target .createCondBr
+
         // Go the parent function (last point) inside CFG
         llvm::Function* parent_func = builder.GetInsertBlock()->getParent();
 
-        llvm::Value* cond = generateExpression(node.m_condition);
+        node.m_condition->accept(*this);
+        // llvm::Value* cond = node.m_condition->current_expression;
+        llvm::Value* cond = nullptr;
 
         llvm::BasicBlock* thenBB = llvm::BasicBlock::Create(context, "then", parent_func);
         llvm::BasicBlock* elseBB = llvm::BasicBlock::Create(context, "else");
@@ -152,7 +150,9 @@ namespace generator {
     }
 
     void Generator::visit(parsing::Integer& node) {
-        // Target llvm:: ...
+        // Target llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), <<integer>>)
+
+        // node.current_expression = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), node.m_value);
     }
 
     void Generator::visit(parsing::ArrayAccess& node) {

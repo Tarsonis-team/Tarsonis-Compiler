@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+// #include <llvm/IR/Value.h>
 
 #include "grammar-units.hpp"
 #include "visitor/abstract-visitor.hpp"
@@ -166,6 +167,8 @@ public:
 
     virtual std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& var_table,
     std::unordered_map<std::string, std::shared_ptr<Declaration>>& type_table) = 0;
+
+    // llvm::Value* current_expression;
 };
 
 class Statement : public ASTNode

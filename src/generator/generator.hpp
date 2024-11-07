@@ -24,8 +24,6 @@ namespace generator {
 
         explicit Generator() : module(std::make_shared<llvm::Module>("I_module", context)), builder(context) {}
 
-        llvm::Value* generateExpression(std::shared_ptr<parsing::Expression> expression);
-
         void visit(parsing::ASTNode& node) override;
         void visit(parsing::Declaration& node) override;
         void visit(parsing::Type& node) override;
