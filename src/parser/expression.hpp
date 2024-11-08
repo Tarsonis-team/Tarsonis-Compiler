@@ -350,6 +350,16 @@ public:
 class Plus : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Plus() : Math()
     {
         this->m_grammar = GrammarUnit::PLUS;
@@ -364,6 +374,16 @@ public:
 class Minus : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Minus() : Math()
     {
         this->m_grammar = GrammarUnit::MINUS;
@@ -378,6 +398,16 @@ public:
 class Multiplication : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Multiplication() : Math()
     {
         this->m_grammar = GrammarUnit::MULTIPLICATE;
@@ -392,6 +422,16 @@ public:
 class Division : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Division() : Math()
     {
         this->m_grammar = GrammarUnit::DIVISION;
@@ -401,6 +441,16 @@ public:
 class Logic : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Logic() : Math()
     {
     }
@@ -409,6 +459,16 @@ public:
 class And : public Logic
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit And() : Logic()
     {
         this->m_grammar = GrammarUnit::AND;
@@ -423,6 +483,16 @@ public:
 class Or : public Logic
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Or() : Logic()
     {
         this->m_grammar = GrammarUnit::OR;
@@ -437,6 +507,16 @@ public:
 class Xor : public Logic
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Xor() : Logic()
     {
         this->m_grammar = GrammarUnit::XOR;
@@ -451,6 +531,16 @@ public:
 class True : public Boolean
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit True() : Boolean(true)
     {
         this->m_grammar = GrammarUnit::TRUE;
@@ -465,6 +555,16 @@ public:
 class False : public Boolean
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit False() : Boolean(false)
     {
         this->m_grammar = GrammarUnit::FALSE;
@@ -479,6 +579,16 @@ public:
 class Relation : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Relation() : Math()
     {
     }
@@ -487,6 +597,16 @@ public:
 class Mod : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Mod() : Relation()
     {
         this->m_grammar = GrammarUnit::MOD;
@@ -501,6 +621,16 @@ public:
 class Greater : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Greater() : Relation()
     {
         this->m_grammar = GrammarUnit::GREATER;
@@ -515,6 +645,16 @@ public:
 class Less : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Less() : Relation()
     {
         this->m_grammar = GrammarUnit::LESS;
@@ -529,6 +669,16 @@ public:
 class GreaterEqual : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit GreaterEqual() : Relation()
     {
         this->m_grammar = GrammarUnit::GREATER_EQUAL;
@@ -543,6 +693,16 @@ public:
 class LessEqual : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit LessEqual() : Relation()
     {
         this->m_grammar = GrammarUnit::LESS_EQUAL;
@@ -557,6 +717,16 @@ public:
 class Equal : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Equal() : Relation()
     {
         this->m_grammar = GrammarUnit::EQUAL;
@@ -571,6 +741,16 @@ public:
 class NotEqual : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit NotEqual() : Relation()
     {
         this->m_grammar = GrammarUnit::NOT_EQUAL;
