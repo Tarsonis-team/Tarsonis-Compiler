@@ -3,9 +3,15 @@
 #include "parser/visitor/abstract-visitor.hpp"
 #include "parser/statement.hpp"
 #include "parser/grammar-units.hpp"
+#include "llvm/Analysis/StackSafetyAnalysis.h"
+#include <llvm-14/llvm/IR/Function.h>
 
 namespace generator {
-// TODO: translate AST nodes to LLVM nodes
+// TODO(): translate AST nodes to LLVM nodes
+
+llvm::Type* Generator::typenameToType(const std::string& name) {
+    return m_type_table.at(name);
+}
 
 void Generator::gen_expr_fork(parsing::Math& node, llvm::Value*& left, llvm::Value*& right) {
     current_expression = left;
@@ -24,26 +30,32 @@ void Generator::visit(parsing::If& node) {
 
     llvm::BasicBlock* thenBB = llvm::BasicBlock::Create(context, "then", parent_func);
     llvm::BasicBlock* elseBB = llvm::BasicBlock::Create(context, "else");
-    llvm::BasicBlock* contBB = llvm::BasicBlock::Create(context, "ifcont");
+    llvm::BasicBlock* skipBB = llvm::BasicBlock::Create(context, "ifskip");
 
-    // Creating IF branch
-    builder.CreateCondBr(cond, thenBB, elseBB);
+    if (node.m_else) {
+        // if we do have else part - then we create that branching
+        builder.CreateCondBr(cond, thenBB, elseBB);
+    } else {
+        // otherwise we don't. and if condition is false, we skip 
+        // the if statement
+        builder.CreateCondBr(cond, thenBB, skipBB);
+    }
 
-    // THEN part
+    // generating THEN part
     builder.SetInsertPoint(thenBB);
     node.m_then->accept(*this);
-    builder.CreateBr(contBB);
+    builder.CreateBr(skipBB);
 
-    // ELSE part
-    parent_func->getBasicBlockList().push_back(elseBB);
-    builder.SetInsertPoint(elseBB);
     if (node.m_else) {
+        // else is generated only in case it exists
+        parent_func->getBasicBlockList().push_back(elseBB);
+        builder.SetInsertPoint(elseBB);
         node.m_else->accept(*this);
+        builder.CreateBr(skipBB);
     }
-    builder.CreateBr(contBB);
 
-    parent_func->getBasicBlockList().push_back(contBB);
-    builder.SetInsertPoint(contBB);
+    parent_func->getBasicBlockList().push_back(skipBB);
+    builder.SetInsertPoint(skipBB);
 }
 
 void Generator::visit(parsing::ASTNode& node) {
@@ -67,15 +79,15 @@ void Generator::visit(parsing::ArrayType& node) {
 }
 
 void Generator::visit(parsing::Variable& node) {
-    // Target llvm:: ...
+
 }
 
 void Generator::visit(parsing::ArrayVariable& node) {
-    // Target llvm:: ...
+    
 }
 
 void Generator::visit(parsing::PrimitiveVariable& node) {
-    // Target llvm:: ...
+    
 }
 
 void Generator::visit(parsing::Body& node) {
@@ -83,7 +95,49 @@ void Generator::visit(parsing::Body& node) {
 }
 
 void Generator::visit(parsing::Routine& node) {
-    // Target llvm:: ...
+    std::cout << "Parsing Prototype\n";
+
+    // Generate types of arguments
+    std::vector<llvm::Type*> arg_types{};
+    arg_types.reserve(node.m_params.size());
+    for (const auto& param : node.m_params) {
+        arg_types.push_back(typenameToType(param->m_type));
+    }
+
+    // function type generation
+    auto* ft = llvm::FunctionType::get(typenameToType(node.return_type), arg_types, false);
+    current_function = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, node.m_name, module.get());
+
+
+    llvm::BasicBlock *BB = llvm::BasicBlock::Create(TheContext, "entry", last_function);
+    Builder.SetInsertPoint(BB);
+    std::cout << "Basic Block Created\n";
+    // arguments generation
+    unsigned Idx = 0;
+    for (auto &Arg : last_function->args()) {
+        auto var = ((Var *) node.proto->args[Idx++]);
+        std::string name = var->var_decl.first;//((Var *) node.proto->args[Idx])->var_decl.first;
+        llvm::AllocaInst *v = Builder.CreateAlloca(get_type(var->var_decl.second), 0, name);
+        std::cout << "Argument Allocated: " << (int)var->var_decl.second->type <<"\n";
+        Builder.CreateStore(&Arg, v);
+        Arg.setName(name);
+        last_params[name] = v;
+    }
+
+    if (node.body->statements.size() > 0) {
+        std::cout << "Creating function body\n";
+        node.body->accept(*this);
+        std::cout << "Created function body\n";
+        if (last_function->getReturnType() == llvm::Type::getVoidTy(TheContext)) {
+            Builder.CreateRetVoid();
+            return;
+        }
+    } else {
+        std::cout << "Creating Return void\n";
+        Builder.CreateRetVoid();
+    }
+
+    verifyFunction(*last_function);
 }
 
 void Generator::visit(parsing::RoutineCall& node) {
@@ -127,7 +181,7 @@ void Generator::visit(parsing::While& node) {
 }
 
 void Generator::visit(parsing::Assignment& node) {
-    // Target llvm:: ...
+    
 }
 
 void Generator::visit(parsing::Program& node) {
@@ -143,7 +197,7 @@ void Generator::visit(parsing::False& node) {
 }
 
 void Generator::visit(parsing::Math& node) {
-    // TODO: consider real numbers (.CreateFAdd)
+    // TODO(): consider real numbers (.CreateFAdd)
     // llvm::Value* left = nullptr;
     // llvm::Value* rigth = nullptr;
 

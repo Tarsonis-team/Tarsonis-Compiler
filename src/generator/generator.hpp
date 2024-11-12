@@ -14,7 +14,7 @@
 
 namespace generator {
 struct Generator : public parsing::IVisitor {
-    llvm::LLVMContext context;
+    llvm::LLVMContext context{};
     std::shared_ptr<llvm::Module> module;
 
     // Something like Control Flow Graph
@@ -24,9 +24,11 @@ struct Generator : public parsing::IVisitor {
     std::unordered_map<std::string, llvm::Value*> m_var_table;
 
     llvm::Value* current_expression;
+    llvm::Function* current_function;
 
     explicit Generator() : module(std::make_shared<llvm::Module>("I_module", context)), builder(context) {}
 
+    llvm::Type* typenameToType(const std::string& name);
     void gen_expr_fork(parsing::Math& node, llvm::Value*& left, llvm::Value*& right);
 
     void visit(parsing::ASTNode& node) override;
