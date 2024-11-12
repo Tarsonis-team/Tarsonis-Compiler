@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 
+#include "generator/generator.hpp"
+
 #include "analyzer/strategies/remove-unreachable.hpp"
 #include "analyzer/strategies/remove-unused.hpp"
 #include "analyzer/strategies/type-check.hpp"
@@ -62,6 +64,9 @@ int main(int argc, char* argv[])
 
         std::cout << "\n AFTER OPTIMIZATIONS: \n";
         program_ast->accept(parsing::Printer{});
+
+        generator::Generator gen(program_ast);
+        gen.apply();
     }
     catch (const std::exception& err)
     {

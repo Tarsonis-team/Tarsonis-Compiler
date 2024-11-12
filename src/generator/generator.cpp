@@ -21,6 +21,11 @@ void Generator::gen_expr_fork(parsing::Math& node, llvm::Value*& left, llvm::Val
     node.m_right->accept(*this);
 }
 
+void Generator::apply() {
+    m_tree->accept(*this);
+    module->print(llvm::outs(), nullptr);
+}
+
 void Generator::visit(parsing::If& node) {
     // Go the parent function (last point) inside CFG
     llvm::Function* parent_func = builder.GetInsertBlock()->getParent();
@@ -91,7 +96,9 @@ void Generator::visit(parsing::PrimitiveVariable& node) {
 }
 
 void Generator::visit(parsing::Body& node) {
-    // Target llvm:: ...
+    for(const auto& stmt : node.m_items) {
+        stmt->accept(*this);
+    }
 }
 
 void Generator::visit(parsing::Routine& node) {
@@ -108,36 +115,30 @@ void Generator::visit(parsing::Routine& node) {
     auto* ft = llvm::FunctionType::get(typenameToType(node.return_type), arg_types, false);
     current_function = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, node.m_name, module.get());
 
-
-    llvm::BasicBlock *BB = llvm::BasicBlock::Create(TheContext, "entry", last_function);
-    Builder.SetInsertPoint(BB);
+    llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry", current_function);
+    builder.SetInsertPoint(BB);
     std::cout << "Basic Block Created\n";
     // arguments generation
-    unsigned Idx = 0;
-    for (auto &Arg : last_function->args()) {
-        auto var = ((Var *) node.proto->args[Idx++]);
-        std::string name = var->var_decl.first;//((Var *) node.proto->args[Idx])->var_decl.first;
-        llvm::AllocaInst *v = Builder.CreateAlloca(get_type(var->var_decl.second), 0, name);
-        std::cout << "Argument Allocated: " << (int)var->var_decl.second->type <<"\n";
-        Builder.CreateStore(&Arg, v);
-        Arg.setName(name);
-        last_params[name] = v;
+    int arg_idx = 0;
+    for (auto &arg : node.m_params) {
+        llvm::AllocaInst *space = builder.CreateAlloca(typenameToType(arg->m_name), nullptr, arg->m_name);
+        auto *arg_var = current_function->getArg(arg_idx);
+        builder.CreateStore(arg_var, space);
+
+        arg_var->setName(arg->m_name);
+
+        m_var_table[arg->m_name] = arg_var;
     }
 
-    if (node.body->statements.size() > 0) {
-        std::cout << "Creating function body\n";
-        node.body->accept(*this);
-        std::cout << "Created function body\n";
-        if (last_function->getReturnType() == llvm::Type::getVoidTy(TheContext)) {
-            Builder.CreateRetVoid();
-            return;
-        }
-    } else {
-        std::cout << "Creating Return void\n";
-        Builder.CreateRetVoid();
+    std::cout << "Creating function body\n";
+    node.m_body->accept(*this);
+    std::cout << "Created function body\n";
+    if (current_function->getReturnType() == llvm::Type::getVoidTy(context)) {
+        builder.CreateRetVoid();
+        return;
     }
-
-    verifyFunction(*last_function);
+    
+    // verifyFunction(*current_function);
 }
 
 void Generator::visit(parsing::RoutineCall& node) {
@@ -185,7 +186,9 @@ void Generator::visit(parsing::Assignment& node) {
 }
 
 void Generator::visit(parsing::Program& node) {
-    // Target llvm:: ...
+    for (const auto& decl : node.m_declarations) {
+        decl->accept(*this);
+    }
 }
 
 void Generator::visit(parsing::True& node) {

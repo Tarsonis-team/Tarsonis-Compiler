@@ -1,3 +1,5 @@
+#include "parser/AST-node.hpp"
+#include "parser/parser.hpp"
 #include "parser/visitor/abstract-visitor.hpp"
 #include "parser/expression.hpp"
 
@@ -16,6 +18,7 @@ namespace generator {
 struct Generator : public parsing::IVisitor {
     llvm::LLVMContext context{};
     std::shared_ptr<llvm::Module> module;
+    std::shared_ptr<parsing::Program> m_tree;
 
     // Something like Control Flow Graph
     llvm::IRBuilder<> builder;
@@ -26,7 +29,12 @@ struct Generator : public parsing::IVisitor {
     llvm::Value* current_expression;
     llvm::Function* current_function;
 
-    explicit Generator() : module(std::make_shared<llvm::Module>("I_module", context)), builder(context) {}
+    explicit Generator(std::shared_ptr<parsing::Program> program)
+        : m_tree(program),
+        module(std::make_shared<llvm::Module>("I_module", context)),
+        builder(context) {}
+
+    void apply();
 
     llvm::Type* typenameToType(const std::string& name);
     void gen_expr_fork(parsing::Math& node, llvm::Value*& left, llvm::Value*& right);
