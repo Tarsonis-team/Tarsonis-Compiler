@@ -60,8 +60,8 @@ int main(int argc, char* argv[])
         Analyzer(program_ast)
             .withCheckOf<TypeCheck>()
             .withOptimizationOf<RemoveUnreachableCode>()
-            .withOptimizationOf<RemoveUnusedDeclarations>();
-
+            // .withOptimizationOf<RemoveUnusedDeclarations>()
+            ;
         std::cout << "\n AFTER OPTIMIZATIONS: \n";
         program_ast->accept(parsing::Printer{});
 

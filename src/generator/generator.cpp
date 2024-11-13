@@ -89,6 +89,12 @@ void Generator::visit(parsing::ArrayType& node) {
 }
 
 void Generator::visit(parsing::Variable& node) {
+    llvm::AllocaInst *var = builder.CreateAlloca(typenameToType(node.m_type->m_name), nullptr, node.m_name);
+
+    if (node.m_value) {
+        node.m_value->accept(*this);
+        builder.CreateStore(current_expression, var);
+    }
 
 }
 
@@ -97,7 +103,13 @@ void Generator::visit(parsing::ArrayVariable& node) {
 }
 
 void Generator::visit(parsing::PrimitiveVariable& node) {
-    
+    // this is never an array, arrays get dispathed into ArrayVariable visit method
+    llvm::AllocaInst *var = builder.CreateAlloca(typenameToType(node.m_type->m_name), nullptr, node.m_name);
+
+    if (node.m_assigned) {
+        node.m_assigned->accept(*this);
+        builder.CreateStore(current_expression, var);
+    }
 }
 
 void Generator::visit(parsing::Body& node) {
