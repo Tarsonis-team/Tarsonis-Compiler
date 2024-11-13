@@ -35,7 +35,23 @@ struct ArrayAccess;
 struct TypeAliasing;
 struct Variable;
 
-struct IVisitor {
+struct Plus;
+struct Minus;
+struct Multiplication;
+struct Division;
+struct And;
+struct Or;
+struct Xor;
+struct Mod;
+struct Greater;
+struct Less;
+struct GreaterEqual;
+struct LessEqual;
+struct Equal;
+struct NotEqual;
+
+// Damn, need to use templates in accept function in nodes...
+struct ICompleteVisitor {
 
     virtual void visit(ASTNode& node) = 0;
     virtual void visit(Declaration& node) = 0;
@@ -69,6 +85,21 @@ struct IVisitor {
     virtual void visit(ArrayAccess& node) = 0;
     virtual void visit(RecordAccess& node) = 0;
     virtual void visit(TypeAliasing& node) = 0;
+
+    virtual void visit(parsing::Plus& node) = 0;
+    virtual void visit(parsing::Minus& node) = 0;
+    virtual void visit(parsing::Multiplication& node)= 0;
+    virtual void visit(parsing::Division& node) = 0;
+    virtual void visit(parsing::And& node) = 0;
+    virtual void visit(parsing::Or& node) = 0;
+    virtual void visit(parsing::Xor& node) = 0;
+    virtual void visit(parsing::Mod& node) = 0;
+    virtual void visit(parsing::Greater& node) = 0;
+    virtual void visit(parsing::Less& node) = 0;
+    virtual void visit(parsing::GreaterEqual& node) = 0;
+    virtual void visit(parsing::LessEqual& node) = 0;
+    virtual void visit(parsing::Equal& node) = 0;
+    virtual void visit(parsing::NotEqual& node) = 0;
 };
 
 }  // namespace parsing

@@ -34,6 +34,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Integer(int value) : Primary(), m_value(value)
     {
         this->m_grammar = GrammarUnit::INTEGER;
@@ -70,6 +80,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Boolean(bool value) : Primary(), m_value(value)
     {
         this->m_grammar = GrammarUnit::BOOL;
@@ -102,6 +122,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -156,6 +186,16 @@ struct ArrayAccess : public Chained
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     std::shared_ptr<Expression> access;
 
     void check_has_field(
@@ -193,6 +233,16 @@ struct RecordAccess : public Chained
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -258,6 +308,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     bool isConst() override {
         return false;
     }
@@ -314,6 +374,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     bool isConst() override {
         return m_left->isConst() && m_right->isConst();
     }
@@ -360,6 +430,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Plus() : Math()
     {
         this->m_grammar = GrammarUnit::PLUS;
@@ -384,6 +464,16 @@ public:
         visitor.visit(*this);
     }
     
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Minus() : Math()
     {
         this->m_grammar = GrammarUnit::MINUS;
@@ -404,6 +494,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -431,6 +531,16 @@ public:
     {
         visitor.visit(*this);
     }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
     
     explicit Division() : Math()
     {
@@ -451,6 +561,16 @@ public:
         visitor.visit(*this);
     }
     
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Logic() : Math()
     {
     }
@@ -465,6 +585,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -492,6 +622,16 @@ public:
     {
         visitor.visit(*this);
     }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
     
     explicit Or() : Logic()
     {
@@ -513,6 +653,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -540,6 +690,16 @@ public:
     {
         visitor.visit(*this);
     }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
     
     explicit True() : Boolean(true)
     {
@@ -561,6 +721,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -588,6 +758,16 @@ public:
     {
         visitor.visit(*this);
     }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
     
     explicit Relation() : Math()
     {
@@ -603,6 +783,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -630,6 +820,16 @@ public:
     {
         visitor.visit(*this);
     }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
     
     explicit Greater() : Relation()
     {
@@ -651,6 +851,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -678,6 +888,16 @@ public:
     {
         visitor.visit(*this);
     }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
     
     explicit GreaterEqual() : Relation()
     {
@@ -699,6 +919,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -726,6 +956,16 @@ public:
     {
         visitor.visit(*this);
     }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
     
     explicit Equal() : Relation()
     {
@@ -747,6 +987,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }

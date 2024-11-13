@@ -8,6 +8,7 @@
 // #include <llvm/IR/Value.h>
 
 #include "grammar-units.hpp"
+#include "parser/visitor/complete-visitor.hpp"
 #include "visitor/abstract-visitor.hpp"
 
 namespace parsing
@@ -39,6 +40,16 @@ public:
     }
 
     virtual void accept(IVisitor&& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    virtual void accept(ICompleteVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    virtual void accept(ICompleteVisitor&& visitor)
     {
         visitor.visit(*this);
     }
@@ -155,6 +166,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     ~Expression() override = default;
 
     explicit Expression() : ASTNode(GrammarUnit::DIVISION)
@@ -184,6 +205,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     ~Statement() override = default;
 
     explicit Statement(GrammarUnit gr) : ASTNode(gr)
@@ -200,6 +231,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -220,6 +261,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -252,6 +303,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }

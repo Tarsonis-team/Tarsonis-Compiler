@@ -2,7 +2,6 @@
 
 #include "parser/visitor/abstract-visitor.hpp"
 #include "parser/statement.hpp"
-#include "parser/grammar-units.hpp"
 #include "llvm/Analysis/StackSafetyAnalysis.h"
 #include <llvm-14/llvm/IR/Function.h>
 
@@ -95,7 +94,6 @@ void Generator::visit(parsing::Variable& node) {
         node.m_value->accept(*this);
         builder.CreateStore(current_expression, var);
     }
-
 }
 
 void Generator::visit(parsing::ArrayVariable& node) {
@@ -196,9 +194,9 @@ void Generator::visit(parsing::For& node) {
     llvm::Value* stepValue = nullptr;
 
     if (node.m_range->m_reverse) {
-        stepValue = ConstantInt::get(llvm::Type::getInt32Ty(context), -1);
+        stepValue = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), -1);
     } else {
-        stepValue = ConstantInt::get(llvm::Type::getInt32Ty(context), 1);
+        stepValue = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 1);
     }
 
     current_expression = startValue;

@@ -2,6 +2,7 @@
 #include "parser/parser.hpp"
 #include "parser/visitor/abstract-visitor.hpp"
 #include "parser/expression.hpp"
+#include "parser/visitor/complete-visitor.hpp"
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
@@ -15,7 +16,7 @@
 #include <unordered_map>
 
 namespace generator {
-struct Generator : public parsing::IVisitor {
+struct Generator : public parsing::ICompleteVisitor {
     llvm::LLVMContext context{};
     std::shared_ptr<llvm::Module> module;
     std::shared_ptr<parsing::Program> m_tree;
@@ -72,19 +73,19 @@ struct Generator : public parsing::IVisitor {
     void visit(parsing::RecordAccess& node) override;
     void visit(parsing::TypeAliasing& node) override;
 
-    void visit(parsing::Plus& node);
-    void visit(parsing::Minus& node);
-    void visit(parsing::Multiplication& node);
-    void visit(parsing::Division& node);
-    void visit(parsing::And& node);
-    void visit(parsing::Or& node);
-    void visit(parsing::Xor& node);
-    void visit(parsing::Mod& node);
-    void visit(parsing::Greater& node);
-    void visit(parsing::Less& node);
-    void visit(parsing::GreaterEqual& node);
-    void visit(parsing::LessEqual& node);
-    void visit(parsing::Equal& node);
-    void visit(parsing::NotEqual& node);
+    void visit(parsing::Plus& node) override;
+    void visit(parsing::Minus& node) override;
+    void visit(parsing::Multiplication& node) override;
+    void visit(parsing::Division& node) override;
+    void visit(parsing::And& node) override;
+    void visit(parsing::Or& node) override;
+    void visit(parsing::Xor& node) override;
+    void visit(parsing::Mod& node) override;
+    void visit(parsing::Greater& node) override;
+    void visit(parsing::Less& node) override;
+    void visit(parsing::GreaterEqual& node) override;
+    void visit(parsing::LessEqual& node) override;
+    void visit(parsing::Equal& node) override;
+    void visit(parsing::NotEqual& node) override;
 };
 } // namespace generator

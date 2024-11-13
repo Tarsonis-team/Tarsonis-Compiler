@@ -20,6 +20,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Routine(std::string name) : Declaration(GrammarUnit::ROUTINE, std::move(name))
     {
     }

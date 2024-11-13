@@ -22,6 +22,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit ReturnStatement(std::shared_ptr<Expression> expr) : Statement(GrammarUnit::RETURN), m_expr(expr)
     {
     }

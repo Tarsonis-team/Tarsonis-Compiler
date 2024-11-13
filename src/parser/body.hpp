@@ -24,6 +24,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Body() : ASTNode(GrammarUnit::BODY)
     {
     }
