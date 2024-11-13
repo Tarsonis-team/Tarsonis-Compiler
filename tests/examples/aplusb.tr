@@ -1,5 +1,5 @@
 
 routine main() -> integer is
     var a: integer
-    var b: integer is 1 + 2
+    var b: integer is 1 + 20
 end

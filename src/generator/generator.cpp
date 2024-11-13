@@ -15,11 +15,11 @@ llvm::Type* Generator::typenameToType(const std::string& name) {
 void Generator::gen_expr_fork(parsing::Math& node, llvm::Value*& left, llvm::Value*& right) {
     std::cout << "Generating expression for " << node.gr_to_str() << "...\n";
 
-    current_expression = left;
     node.m_left->accept(*this);
+    left = current_expression;
 
-    current_expression = right;
     node.m_right->accept(*this);
+    right = current_expression;
 }
 
 void Generator::apply() {
