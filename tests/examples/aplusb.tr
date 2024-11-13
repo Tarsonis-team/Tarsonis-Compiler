@@ -1,5 +1,6 @@
 
 routine main() -> integer is
-    var a: integer
-    var b: integer is 1 + 20
+    var a: integer is 2 + 1;
+    var d: integer
+    var b: integer is 1 + a + d;
 end

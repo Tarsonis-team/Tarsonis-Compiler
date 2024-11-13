@@ -87,14 +87,7 @@ void Generator::visit(parsing::ArrayType& node) {
     // Target llvm:: ...
 }
 
-void Generator::visit(parsing::Variable& node) {
-    llvm::AllocaInst *var = builder.CreateAlloca(typenameToType(node.m_type->m_name), nullptr, node.m_name);
-
-    if (node.m_value) {
-        node.m_value->accept(*this);
-        builder.CreateStore(current_expression, var);
-    }
-}
+void Generator::visit(parsing::Variable& node) {}
 
 void Generator::visit(parsing::ArrayVariable& node) {
     
@@ -108,6 +101,7 @@ void Generator::visit(parsing::PrimitiveVariable& node) {
         node.m_assigned->accept(*this);
         builder.CreateStore(current_expression, var);
     }
+    m_var_table[node.m_name] = var;
 }
 
 void Generator::visit(parsing::Body& node) {
@@ -134,12 +128,7 @@ void Generator::visit(parsing::Routine& node) {
     int arg_idx = 0;
     for (auto &arg : node.m_params) {
         llvm::AllocaInst *space = builder.CreateAlloca(typenameToType(arg->m_name), nullptr, arg->m_name);
-        auto *arg_var = current_function->getArg(arg_idx);
-        builder.CreateStore(arg_var, space);
-
-        arg_var->setName(arg->m_name);
-
-        m_var_table[arg->m_name] = arg_var;
+        m_var_table[arg->m_name] = space;
     }
 
     node.m_body->accept(*this);
@@ -172,11 +161,20 @@ void Generator::visit(parsing::Expression& node) {
 }
 
 void Generator::visit(parsing::Modifiable& node) {
-    // Target llvm:: ...
+    if (node.m_chain.empty()) {
+        auto *var = m_var_table.at(node.m_head_name);
+        if (auto *allocaInst = llvm::dyn_cast<llvm::AllocaInst>(var)) {
+            llvm::Type *allocatedType = allocaInst->getAllocatedType();
+            current_expression = builder.CreateLoad(allocatedType, var, node.m_head_name);
+            return;
+        } else {
+            llvm::errs() << "Value is not an AllocaInst\n";
+        }
+    }
 }
 
 void Generator::visit(parsing::ReturnStatement& node) {
-    // Target llvm:: ...
+
 }
 
 void Generator::visit(parsing::Range& node) {
@@ -204,7 +202,6 @@ void Generator::visit(parsing::For& node) {
 
     current_expression = endValue;
     node.m_range->m_end->accept(*this);
-
 
     // Creating identifier (var i)
     llvm::AllocaInst* var_alloc = builder.CreateAlloca(startValue->getType(), nullptr, node.m_identifier->m_name);
@@ -266,38 +263,7 @@ void Generator::visit(parsing::False& node) {
     current_expression = llvm::ConstantInt::get(llvm::Type::getInt1Ty(context), 0);
 }
 
-void Generator::visit(parsing::Math& node) {
-    // TODO(): consider real numbers (.CreateFAdd)
-    // llvm::Value* left = nullptr;
-    // llvm::Value* rigth = nullptr;
-
-    // llvm::Value* result = nullptr;
-
-    // current_expression = left;
-    // node.m_left->accept(*this);
-
-    // current_expression = rigth;
-    // node.m_right->accept(*this);
-
-    // if (leftValue->getType()->isIntegerTy() && rightValue->getType()->isIntegerTy()) {
-    //     switch (node.get_grammar()) {
-    //         case GrammarUnit::PLUS:
-    //             result = builder.CreateAdd(left, rigth, "addtmp");
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    // } else if (false) {
-    //     // real
-    // } else if (false) {
-    //     // bool
-    // } else {
-    //     throw std::runtime_error("Both operands of '+' must be of the same type (int or real)");
-    // }
-    
-
-    // current_expression = result;
-}
+void Generator::visit(parsing::Math& node) {}
 
 void Generator::visit(parsing::Real& node) {
     current_expression = llvm::ConstantFP::get(llvm::Type::getDoubleTy(context), node.m_value);

@@ -4,6 +4,7 @@
 #include "parser/expression.hpp"
 #include "parser/visitor/complete-visitor.hpp"
 
+#include <llvm-15/llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
@@ -25,7 +26,8 @@ struct Generator : public parsing::ICompleteVisitor {
     llvm::IRBuilder<> builder;
 
     std::unordered_map<std::string, llvm::Type*> m_type_table;
-    std::unordered_map<std::string, llvm::Value*> m_var_table;
+    // we may consider storing string -> llvm::AllocaInst*
+    std::unordered_map<std::string, llvm::AllocaInst*> m_var_table;
 
     llvm::Value* current_expression;
     llvm::Function* current_function;
