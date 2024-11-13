@@ -22,6 +22,9 @@ void Generator::gen_expr_fork(parsing::Math& node, llvm::Value*& left, llvm::Val
 }
 
 void Generator::apply() {
+    m_type_table.emplace("integer", llvm::Type::getInt32Ty(context));
+    m_type_table.emplace("real", llvm::Type::getFloatTy(context));
+
     m_tree->accept(*this);
     module->print(llvm::outs(), nullptr);
 }
@@ -102,8 +105,6 @@ void Generator::visit(parsing::Body& node) {
 }
 
 void Generator::visit(parsing::Routine& node) {
-    std::cout << "Parsing Prototype\n";
-
     // Generate types of arguments
     std::vector<llvm::Type*> arg_types{};
     arg_types.reserve(node.m_params.size());
@@ -117,7 +118,6 @@ void Generator::visit(parsing::Routine& node) {
 
     llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry", current_function);
     builder.SetInsertPoint(BB);
-    std::cout << "Basic Block Created\n";
     // arguments generation
     int arg_idx = 0;
     for (auto &arg : node.m_params) {
@@ -130,9 +130,7 @@ void Generator::visit(parsing::Routine& node) {
         m_var_table[arg->m_name] = arg_var;
     }
 
-    std::cout << "Creating function body\n";
     node.m_body->accept(*this);
-    std::cout << "Created function body\n";
     if (current_function->getReturnType() == llvm::Type::getVoidTy(context)) {
         builder.CreateRetVoid();
         return;
