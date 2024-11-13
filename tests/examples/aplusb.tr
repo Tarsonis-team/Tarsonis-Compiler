@@ -1,5 +1,5 @@
 
-routine main() -> integer is
+routine main() is
     var a: integer is 2 + 1;
     var d: integer
     var b: integer is 1 + a + d;

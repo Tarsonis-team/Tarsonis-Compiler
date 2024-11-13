@@ -145,8 +145,9 @@ struct TypeCheck : parsing::IVisitor
         }
 
         m_var_table.insert({ node.m_name, std::make_shared<parsing::Routine>(node) });
-        m_current_return_type = std::dynamic_pointer_cast<parsing::Type>(m_type_table.at(node.return_type));
- 
+        if (!node.return_type.empty()) {
+            m_current_return_type = std::dynamic_pointer_cast<parsing::Type>(m_type_table.at(node.return_type));
+        }
         node.m_body->accept(*this);
 
         for (auto& param : node.m_params)

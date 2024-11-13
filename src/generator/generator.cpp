@@ -9,6 +9,9 @@ namespace generator {
 // TODO(): translate AST nodes to LLVM nodes
 
 llvm::Type* Generator::typenameToType(const std::string& name) {
+    if (name.empty()) {
+        return llvm::Type::getVoidTy(context);;
+    }
     return m_type_table.at(name);
 }
 
@@ -132,7 +135,8 @@ void Generator::visit(parsing::Routine& node) {
     }
 
     node.m_body->accept(*this);
-    if (current_function->getReturnType() == llvm::Type::getVoidTy(context)) {
+    if (node.return_type.empty()) {
+        std::cout << "RETURN VOID\n";
         builder.CreateRetVoid();
         return;
     }
