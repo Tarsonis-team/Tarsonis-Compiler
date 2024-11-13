@@ -14,6 +14,8 @@ llvm::Type* Generator::typenameToType(const std::string& name) {
 }
 
 void Generator::gen_expr_fork(parsing::Math& node, llvm::Value*& left, llvm::Value*& right) {
+    std::cout << "Generating expression for " << node.gr_to_str() << "...\n";
+
     current_expression = left;
     node.m_left->accept(*this);
 
@@ -174,7 +176,64 @@ void Generator::visit(parsing::Range& node) {
 }
 
 void Generator::visit(parsing::For& node) {
-    // Target llvm:: ...
+    std::cout << "\nGenerating For-loop statement...\n";
+
+    llvm::Function* parent_function = builder.GetInsertBlock()->getParent();
+
+    // Working with range
+    llvm::Value* startValue = nullptr;
+    llvm::Value* endValue = nullptr;
+    llvm::Value* stepValue = nullptr;
+
+    if (node.m_range->m_reverse) {
+        stepValue = ConstantInt::get(llvm::Type::getInt32Ty(context), -1);
+    } else {
+        stepValue = ConstantInt::get(llvm::Type::getInt32Ty(context), 1);
+    }
+
+    current_expression = startValue;
+    node.m_range->m_begin->accept(*this);
+
+    current_expression = endValue;
+    node.m_range->m_end->accept(*this);
+
+
+    // Creating identifier (var i)
+    llvm::AllocaInst* var_alloc = builder.CreateAlloca(startValue->getType(), nullptr, node.m_identifier->m_name);
+    builder.CreateStore(startValue, var_alloc);
+
+    // Top-level structure
+    llvm::BasicBlock* loopBB = llvm::BasicBlock::Create(context, "loop", parent_function);
+    llvm::BasicBlock* afterBB = llvm::BasicBlock::Create(context, "afterloop", parent_function);
+
+    builder.CreateBr(loopBB);
+
+    // parent_function->getBasicBlockList().push_back(loopBB);
+    builder.SetInsertPoint(loopBB);
+    llvm::Value* for_var = builder.CreateLoad(var_alloc->getAllocatedType(), var_alloc, node.m_identifier->m_name);
+
+    // Condition to break a loop
+    llvm::Value* for_condition = builder.CreateICmpSLT(for_var, endValue, "loopcond");
+    builder.CreateCondBr(for_condition, loopBB, afterBB);
+
+    // Generating body
+    llvm::BasicBlock* loopBodyBB = llvm::BasicBlock::Create(context, "loopbody", parent_function);
+    // parent_function->getBasicBlockList().push_back(loopBodyBB);
+    builder.SetInsertPoint(loopBodyBB);
+    node.m_body->accept(*this);
+
+
+    // i++
+    llvm::Value* upd_value = builder.CreateAdd(for_var, stepValue, "nextvalue");
+    builder.CreateStore(upd_value, var_alloc);
+
+    // This line 'jumps' to the condition of for-loop
+    builder.CreateBr(loopBB);
+
+    // parent_function->getBasicBlockList().push_back(afterBB);
+    builder.SetInsertPoint(afterBB);
+
+    std::cout << "> For-loop statement was generated\n\n";
 }
 
 void Generator::visit(parsing::While& node) {
