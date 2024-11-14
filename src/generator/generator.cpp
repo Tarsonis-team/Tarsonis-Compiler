@@ -18,9 +18,11 @@ llvm::Type* Generator::typenameToType(const std::string& name) {
 void Generator::gen_expr_fork(parsing::Math& node, llvm::Value*& left, llvm::Value*& right) {
     std::cout << "Generating expression for " << node.gr_to_str() << "...\n";
 
+    is_lvalue = false;
     node.m_left->accept(*this);
     left = current_expression;
 
+    is_lvalue = false;
     node.m_right->accept(*this);
     right = current_expression;
 }
@@ -167,13 +169,13 @@ void Generator::visit(parsing::Expression& node) {
 void Generator::visit(parsing::Modifiable& node) {
     if (node.m_chain.empty()) {
         auto *var = m_var_table.at(node.m_head_name);
-        if (auto *allocaInst = llvm::dyn_cast<llvm::AllocaInst>(var)) {
-            llvm::Type *allocatedType = allocaInst->getAllocatedType();
-            current_expression = builder.CreateLoad(allocatedType, var, node.m_head_name);
-            return;
+        llvm::Type *allocatedType = var->getAllocatedType();
+        if (is_lvalue) {
+            current_lvalue = var;
         } else {
-            llvm::errs() << "Value is not an AllocaInst\n";
+            current_expression = builder.CreateLoad(allocatedType, var, node.m_head_name);
         }
+        return;
     }
 }
 
@@ -246,11 +248,36 @@ void Generator::visit(parsing::For& node) {
 }
 
 void Generator::visit(parsing::While& node) {
-    // Target llvm:: ...
+    llvm::Function* parent_func = builder.GetInsertBlock()->getParent();
+
+    node.m_condition->accept(*this);
+    llvm::Value* cond = current_expression;
+
+    llvm::BasicBlock* loopBB = llvm::BasicBlock::Create(context, "loop", parent_func);
+    llvm::BasicBlock* skipBB = llvm::BasicBlock::Create(context, "loopskip");
+
+    builder.CreateCondBr(cond, loopBB, skipBB);
+
+    // generating body
+    builder.SetInsertPoint(loopBB);
+    node.m_body->accept(*this);
+    builder.CreateCondBr(cond, loopBB, skipBB);
+
+    parent_func->getBasicBlockList().push_back(skipBB);
+    builder.SetInsertPoint(skipBB);
 }
 
 void Generator::visit(parsing::Assignment& node) {
-    
+    // after this is called current_expression contains
+    // the value to be assigned
+    node.m_expression->accept(*this);
+
+    // and this thing sets out current_lvalue thing
+    // so now we have an address to store or value to
+    is_lvalue = true;
+    node.m_modifiable->accept(*this);
+
+    builder.CreateStore(current_expression, current_lvalue);
 }
 
 void Generator::visit(parsing::Program& node) {

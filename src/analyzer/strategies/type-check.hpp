@@ -281,6 +281,7 @@ struct TypeCheck : parsing::IVisitor
 
     void visit(parsing::If& node) override
     {
+        node.m_condition->accept(*this);
         node.m_then->accept(*this);
         if (node.m_else.get())
         {

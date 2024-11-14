@@ -1,6 +1,14 @@
 
-routine main() is
+routine main() -> integer is
     var a: integer is 2 + 1;
     var d: integer
-    var b: integer is 1 + a + d;
+
+    d := 1 + a;
+    if d then
+        var c : integer is 5
+    end
+
+    while d loop
+        var k : integer is 10;
+    end
 end
