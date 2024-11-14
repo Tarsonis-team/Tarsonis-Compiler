@@ -136,7 +136,9 @@ struct TypeCheck : parsing::IVisitor
         for (auto& param : node.m_params)
         {
             param->accept(*this);
+            
             m_type_table.emplace(param->m_name, m_type_table.at(param->m_type));
+            m_var_table.emplace(param->m_name, m_type_table.at(param->m_type));
         }
 
         if (!node.return_type.empty() && !m_type_table.contains(node.return_type))

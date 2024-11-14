@@ -5,7 +5,7 @@ end
 
 routine main() is
     var a: integer is 2 + 1;
-    var d: integer is two();
+    var d: integer is two(5);
 
     d := 1 + a;
     if d then
