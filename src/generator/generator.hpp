@@ -28,6 +28,7 @@ struct Generator : public parsing::ICompleteVisitor {
     std::unordered_map<std::string, llvm::Type*> m_type_table;
     // we may consider storing string -> llvm::AllocaInst*
     std::unordered_map<std::string, llvm::AllocaInst*> m_var_table;
+    std::unordered_map<std::string, llvm::Function*> m_routine_table;
 
     llvm::Value* current_expression;
     llvm::Function* current_function;

@@ -2,11 +2,11 @@
 
 #include "parser/visitor/abstract-visitor.hpp"
 #include "parser/statement.hpp"
+#include "parser/return.hpp"
 #include "llvm/Analysis/StackSafetyAnalysis.h"
 #include <llvm-14/llvm/IR/Function.h>
 
 namespace generator {
-// TODO(): translate AST nodes to LLVM nodes
 
 llvm::Type* Generator::typenameToType(const std::string& name) {
     if (name.empty()) {
@@ -72,17 +72,11 @@ void Generator::visit(parsing::If& node) {
     builder.SetInsertPoint(skipBB);
 }
 
-void Generator::visit(parsing::ASTNode& node) {
-    // Target llvm:: ...
-}
+void Generator::visit(parsing::ASTNode& node) {}
 
-void Generator::visit(parsing::Declaration& node) {
-    // Target llvm:: ...
-}
+void Generator::visit(parsing::Declaration& node) {}
 
-void Generator::visit(parsing::Type& node) {
-    // Target llvm:: ...
-}
+void Generator::visit(parsing::Type& node) {}
 
 void Generator::visit(parsing::RecordType& node) {
     // Target llvm:: ...
@@ -127,13 +121,18 @@ void Generator::visit(parsing::Routine& node) {
     auto* ft = llvm::FunctionType::get(typenameToType(node.return_type), arg_types, false);
     current_function = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, node.m_name, module.get());
 
+    m_routine_table[node.m_name] = current_function;
+
     llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry", current_function);
     builder.SetInsertPoint(BB);
     // arguments generation
     int arg_idx = 0;
     for (auto &arg : node.m_params) {
-        llvm::AllocaInst *space = builder.CreateAlloca(typenameToType(arg->m_name), nullptr, arg->m_name);
-        m_var_table[arg->m_name] = space;
+        // llvm::AllocaInst *space = builder.CreateAlloca(typenameToType(arg->m_name), nullptr, arg->m_name);
+        // m_var_table[arg->m_name] = space;
+        arg->accept(*this);
+
+        
     }
 
     node.m_body->accept(*this);
@@ -142,29 +141,48 @@ void Generator::visit(parsing::Routine& node) {
         builder.CreateRetVoid();
         return;
     }
-    
+
     // verifyFunction(*current_function);
 }
 
 void Generator::visit(parsing::RoutineCall& node) {
-    // Target llvm:: ...
+    std::cout << "Generating routine call...\n";
+
+    if (m_routine_table.count(node.m_routine_name) == 0) {
+        throw std::runtime_error("Routine doesn't exist: " + node.m_routine_name); 
+    }
+    llvm::Function* routine = m_routine_table[node.m_routine_name];
+
+    // checking number of arguments
+    if (routine->arg_size() != node.m_parameters.size()) {
+        throw std::runtime_error("Invalid number of arguments for a routine call: " + node.m_routine_name); 
+    }
+
+    // create a vector of arguments
+    std::vector<llvm::Value*> params;
+    for (auto& par : node.m_parameters) {
+        par->accept(*this);
+        params.push_back(current_expression);
+    }
+
+    current_expression = builder.CreateCall(routine, params, "call_" + node.m_routine_name);
 }
 
 void Generator::visit(parsing::RoutineCallResult& node) {
-    // Target llvm:: ...
+    node.m_routine_call->accept(*this);
 }
 
 void Generator::visit(parsing::RoutineParameter& node) {
-    // Target llvm:: ...
+    llvm::AllocaInst *space = builder.CreateAlloca(typenameToType(node.m_type), nullptr, node.m_name);
+    m_var_table[node.m_name] = space;
+
+    // not sure about first param
+    // builder.CreateStore(nullptr, space);
 }
 
-void Generator::visit(parsing::Statement& node) {
-    // Target llvm:: ...
-}
+void Generator::visit(parsing::Statement& node) {}
 
-void Generator::visit(parsing::Expression& node) {
-    // Target llvm::Value*
-}
+void Generator::visit(parsing::Expression& node) {}
 
 void Generator::visit(parsing::Modifiable& node) {
     if (node.m_chain.empty()) {
@@ -180,12 +198,15 @@ void Generator::visit(parsing::Modifiable& node) {
 }
 
 void Generator::visit(parsing::ReturnStatement& node) {
+    std::cout << "Generating return statement...\n";
 
+    node.m_expr->accept(*this);
+    llvm::Value* ret_res = current_expression;
+
+    builder.CreateRet(ret_res);
 }
 
-void Generator::visit(parsing::Range& node) {
-    // Target llvm:: ...
-}
+void Generator::visit(parsing::Range& node) {}
 
 void Generator::visit(parsing::For& node) {
     std::cout << "\nGenerating For-loop statement...\n";

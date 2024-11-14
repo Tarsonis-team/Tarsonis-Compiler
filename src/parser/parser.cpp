@@ -801,9 +801,9 @@ std::shared_ptr<Variable> Parser::parse_variable_decl()
             if (currentTok().m_id == TOKEN_IS)
             {
                 advanceTok();
-                return make_shared<PrimitiveVariable>(var_name, type, parse_expression());
+                return std::make_shared<PrimitiveVariable>(var_name, type, parse_expression());
             }
-            return make_shared<PrimitiveVariable>(var_name, type);
+            return std::make_shared<PrimitiveVariable>(var_name, type);
         case TOKEN_ARRAY:
             return std::make_shared<ArrayVariable>(var_name, parse_array_type());
         default:

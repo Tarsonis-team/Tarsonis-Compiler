@@ -32,6 +32,7 @@ public:
 
     explicit Routine(std::string name) : Declaration(GrammarUnit::ROUTINE, std::move(name))
     {
+        return_type = "";
     }
 
     void removeUnused(std::unordered_map<std::string, int>& table) override

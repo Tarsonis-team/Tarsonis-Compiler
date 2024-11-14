@@ -1,7 +1,11 @@
+routine two(integer t) -> integer is
+    return 2 + t;
+end
 
-routine main() -> integer is
+
+routine main() is
     var a: integer is 2 + 1;
-    var d: integer
+    var d: integer is two();
 
     d := 1 + a;
     if d then
