@@ -203,43 +203,39 @@ void Generator::visit(parsing::For& node) {
         stepValue = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 1);
     }
 
-    current_expression = startValue;
     node.m_range->m_begin->accept(*this);
+    startValue = current_expression;
 
-    current_expression = endValue;
     node.m_range->m_end->accept(*this);
+    endValue = current_expression;
 
     // Creating identifier (var i)
-    llvm::AllocaInst* var_alloc = builder.CreateAlloca(startValue->getType(), nullptr, node.m_identifier->m_name);
-    builder.CreateStore(startValue, var_alloc);
+    llvm::AllocaInst* iterator_var = builder.CreateAlloca(startValue->getType(), nullptr, node.m_identifier->m_name);
+    builder.CreateStore(startValue, iterator_var);
 
     // Top-level structure
     llvm::BasicBlock* loopBB = llvm::BasicBlock::Create(context, "loop", parent_function);
     llvm::BasicBlock* afterBB = llvm::BasicBlock::Create(context, "afterloop", parent_function);
 
-    builder.CreateBr(loopBB);
-
     // parent_function->getBasicBlockList().push_back(loopBB);
-    builder.SetInsertPoint(loopBB);
-    llvm::Value* for_var = builder.CreateLoad(var_alloc->getAllocatedType(), var_alloc, node.m_identifier->m_name);
+    llvm::Value* for_var = builder.CreateLoad(iterator_var->getAllocatedType(), iterator_var, node.m_identifier->m_name);
 
     // Condition to break a loop
     llvm::Value* for_condition = builder.CreateICmpSLT(for_var, endValue, "loopcond");
     builder.CreateCondBr(for_condition, loopBB, afterBB);
-
-    // Generating body
-    llvm::BasicBlock* loopBodyBB = llvm::BasicBlock::Create(context, "loopbody", parent_function);
-    // parent_function->getBasicBlockList().push_back(loopBodyBB);
-    builder.SetInsertPoint(loopBodyBB);
+    
+    builder.SetInsertPoint(loopBB);
     node.m_body->accept(*this);
-
 
     // i++
     llvm::Value* upd_value = builder.CreateAdd(for_var, stepValue, "nextvalue");
-    builder.CreateStore(upd_value, var_alloc);
+    builder.CreateStore(upd_value, iterator_var);
 
-    // This line 'jumps' to the condition of for-loop
-    builder.CreateBr(loopBB);
+    for_var = builder.CreateLoad(iterator_var->getAllocatedType(), iterator_var, node.m_identifier->m_name);
+
+    // Condition to break a loop
+    for_condition = builder.CreateICmpSLT(for_var, endValue, "loopcond");
+    builder.CreateCondBr(for_condition, loopBB, afterBB);
 
     // parent_function->getBasicBlockList().push_back(afterBB);
     builder.SetInsertPoint(afterBB);
