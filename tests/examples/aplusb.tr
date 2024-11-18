@@ -20,4 +20,5 @@ routine main() is
     end
 
     print(1);
+    print(a);
 end

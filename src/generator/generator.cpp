@@ -340,6 +340,51 @@ void Generator::visit(parsing::TypeAliasing& node) {
 
 void Generator::visit(parsing::StdFunction& node) {
     std::cout << "Parsing std function " << node.m_routine_name << " call...\n";
+
+    if (node.m_routine_name == "print") {
+        // function print
+        llvm::Function* print_function = module->getFunction("printf");
+        
+        if (!print_function || print_function == nullptr) {
+            auto* printfType = llvm::FunctionType::get(
+                llvm::Type::getInt32Ty(context), // returns int
+                llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0), // takes char*
+                true // variadic function
+            );
+            print_function = llvm::Function::Create(printfType, llvm::Function::ExternalLinkage, "printf", module.get());
+        }
+
+        llvm::Value* print_value = nullptr;
+        llvm::Type* print_type = nullptr;
+
+        if (node.m_parameters.size() != 1) {
+            throw std::runtime_error("Invalid number of parameters for print function call: " + node.m_parameters.size());
+        }
+
+        node.m_parameters[0]->accept(*this);
+        print_value = current_expression;
+        print_type = print_value->getType();
+
+        llvm::Value* print_format;
+        if (print_type->isIntegerTy()) {
+            // int
+            print_format = builder.CreateGlobalStringPtr("%d\n");
+        } else if (print_type->isFloatTy() || print_type->isDoubleTy()) {
+            // real
+            print_format = builder.CreateGlobalStringPtr("%f\n");
+        } else if (print_type->isIntegerTy(1)) {
+            // bool
+            print_format = builder.CreateGlobalStringPtr("%s\n");
+            print_value = builder.CreateSelect(print_value, builder.CreateGlobalStringPtr("true"), builder.CreateGlobalStringPtr("false"));
+        } else {
+            // unrecognised => throw an error?
+            print_format = builder.CreateGlobalStringPtr("%s\n");
+        }
+
+        builder.CreateCall(print_function, {print_format, print_value});
+    } else {
+        throw std::runtime_error("std function has no implementation: " + node.m_routine_name);
+    }
 }
 
 ////////////////
