@@ -20,6 +20,10 @@ struct TypeCheck : parsing::IVisitor
     {
     }
 
+    bool is_standart_function(std::string& name) {
+        return name == "print";
+    }
+
     std::vector<std::string> checkErrors()
     {
         // what this table is supposed to hold?
@@ -160,7 +164,7 @@ struct TypeCheck : parsing::IVisitor
 
     void visit(parsing::RoutineCall& node) override
     {
-        if (!m_var_table.contains(node.m_routine_name))
+        if (!m_var_table.contains(node.m_routine_name) && !is_standart_function(node.m_routine_name))
         {
             throw std::runtime_error("undeclared function is called: " + node.m_routine_name);
         }

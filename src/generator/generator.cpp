@@ -3,6 +3,7 @@
 #include "parser/visitor/abstract-visitor.hpp"
 #include "parser/statement.hpp"
 #include "parser/return.hpp"
+#include "parser/print.hpp"
 #include "llvm/Analysis/StackSafetyAnalysis.h"
 #include <llvm-14/llvm/IR/Function.h>
 
@@ -335,6 +336,10 @@ void Generator::visit(parsing::RecordAccess& node) {
 
 void Generator::visit(parsing::TypeAliasing& node) {
     // Target llvm:: ...
+}
+
+void Generator::visit(parsing::Print& node) {
+    std::cout << "Parsing 'print' function call...\n";
 }
 
 ////////////////

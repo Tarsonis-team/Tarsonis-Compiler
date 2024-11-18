@@ -5,6 +5,7 @@
 #include "lexer/token.hpp"
 #include "return.hpp"
 #include "statement.hpp"
+#include "print.hpp"
 #include <algorithm>
 #include <array>
 #include <memory>
@@ -604,6 +605,30 @@ std::shared_ptr<RoutineCall> Parser::parse_routine_call()
     {
         throw std::runtime_error("no routine identifier");
     }
+
+    // calling 'print' function
+    if (currentTok().m_value == "print") {
+        std::shared_ptr<Print> call_print = std::make_shared<Print>();
+
+        advanceTok();
+
+        if (currentTok().m_id != TOKEN_LPAREN)
+        {
+            throw std::runtime_error("expected '(' after the 'print' word");
+        }
+        advanceTok();
+
+        call_print->m_parameters.push_back(parse_expression());
+
+        if (currentTok().m_id != TOKEN_RPAREN) {
+            throw std::runtime_error("'print' function can accept only one parameter");
+        }
+
+        advanceTok();
+
+        return call_print;
+    }
+
     std::shared_ptr<RoutineCall> call = std::make_shared<RoutineCall>(currentTok().m_value);
     advanceTok();
 

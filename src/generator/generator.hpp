@@ -92,5 +92,7 @@ struct Generator : public parsing::ICompleteVisitor {
     void visit(parsing::LessEqual& node) override;
     void visit(parsing::Equal& node) override;
     void visit(parsing::NotEqual& node) override;
+
+    void visit(parsing::Print& node) override;
 };
 } // namespace generator

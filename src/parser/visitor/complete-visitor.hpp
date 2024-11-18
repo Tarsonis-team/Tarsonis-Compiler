@@ -50,6 +50,8 @@ struct LessEqual;
 struct Equal;
 struct NotEqual;
 
+struct Print;
+
 // Damn, need to use templates in accept function in nodes...
 struct ICompleteVisitor {
 
@@ -100,6 +102,8 @@ struct ICompleteVisitor {
     virtual void visit(parsing::LessEqual& node) = 0;
     virtual void visit(parsing::Equal& node) = 0;
     virtual void visit(parsing::NotEqual& node) = 0;
+
+    virtual void visit(parsing::Print& node) = 0;
 };
 
 }  // namespace parsing
