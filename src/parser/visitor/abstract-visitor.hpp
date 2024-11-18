@@ -35,6 +35,8 @@ struct ArrayAccess;
 struct TypeAliasing;
 struct Variable;
 
+struct StdFunction;
+
 struct IVisitor {
 
     virtual void visit(ASTNode& node) = 0;
@@ -69,6 +71,8 @@ struct IVisitor {
     virtual void visit(ArrayAccess& node) = 0;
     virtual void visit(RecordAccess& node) = 0;
     virtual void visit(TypeAliasing& node) = 0;
+
+    virtual void visit(parsing::StdFunction& node) = 0;
 };
 
 }  // namespace parsing

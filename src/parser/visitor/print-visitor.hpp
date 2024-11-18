@@ -9,6 +9,7 @@
 #include "parser/return.hpp"
 #include "parser/body.hpp"
 #include "parser/routine.hpp"
+#include "parser/std-function.hpp"
 
 namespace parsing {
 
@@ -260,6 +261,17 @@ void visit(RecordType& node) override {
         field->accept(*this);
     }
     cout << "} \n";
+}
+
+void visit(StdFunction& node) override {
+    cout << m_nest << "std::" << node.m_routine_name << " ( ";
+
+    for (auto& par : node.m_parameters)
+    {
+        par->accept(*this);
+        cout << ", ";
+    }
+    cout << ") \n";
 }
 
     nest m_nest;

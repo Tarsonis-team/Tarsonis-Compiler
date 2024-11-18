@@ -3,7 +3,7 @@
 #include "parser/visitor/abstract-visitor.hpp"
 #include "parser/statement.hpp"
 #include "parser/return.hpp"
-#include "parser/print.hpp"
+#include "parser/std-function.hpp"
 #include "llvm/Analysis/StackSafetyAnalysis.h"
 #include <llvm-14/llvm/IR/Function.h>
 
@@ -338,8 +338,8 @@ void Generator::visit(parsing::TypeAliasing& node) {
     // Target llvm:: ...
 }
 
-void Generator::visit(parsing::Print& node) {
-    std::cout << "Parsing 'print' function call...\n";
+void Generator::visit(parsing::StdFunction& node) {
+    std::cout << "Parsing std function " << node.m_routine_name << " call...\n";
 }
 
 ////////////////

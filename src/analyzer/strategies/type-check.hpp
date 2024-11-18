@@ -7,6 +7,7 @@
 #include "parser/visitor/abstract-visitor.hpp"
 #include "parser/return.hpp"
 #include "parser/routine.hpp"
+#include "parser/std-function.hpp"
 #include <exception>
 #include <memory>
 #include <stdexcept>
@@ -18,10 +19,6 @@ struct TypeCheck : parsing::IVisitor
 {
     explicit TypeCheck(std::shared_ptr<parsing::Program> program) : m_ast(program)
     {
-    }
-
-    bool is_standart_function(std::string& name) {
-        return name == "print";
     }
 
     std::vector<std::string> checkErrors()
@@ -164,12 +161,21 @@ struct TypeCheck : parsing::IVisitor
 
     void visit(parsing::RoutineCall& node) override
     {
-        if (!m_var_table.contains(node.m_routine_name) && !is_standart_function(node.m_routine_name))
+        if (!m_var_table.contains(node.m_routine_name))
         {
             throw std::runtime_error("undeclared function is called: " + node.m_routine_name);
         }
         for (auto& param : node.m_parameters)
         {
+            param->accept(*this);
+        }
+    }
+
+    void visit(parsing::StdFunction& node) override {
+        if (!parsing::StdFunction::is_std_function(node.m_routine_name)) {
+            throw std::runtime_error("unknown std function is called: " + node.m_routine_name);
+        }
+        for (auto& param : node.m_parameters) {
             param->accept(*this);
         }
     }

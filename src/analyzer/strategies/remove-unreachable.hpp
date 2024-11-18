@@ -7,6 +7,8 @@
 #include "parser/return.hpp"
 #include "parser/routine.hpp"
 #include "parser/statement.hpp"
+#include "parser/std-function.hpp"
+
 #include "parser/visitor/abstract-visitor.hpp"
 #include <memory>
 
@@ -80,6 +82,10 @@ struct RemoveUnreachableCode : public parsing::IVisitor
     }
 
     void visit(parsing::RoutineCall& node) override
+    {
+    }
+
+    void visit(parsing::StdFunction& node) override 
     {
     }
 
