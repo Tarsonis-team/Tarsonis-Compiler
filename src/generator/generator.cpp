@@ -146,7 +146,7 @@ void Generator::visit(parsing::ArrayVariable& node) {
     node.m_type->accept(*this);
 
     auto *element_type = typenameToType(node.m_type->m_type->m_name);
-    auto *array_type = m_type_table[get_array_typename(node.m_type->m_type->m_name)];
+    auto *array_type = m_type_table[get_array_typename(node.m_type->m_type->m_name, node.m_type->m_generated_size)];
 
     llvm::AllocaInst* arr_var = builder.CreateAlloca(array_type, nullptr, node.m_name);
     m_var_table[node.m_name] = arr_var;
@@ -410,13 +410,15 @@ void Generator::visit(parsing::ArrayAccess& node) {
     node.access->accept(*this);
     llvm::Value* index = current_expression;
 
+    std::cout << "array type:";
+    outer->getType()->print(llvm::errs());
+    std::cout << "\n";
+
     if (!outer->getType()->isPointerTy()) {
         throw std::runtime_error("Outer must be a pointer to the array!");
     }
 
-    // std::cout << "array type:";
-    // current_array_type->print(llvm::errs());
-    // std::cout << "\n";
+
 
     llvm::Value* element = builder.CreateGEP(
         current_array_type,

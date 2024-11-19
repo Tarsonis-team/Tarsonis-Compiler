@@ -4,6 +4,7 @@
 #include "declaration.hpp"
 #include "grammar-units.hpp"
 
+#include <exception>
 #include <memory>
 #include <stdexcept>
 
@@ -200,11 +201,14 @@ struct ArrayAccess : public Chained
 
     void check_has_field(
         std::shared_ptr<Declaration>& current_type,
-        std::unordered_map<std::string, std::shared_ptr<Declaration>>&) override
+        std::unordered_map<std::string, std::shared_ptr<Declaration>>& types) override
     {
         // skip, it is just an array access, the array
         // identifier was before.
         // But we need to check that this is really an array...
+        if (current_type->m_name != "array") {
+            current_type = types.at(current_type->m_name);
+        }
         try
         {
             ArrayType& array = dynamic_cast<ArrayType&>(*current_type);
@@ -218,10 +222,18 @@ struct ArrayAccess : public Chained
     }
 
     std::shared_ptr<Type>
-    deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>&) override
+    deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>&types) override
     {
-        ArrayType& array = dynamic_cast<ArrayType&>(*cur_type);
-        return array.m_type;
+        if (cur_type->m_name != "array") {
+            cur_type = std::dynamic_pointer_cast<Type>(types.at(cur_type->m_name));
+        }
+        try {
+            ArrayType& array = dynamic_cast<ArrayType&>(*cur_type);
+            return array.m_type;
+        } catch (const std::exception& err) {
+            std::cout << "failed type deduction: " << cur_type->m_name << err.what();
+            throw ;
+        }
     }
 };
 
