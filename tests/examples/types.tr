@@ -6,3 +6,12 @@ end
 
 type socketFD is integer;
 type AK_74 is Weapon;
+
+routine main() is
+    var ak_74: AK_74;
+    var socket: socketFD;
+
+    socket := 8;
+
+    print(socket)
+end

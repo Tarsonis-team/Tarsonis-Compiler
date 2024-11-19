@@ -1,11 +1,9 @@
-
 routine two(integer a) -> integer is
-    return two(1);
+    return 2 + a;
 end
 
 routine main() is
     var c: integer is two(1);
-    two(1);
-    two(3, 4);
+    print(c);
 end
 

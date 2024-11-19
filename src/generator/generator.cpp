@@ -43,6 +43,19 @@ void Generator::apply() {
     std::cout << "\n";
 
     module->print(llvm::outs(), nullptr);
+
+    std::error_code EC;
+    llvm::raw_fd_ostream fileStream("output.ll", EC);
+
+    if (EC) {
+        llvm::errs() << "Error opening file: " << EC.message() << "\n";
+        return;
+    }
+
+    module->print(fileStream, nullptr);
+    fileStream.close();
+
+    llvm::outs() << "LLVM IR written to output.ll\n";
 }
 
 void Generator::visit(parsing::If& node) {
@@ -324,6 +337,7 @@ void Generator::visit(parsing::For& node) {
     // Creating identifier (var i)
     llvm::AllocaInst* iterator_var = builder.CreateAlloca(startValue->getType(), nullptr, node.m_identifier->m_name);
     builder.CreateStore(startValue, iterator_var);
+    m_var_table[node.m_identifier->m_name] = iterator_var;
 
     // Top-level structure
     llvm::BasicBlock* loopBB = llvm::BasicBlock::Create(context, "loop", parent_function);
@@ -431,8 +445,6 @@ void Generator::visit(parsing::ArrayAccess& node) {
     if (!outer->getType()->isPointerTy()) {
         throw std::runtime_error("Outer must be a pointer to the array!");
     }
-
-
 
     llvm::Value* element = builder.CreateGEP(
         current_array_type,

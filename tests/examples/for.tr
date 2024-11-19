@@ -1,14 +1,7 @@
-routine main(integer n) is
-    var result : integer is 0
+routine main() is
+    var result : integer is 0;
 
-    for i in 1 .. n + 1 loop
-        result := result
-        result := i - 1;
+    for i in 1 .. 10 loop
+        print(i);
     end
-
-    for i in reverse n .. 1 loop
-        result := result
-    end
-
-    return result
 end

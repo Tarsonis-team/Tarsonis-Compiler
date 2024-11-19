@@ -15,7 +15,7 @@ routine main() is
     var d: integer is two(5);
 
     some_arr := arr[1];
-    d := 1 + some_arr[a] + arr[0][0];
+    d := 1 + some_arr[a];
     if d then
         var c : integer is 5
     end
