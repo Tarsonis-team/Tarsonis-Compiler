@@ -1,15 +1,18 @@
+type SomeArr is array[5] integer;
+
 routine two(integer t) -> integer is
     return 2 + t;
 end
 
 
 routine main() is
+    var some_arr: SomeArr;
     var arr: array[2] integer;
 
     var a: integer is 2 + 1;
     var d: integer is two(5);
 
-    d := 1 + a;
+    d := a + arr[1];
     if d then
         var c : integer is 5
     end

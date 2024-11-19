@@ -243,7 +243,20 @@ void Generator::visit(parsing::Modifiable& node) {
         return;
     }
 
-    // TODO: arrays and records
+    auto var = m_var_table.at(node.m_head_name);
+    auto head_type = var->getAllocatedType();
+
+    // ??? 
+    // current_expression = builder.CreateLoad(head_type, var, node.m_head_name);
+
+    current_expression = var;
+    current_array_type = head_type;
+
+    for (auto& item : node.m_chain) {
+        item->accept(*this);
+    }
+
+    current_expression = builder.CreateLoad(current_array_type->getArrayElementType(), current_expression, "accessed_value");
 }
 
 void Generator::visit(parsing::ReturnStatement& node) {
@@ -375,7 +388,26 @@ void Generator::visit(parsing::Integer& node) {
 }
 
 void Generator::visit(parsing::ArrayAccess& node) {
-    // Target llvm:: ...
+    std::cout << "Accessing an array...\n";
+
+    llvm::Value* outer = current_expression;
+
+    node.access->accept(*this);
+    llvm::Value* index = current_expression;
+
+    if (!outer->getType()->isPointerTy()) {
+        std::cerr << "Outer must be a pointer to the array!\n";
+        return;
+    }
+
+    llvm::Value* element = builder.CreateGEP(
+        current_array_type,
+        outer,
+        {llvm::ConstantInt::get(context, llvm::APInt(32, 0)), index},
+        "arr_index"
+    );
+
+    current_expression = element;
 }
 
 void Generator::visit(parsing::RecordAccess& node) {
@@ -383,7 +415,19 @@ void Generator::visit(parsing::RecordAccess& node) {
 }
 
 void Generator::visit(parsing::TypeAliasing& node) {
-    // Target llvm:: ...
+    auto default_type = node.m_from;
+    llvm::Type* real_type = nullptr;
+
+    if (auto arr_type = std::dynamic_pointer_cast<parsing::ArrayType>(default_type)) {
+        node.m_from->accept(*this);
+        real_type = typenameToType(get_array_typename(arr_type->m_type->m_name));
+    } else if (auto record_type = std::dynamic_pointer_cast<parsing::RecordType>(default_type)) {
+        // TODO: record
+    } else {
+        real_type = typenameToType(node.m_name);
+    }
+
+    m_type_table.emplace(node.m_to, real_type);
 }
 
 void Generator::visit(parsing::StdFunction& node) {
@@ -448,6 +492,11 @@ void Generator::visit(parsing::Plus& node) {
     } else if (left->getType()->isDoubleTy() && right->getType()->isDoubleTy()) {
         current_expression = builder.CreateFAdd(left, right, "faddtmp");
     } else {
+        
+        std::cout << "Right type: ";
+        right->getType()->print(llvm::errs());
+        std::cout << "\n";
+
         throw std::runtime_error("Invalid types for '+' operator. Both operands must be integer or real.");
     }
 }

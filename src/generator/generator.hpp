@@ -33,6 +33,8 @@ struct Generator : public parsing::ICompleteVisitor {
     llvm::Value* current_expression;
     llvm::Function* current_function;
     llvm::AllocaInst* current_lvalue;
+    llvm::Type* current_array_type;
+
     bool is_lvalue = false;
 
     explicit Generator(std::shared_ptr<parsing::Program> program)
