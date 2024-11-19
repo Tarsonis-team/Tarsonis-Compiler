@@ -254,9 +254,13 @@ void Generator::visit(parsing::Modifiable& node) {
 
     for (auto& item : node.m_chain) {
         item->accept(*this);
-    }
 
-    current_expression = builder.CreateLoad(current_array_type->getArrayElementType(), current_expression, "accessed_value");
+        current_expression = builder.CreateLoad(current_array_type->getArrayElementType(), current_expression, "accessed_value");
+
+        if (llvm::ArrayType::classof(current_expression->getType())) {
+            current_array_type = current_expression->getType();
+        }
+    }
 }
 
 void Generator::visit(parsing::ReturnStatement& node) {
@@ -396,9 +400,12 @@ void Generator::visit(parsing::ArrayAccess& node) {
     llvm::Value* index = current_expression;
 
     if (!outer->getType()->isPointerTy()) {
-        std::cerr << "Outer must be a pointer to the array!\n";
-        return;
+        throw std::runtime_error("Outer must be a pointer to the array!");
     }
+
+    // std::cout << "array type:";
+    // current_array_type->print(llvm::errs());
+    // std::cout << "\n";
 
     llvm::Value* element = builder.CreateGEP(
         current_array_type,
@@ -493,9 +500,9 @@ void Generator::visit(parsing::Plus& node) {
         current_expression = builder.CreateFAdd(left, right, "faddtmp");
     } else {
         
-        std::cout << "Right type: ";
-        right->getType()->print(llvm::errs());
-        std::cout << "\n";
+        // std::cout << "Right-part type: ";
+        // right->getType()->print(llvm::errs());
+        // std::cout << "\n";
 
         throw std::runtime_error("Invalid types for '+' operator. Both operands must be integer or real.");
     }

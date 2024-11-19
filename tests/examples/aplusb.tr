@@ -7,12 +7,13 @@ end
 
 routine main() is
     var some_arr: SomeArr;
-    var arr: array[2] integer;
+    var arr: array[2] SomeArr;
 
     var a: integer is 2 + 1;
     var d: integer is two(5);
 
-    d := a + arr[1];
+    some_arr := arr[1];
+    d := 1 + some_arr[0];
     if d then
         var c : integer is 5
     end
