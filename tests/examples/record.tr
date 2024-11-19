@@ -10,11 +10,6 @@ end
 
 type aes is Line;
 
-routine new_line(Point p1, Point p2) -> Line is
-    var pf: aes
-    
-    
-    pf._begin := 1
-    pf._end := p2
-    pf := 1;
+routine main() is
+
 end

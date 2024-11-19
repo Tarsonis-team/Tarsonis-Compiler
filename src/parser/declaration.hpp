@@ -269,6 +269,7 @@ public:
 
     std::shared_ptr<Type> m_type;
     std::shared_ptr<Expression> m_size;
+    int m_generated_size;
 
     bool isArray() override
     {

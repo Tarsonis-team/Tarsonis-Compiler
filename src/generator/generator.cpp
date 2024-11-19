@@ -7,6 +7,8 @@
 #include "llvm/Analysis/StackSafetyAnalysis.h"
 #include <llvm-14/llvm/IR/Function.h>
 
+#include <vector>
+
 namespace generator {
 
 llvm::Type* Generator::typenameToType(const std::string& name) {
@@ -16,8 +18,8 @@ llvm::Type* Generator::typenameToType(const std::string& name) {
     return m_type_table.at(name);
 }
 
-std::string get_array_typename(const std::string& inner_type) {
-    return "array_" + inner_type;
+std::string get_array_typename(const std::string& inner_type, int size) {
+    return "array_" + inner_type + "_" + std::to_string(size);
 }
 
 void Generator::gen_expr_fork(parsing::Math& node, llvm::Value*& left, llvm::Value*& right) {
@@ -87,17 +89,24 @@ void Generator::visit(parsing::Declaration& node) {}
 void Generator::visit(parsing::Type& node) {}
 
 void Generator::visit(parsing::RecordType& node) {
-    // Target llvm:: ...
+    std::cout << "Generating a record " << node.m_name << "...\n";
+
+    std::vector<llvm::Type*> struct_fields;
+
+    for (auto& field : node.m_fields) {
+        std::cout << "field: " << field->m_name << "\n";
+        field->accept(*this);
+    }
 }
 
 void Generator::visit(parsing::ArrayType& node) {
     auto inner_type_str = node.m_type->m_name;
 
-    if (m_type_table.contains(get_array_typename(inner_type_str)))
-    {
-        // this type was created before
-        return;
-    }
+    // if (m_type_table.contains(get_array_typename(inner_type_str)))
+    // {
+    //     // this type was created before
+    //     return;
+    // }
 
     std::cout << "Generating array type with inner type: " << inner_type_str << "...\n"; 
 
@@ -124,7 +133,9 @@ void Generator::visit(parsing::ArrayType& node) {
 
     llvm::ArrayType* array_type = llvm::ArrayType::get(inner_type, array_size->getZExtValue());
 
-    m_type_table.emplace(get_array_typename(inner_type_str), array_type);
+    node.m_generated_size = array_size->getZExtValue();
+
+    m_type_table.emplace(get_array_typename(inner_type_str, array_size->getZExtValue()), array_type);
 }
 
 void Generator::visit(parsing::Variable& node) {}
@@ -135,7 +146,7 @@ void Generator::visit(parsing::ArrayVariable& node) {
     node.m_type->accept(*this);
 
     auto element_type = typenameToType(node.m_type->m_type->m_name);
-    auto array_type = m_type_table[get_array_typename(node.m_type->m_type->m_name)];
+    auto array_type = m_type_table[get_array_typename(node.m_type->m_type->m_name, node.m_type->m_generated_size)];
 
     llvm::AllocaInst* arr_var = builder.CreateAlloca(array_type, nullptr, node.m_name);
     m_var_table[node.m_name] = arr_var;
@@ -427,7 +438,7 @@ void Generator::visit(parsing::TypeAliasing& node) {
 
     if (auto arr_type = std::dynamic_pointer_cast<parsing::ArrayType>(default_type)) {
         node.m_from->accept(*this);
-        real_type = typenameToType(get_array_typename(arr_type->m_type->m_name));
+        real_type = typenameToType(get_array_typename(arr_type->m_type->m_name, arr_type->m_generated_size));
     } else if (auto record_type = std::dynamic_pointer_cast<parsing::RecordType>(default_type)) {
         // TODO: record
     } else {

@@ -9,11 +9,13 @@ routine main() is
     var some_arr: SomeArr;
     var arr: array[2] SomeArr;
 
+    var new_arr: array[3] integer;
+
     var a: integer is 2 + 1;
     var d: integer is two(5);
 
     some_arr := arr[1];
-    d := 1 + some_arr[0];
+    d := 1 + some_arr[a] + new_arr[0];
     if d then
         var c : integer is 5
     end
