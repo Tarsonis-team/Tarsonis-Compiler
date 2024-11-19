@@ -305,6 +305,7 @@ struct RecordAccess : public Chained
     }
 
     std::string identifier;
+    std::string m_record_name;
 };
 
 class Modifiable : public Primary

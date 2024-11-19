@@ -15,6 +15,8 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
+#include <string>
 
 namespace generator {
 struct Generator : public parsing::ICompleteVisitor {
@@ -29,11 +31,14 @@ struct Generator : public parsing::ICompleteVisitor {
     // we may consider storing string -> llvm::AllocaInst*
     std::unordered_map<std::string, llvm::AllocaInst*> m_var_table;
     std::unordered_map<std::string, llvm::Function*> m_routine_table;
+    std::unordered_map<std::string, std::vector<std::string>> m_records_table;
+    std::unordered_map<std::string, std::string> m_recordnames_table;
 
     llvm::Value* current_expression;
     llvm::Function* current_function;
     llvm::AllocaInst* current_lvalue;
     llvm::Type* current_array_type;
+    llvm::Type* current_access_type;
 
     bool is_lvalue = false;
 

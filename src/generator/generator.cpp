@@ -92,11 +92,17 @@ void Generator::visit(parsing::RecordType& node) {
     std::cout << "Generating a record " << node.m_name << "...\n";
 
     std::vector<llvm::Type*> struct_fields;
+    std::vector<std::string> field_names;
 
     for (auto& field : node.m_fields) {
-        std::cout << "field: " << field->m_name << "\n";
-        field->accept(*this);
+        auto var_field = std::dynamic_pointer_cast<parsing::Variable>(field);
+        struct_fields.push_back(typenameToType(var_field->m_type->m_name));
+        field_names.push_back(field->m_name);
     }
+
+    llvm::StructType* struct_type = llvm::StructType::create(context, struct_fields, node.m_name);
+    m_type_table[node.m_name] = struct_type;
+    m_records_table[node.m_name] = field_names;
 }
 
 void Generator::visit(parsing::ArrayType& node) {
@@ -161,6 +167,10 @@ void Generator::visit(parsing::PrimitiveVariable& node) {
         builder.CreateStore(current_expression, var);
     }
     m_var_table[node.m_name] = var;
+
+    if (auto rec_type = std::dynamic_pointer_cast<parsing::RecordType>(node.m_type)) {
+        m_recordnames_table[node.m_name] = rec_type->m_name;
+    }
 }
 
 void Generator::visit(parsing::Body& node) {
@@ -264,9 +274,13 @@ void Generator::visit(parsing::Modifiable& node) {
     current_array_type = head_type;
 
     for (auto& item : node.m_chain) {
+        if (auto rec_access = std::dynamic_pointer_cast<parsing::RecordAccess>(item)) {
+            rec_access->m_record_name = node.m_head_name;
+        }
+
         item->accept(*this);
 
-        current_expression = builder.CreateLoad(current_array_type->getArrayElementType(), current_expression, "accessed_value");
+        current_expression = builder.CreateLoad(current_access_type, current_expression, "accessed_value");
 
         if (llvm::ArrayType::classof(current_expression->getType())) {
             current_array_type = current_expression->getType();
@@ -428,23 +442,42 @@ void Generator::visit(parsing::ArrayAccess& node) {
     );
 
     current_expression = element;
+    current_access_type = current_array_type->getArrayElementType();
 }
 
 void Generator::visit(parsing::RecordAccess& node) {
-    // Target llvm:: ...
+    std::cout << "Accessing a record...\n";
+
+    llvm::Value* record = current_expression;
+
+    std::cout << "1: " << node.m_record_name << "\n";
+    std::cout << "2: " << m_recordnames_table.at(node.m_record_name) << "\n";
+
+    int index = 0;
+    for (auto& field_name : m_records_table.at(m_recordnames_table.at(node.m_record_name))) {
+        if (field_name == node.identifier) {
+            break;
+        }
+        index++;
+    }
+
+    llvm::Value* field_ptr = builder.CreateStructGEP(record->getType(), record, index, node.identifier);
+    current_expression = field_ptr;
+
+    llvm::StructType* struct_type = llvm::dyn_cast<llvm::StructType>(record->getType());
+    current_access_type = struct_type->getElementType(index);
 }
 
 void Generator::visit(parsing::TypeAliasing& node) {
     auto default_type = node.m_from;
     llvm::Type* real_type = nullptr;
 
+    node.m_from->accept(*this);
+
     if (auto arr_type = std::dynamic_pointer_cast<parsing::ArrayType>(default_type)) {
-        node.m_from->accept(*this);
         real_type = typenameToType(get_array_typename(arr_type->m_type->m_name, arr_type->m_generated_size));
-    } else if (auto record_type = std::dynamic_pointer_cast<parsing::RecordType>(default_type)) {
-        // TODO: record
     } else {
-        real_type = typenameToType(node.m_name);
+        real_type = typenameToType(default_type->m_name);
     }
 
     m_type_table.emplace(node.m_to, real_type);

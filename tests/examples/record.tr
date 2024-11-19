@@ -11,5 +11,9 @@ end
 type aes is Line;
 
 routine main() is
+    var point: Point;
+    var line: Line;
+    var a: integer;
 
+    a := point.x;
 end
