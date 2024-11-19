@@ -4,6 +4,8 @@ end
 
 
 routine main() is
+    var arr: array[2] integer;
+
     var a: integer is 2 + 1;
     var d: integer is two(5);
 

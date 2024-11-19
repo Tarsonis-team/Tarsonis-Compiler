@@ -16,6 +16,10 @@ llvm::Type* Generator::typenameToType(const std::string& name) {
     return m_type_table.at(name);
 }
 
+std::string get_array_typename(const std::string& inner_type) {
+    return "array_" + inner_type;
+}
+
 void Generator::gen_expr_fork(parsing::Math& node, llvm::Value*& left, llvm::Value*& right) {
     std::cout << "Generating expression for " << node.gr_to_str() << "...\n";
 
@@ -33,6 +37,9 @@ void Generator::apply() {
     m_type_table.emplace("real", llvm::Type::getFloatTy(context));
 
     m_tree->accept(*this);
+
+    std::cout << "\n";
+
     module->print(llvm::outs(), nullptr);
 }
 
@@ -84,13 +91,54 @@ void Generator::visit(parsing::RecordType& node) {
 }
 
 void Generator::visit(parsing::ArrayType& node) {
-    // Target llvm:: ...
+    auto inner_type_str = node.m_type->m_name;
+
+    if (m_type_table.contains(get_array_typename(inner_type_str)))
+    {
+        // this type was created before
+        return;
+    }
+
+    std::cout << "Generating array type with inner type: " << inner_type_str << "...\n"; 
+
+    auto inner_type = typenameToType(inner_type_str);
+    // llvm::Type* ptr = nullptr;
+
+    // if (inner_type->isIntegerTy()) {
+    //     ptr = llvm::Type::getInt32PtrTy(context);
+    // } else if (inner_type->isDoubleTy()) {
+    //     ptr = llvm::Type::getDoublePtrTy(context);
+    // } else if (inner_type->isIntegerTy(1)) {
+    //     // bool
+    //     ptr = llvm::Type::getInt1PtrTy(context);
+    // } else {
+    //     // complex
+    //     ptr = llvm::PointerType::getUnqual(inner_type);
+    // }
+
+    node.m_size->accept(*this);
+    auto array_size = llvm::dyn_cast<llvm::ConstantInt>(current_expression);
+    if (!array_size) {
+        throw std::runtime_error("Array size must be a constant integer for static allocation.");
+    }
+
+    llvm::ArrayType* array_type = llvm::ArrayType::get(inner_type, array_size->getZExtValue());
+
+    m_type_table.emplace(get_array_typename(inner_type_str), array_type);
 }
 
 void Generator::visit(parsing::Variable& node) {}
 
 void Generator::visit(parsing::ArrayVariable& node) {
-    
+    std::cout << "Generating array var...\n"; 
+
+    node.m_type->accept(*this);
+
+    auto element_type = typenameToType(node.m_type->m_type->m_name);
+    auto array_type = m_type_table[get_array_typename(node.m_type->m_type->m_name)];
+
+    llvm::AllocaInst* arr_var = builder.CreateAlloca(array_type, nullptr, node.m_name);
+    m_var_table[node.m_name] = arr_var;
 }
 
 void Generator::visit(parsing::PrimitiveVariable& node) {
@@ -132,8 +180,6 @@ void Generator::visit(parsing::Routine& node) {
         // llvm::AllocaInst *space = builder.CreateAlloca(typenameToType(arg->m_name), nullptr, arg->m_name);
         // m_var_table[arg->m_name] = space;
         arg->accept(*this);
-
-        
     }
 
     node.m_body->accept(*this);
@@ -196,6 +242,8 @@ void Generator::visit(parsing::Modifiable& node) {
         }
         return;
     }
+
+    // TODO: arrays and records
 }
 
 void Generator::visit(parsing::ReturnStatement& node) {
