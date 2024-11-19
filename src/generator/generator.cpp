@@ -110,7 +110,7 @@ void Generator::visit(parsing::ArrayType& node) {
 
     std::cout << "Generating array type with inner type: " << inner_type_str << "...\n"; 
 
-    auto inner_type = typenameToType(inner_type_str);
+    auto *inner_type = typenameToType(inner_type_str);
     // llvm::Type* ptr = nullptr;
 
     // if (inner_type->isIntegerTy()) {
@@ -126,7 +126,7 @@ void Generator::visit(parsing::ArrayType& node) {
     // }
 
     node.m_size->accept(*this);
-    auto array_size = llvm::dyn_cast<llvm::ConstantInt>(current_expression);
+    auto *array_size = llvm::dyn_cast<llvm::ConstantInt>(current_expression);
     if (!array_size) {
         throw std::runtime_error("Array size must be a constant integer for static allocation.");
     }
@@ -145,8 +145,8 @@ void Generator::visit(parsing::ArrayVariable& node) {
 
     node.m_type->accept(*this);
 
-    auto element_type = typenameToType(node.m_type->m_type->m_name);
-    auto array_type = m_type_table[get_array_typename(node.m_type->m_type->m_name, node.m_type->m_generated_size)];
+    auto *element_type = typenameToType(node.m_type->m_type->m_name);
+    auto *array_type = m_type_table[get_array_typename(node.m_type->m_type->m_name)];
 
     llvm::AllocaInst* arr_var = builder.CreateAlloca(array_type, nullptr, node.m_name);
     m_var_table[node.m_name] = arr_var;
@@ -206,7 +206,7 @@ void Generator::visit(parsing::Routine& node) {
 void Generator::visit(parsing::RoutineCall& node) {
     std::cout << "Generating routine call...\n";
 
-    if (m_routine_table.count(node.m_routine_name) == 0) {
+    if (!m_routine_table.contains(node.m_routine_name)) {
         throw std::runtime_error("Routine doesn't exist: " + node.m_routine_name); 
     }
     llvm::Function* routine = m_routine_table[node.m_routine_name];
@@ -254,8 +254,8 @@ void Generator::visit(parsing::Modifiable& node) {
         return;
     }
 
-    auto var = m_var_table.at(node.m_head_name);
-    auto head_type = var->getAllocatedType();
+    auto *var = m_var_table.at(node.m_head_name);
+    auto *head_type = var->getAllocatedType();
 
     // ??? 
     // current_expression = builder.CreateLoad(head_type, var, node.m_head_name);
