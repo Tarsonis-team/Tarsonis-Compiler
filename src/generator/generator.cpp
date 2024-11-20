@@ -287,13 +287,7 @@ void Generator::visit(parsing::Modifiable& node) {
     }
 
     auto *var = m_var_table.at(node.m_head_name);
-    auto *head_type = var->getAllocatedType();
-
-    // ??? 
-    // current_expression = builder.CreateLoad(head_type, var, node.m_head_name);
-
     current_expression = var;
-    current_array_type = head_type;
 
     for (auto& item : node.m_chain) {
         if (auto rec_access = std::dynamic_pointer_cast<parsing::RecordAccess>(item)) {
@@ -301,12 +295,12 @@ void Generator::visit(parsing::Modifiable& node) {
         }
 
         item->accept(*this);
+    }
 
+    if (is_lvalue) {
+        current_lvalue = current_expression;
+    } else {
         current_expression = builder.CreateLoad(current_access_type, current_expression, "accessed_value");
-
-        if (llvm::ArrayType::classof(current_expression->getType())) {
-            current_array_type = current_expression->getType();
-        }
     }
 }
 
@@ -412,13 +406,14 @@ void Generator::visit(parsing::Assignment& node) {
     // the value to be assigned
     is_lvalue = false;
     node.m_expression->accept(*this);
+    llvm::Value* expr_value = current_expression;
 
     // and this thing sets out current_lvalue thing
     // so now we have an address to store or value to
     is_lvalue = true;
     node.m_modifiable->accept(*this);
 
-    builder.CreateStore(current_expression, current_lvalue);
+    builder.CreateStore(expr_value, current_lvalue);
 }
 
 void Generator::visit(parsing::Program& node) {
@@ -466,14 +461,14 @@ void Generator::visit(parsing::ArrayAccess& node) {
     }
 
     llvm::Value* element = builder.CreateGEP(
-        current_array_type,
+        outer->getType()->getPointerElementType(),
         outer,
         {llvm::ConstantInt::get(context, llvm::APInt(32, 0)), index},
         "arr_index"
     );
 
     current_expression = element;
-    current_access_type = current_array_type->getArrayElementType();
+    current_access_type = outer->getType()->getPointerElementType()->getArrayElementType();
 }
 
 void Generator::visit(parsing::RecordAccess& node) {

@@ -1,7 +1,11 @@
+type arr_type is array[3] integer;
+
 routine main() is
-    var a: array[2] integer;
+    var a: array[5] arr_type;
+    var b: arr_type;
 
-    a[1] := 5;
+    b[3] := 7;
+    a[1][2] := b[3];
 
-    print(a[1]);
+    print(a[1][2]);
 end

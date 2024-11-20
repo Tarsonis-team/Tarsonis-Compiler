@@ -2,30 +2,20 @@
 source_filename = "I_module"
 
 @0 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
-@1 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
-
-define i32 @two(i32 %0) {
-entry:
-  %a = alloca i32, align 4
-  store i32 %0, i32* %a, align 4
-  store i32 9, i32* %a, align 4
-  %a1 = load i32, i32* %a, align 4
-  %addtmp = add i32 2, %a1
-  ret i32 %addtmp
-}
 
 define void @main() {
 entry:
-  %a = alloca i32, align 4
-  store i32 5, i32* %a, align 4
-  %c = alloca i32, align 4
-  %a1 = load i32, i32* %a, align 4
-  %call_two = call i32 @two(i32 %a1)
-  store i32 %call_two, i32* %c, align 4
-  %c2 = load i32, i32* %c, align 4
-  %0 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @0, i32 0, i32 0), i32 %c2)
-  %a3 = load i32, i32* %a, align 4
-  %1 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @1, i32 0, i32 0), i32 %a3)
+  %a = alloca [5 x [3 x i32]], align 4
+  %b = alloca [3 x i32], align 4
+  %arr_index = getelementptr [3 x i32], [3 x i32]* %b, i32 0, i32 3
+  store i32 7, i32* %arr_index, align 4
+  %b1 = load [3 x i32], [3 x i32]* %b, align 4
+  %arr_index2 = getelementptr [5 x [3 x i32]], [5 x [3 x i32]]* %a, i32 0, i32 1
+  store [3 x i32] %b1, [3 x i32]* %arr_index2, align 4
+  %arr_index3 = getelementptr [5 x [3 x i32]], [5 x [3 x i32]]* %a, i32 0, i32 1
+  %arr_index4 = getelementptr [3 x i32], [3 x i32]* %arr_index2, i32 0, i32 3
+  %accessed_value = load i32, i32* %arr_index4, align 4
+  %0 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @0, i32 0, i32 0), i32 %accessed_value)
   ret void
 }
 
