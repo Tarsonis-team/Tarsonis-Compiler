@@ -1,29 +1,7 @@
+routine main() is
+    var a: array[2] integer;
 
-type Point is record
-    var x: integer
-    var y: integer
-end
+    a[1] := 5;
 
-type SockFD is integer;
-type P is Point;
-
-routine two() -> integer is
-
-end
-
-type arr is array[2] integer;
-
-routine main() -> arr is
-    var a: array[2] Point;
-    var b: array[2] array[3] P;
-
-    b[0][1].x := b[0][0].y;
-    b[0][0].x := two() + 2;
-    
-    var k: arr;
-    k[2] := b[0][0].x;
-
-    var nonc: array[2] boolean;
-
-    return k
+    print(a[1]);
 end

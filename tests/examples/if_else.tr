@@ -1,11 +1,11 @@
 routine main() is
-    var c: integer is 4;
-    var a: integer is 1;
+    var a: integer is 5;
     
-    if c > 3 then
-        a := 3
+    if a > 4 then
+        a := 3 + a;
     else
-        a := 4 + a
+        a := 5;
+        print(a);
     end
 
     print(a);

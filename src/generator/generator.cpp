@@ -194,7 +194,9 @@ void Generator::visit(parsing::Body& node) {
 
 void Generator::visit(parsing::Routine& node) {
     // Generate types of arguments
-    std::vector<llvm::Type*> arg_types{};
+    std::cout << "\nGenerating routine " << node.m_name << "...\n\n";
+
+    std::vector<llvm::Type*> arg_types;
     arg_types.reserve(node.m_params.size());
     for (const auto& param : node.m_params) {
         arg_types.push_back(typenameToType(param->m_type));
@@ -211,12 +213,19 @@ void Generator::visit(parsing::Routine& node) {
     // arguments generation
     int arg_idx = 0;
     for (auto &arg : node.m_params) {
-        // llvm::AllocaInst *space = builder.CreateAlloca(typenameToType(arg->m_name), nullptr, arg->m_name);
-        // m_var_table[arg->m_name] = space;
+        llvm::AllocaInst *space = builder.CreateAlloca(typenameToType(arg->m_type), nullptr, arg->m_name);
+        m_var_table[arg->m_name] = space;
+
         arg->accept(*this);
+
+        llvm::Value* arg_value = current_function->getArg(arg_idx);
+        builder.CreateStore(arg_value, space);
+
+        arg_idx++;
     }
 
     node.m_body->accept(*this);
+
     if (node.return_type.empty()) {
         std::cout << "RETURN VOID\n";
         builder.CreateRetVoid();
@@ -254,8 +263,8 @@ void Generator::visit(parsing::RoutineCallResult& node) {
 }
 
 void Generator::visit(parsing::RoutineParameter& node) {
-    llvm::AllocaInst *space = builder.CreateAlloca(typenameToType(node.m_type), nullptr, node.m_name);
-    m_var_table[node.m_name] = space;
+    // llvm::AllocaInst *space = builder.CreateAlloca(typenameToType(node.m_type), nullptr, node.m_name);
+    // m_var_table[node.m_name] = space;
 
     // not sure about first param
     // builder.CreateStore(nullptr, space);
@@ -328,9 +337,11 @@ void Generator::visit(parsing::For& node) {
         stepValue = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 1);
     }
 
+    is_lvalue = false;
     node.m_range->m_begin->accept(*this);
     startValue = current_expression;
 
+    is_lvalue = false;
     node.m_range->m_end->accept(*this);
     endValue = current_expression;
 
@@ -354,6 +365,7 @@ void Generator::visit(parsing::For& node) {
     node.m_body->accept(*this);
 
     // i++
+    for_var = builder.CreateLoad(iterator_var->getAllocatedType(), iterator_var, node.m_identifier->m_name);
     llvm::Value* upd_value = builder.CreateAdd(for_var, stepValue, "nextvalue");
     builder.CreateStore(upd_value, iterator_var);
 
@@ -372,6 +384,7 @@ void Generator::visit(parsing::For& node) {
 void Generator::visit(parsing::While& node) {
     llvm::Function* parent_func = builder.GetInsertBlock()->getParent();
 
+    is_lvalue = false;
     node.m_condition->accept(*this);
     llvm::Value* cond = current_expression;
 
@@ -383,6 +396,11 @@ void Generator::visit(parsing::While& node) {
     // generating body
     builder.SetInsertPoint(loopBB);
     node.m_body->accept(*this);
+
+    is_lvalue = false;
+    node.m_condition->accept(*this);
+    cond = current_expression;
+
     builder.CreateCondBr(cond, loopBB, skipBB);
 
     parent_func->getBasicBlockList().push_back(skipBB);
@@ -392,6 +410,7 @@ void Generator::visit(parsing::While& node) {
 void Generator::visit(parsing::Assignment& node) {
     // after this is called current_expression contains
     // the value to be assigned
+    is_lvalue = false;
     node.m_expression->accept(*this);
 
     // and this thing sets out current_lvalue thing
@@ -518,6 +537,7 @@ void Generator::visit(parsing::StdFunction& node) {
             throw std::runtime_error("Invalid number of parameters for print function call: " + node.m_parameters.size());
         }
 
+        is_lvalue = false;
         node.m_parameters[0]->accept(*this);
         print_value = current_expression;
         print_type = print_value->getType();

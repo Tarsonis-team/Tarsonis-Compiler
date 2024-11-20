@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
     // }
     // std::string source_file_path = argv[1];
 //    std::string source_file_path = "/home/max/vscdir/tarsonis/tests/examples/aplusb.tr";
-    std::string source_file_path = "/home/nickolaus-sdr/compilers/Tarsonis-Compiler/tests/examples/if_else.tr";
+    std::string source_file_path = "/home/nickolaus-sdr/compilers/Tarsonis-Compiler/tests/examples/arrays.tr";
 
     if (!std::filesystem::exists(source_file_path))
     {

@@ -1,7 +1,9 @@
 routine main() is
     var result : integer is 0;
 
-    for i in 1 .. 10 loop
-        print(i);
+    for i in 0 .. 4 loop
+        result := result + i;
     end
+
+    print(result);
 end
