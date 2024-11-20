@@ -3,15 +3,12 @@ type Point is record
     var y: integer
 end
 
-type Line is record
-    var _begin: Point
-    var _end: Point
-end
-
-type aes is Line;
 
 routine main() is
     var point: Point;
-    var line: Line;
-    var a: integer;
+
+    point.x := 5;
+    point.y := 3;
+
+    print(point.x + point.y);
 end

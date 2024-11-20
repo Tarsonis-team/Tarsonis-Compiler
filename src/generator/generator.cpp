@@ -173,6 +173,8 @@ void Generator::visit(parsing::ArrayVariable& node) {
 
 void Generator::visit(parsing::PrimitiveVariable& node) {
     // this is never an array, arrays get dispathed into ArrayVariable visit method
+    std::cout << "Generating non-array variable " << node.m_name << "...\n";
+
     llvm::AllocaInst *var = builder.CreateAlloca(typenameToType(node.m_type->m_name), nullptr, node.m_name);
 
     if (node.m_assigned) {
@@ -181,8 +183,9 @@ void Generator::visit(parsing::PrimitiveVariable& node) {
     }
     m_var_table[node.m_name] = var;
 
-    if (auto rec_type = std::dynamic_pointer_cast<parsing::RecordType>(node.m_type)) {
-        m_recordnames_table[node.m_name] = rec_type->m_name;
+    if (m_records_table.contains(node.m_type->m_name)) {
+        std::cout << node.m_name << " -> " << node.m_type->m_name << "\n";
+        m_recordnames_table[node.m_name] = node.m_type->m_name;
     }
 }
 
@@ -476,21 +479,29 @@ void Generator::visit(parsing::RecordAccess& node) {
 
     llvm::Value* record = current_expression;
 
+    std::cout << "record type:";
+    record->getType()->print(llvm::errs());
+    std::cout << "\n";
+
+
     std::cout << "1: " << node.m_record_name << "\n";
     std::cout << "2: " << m_recordnames_table.at(node.m_record_name) << "\n";
+    std::cout << "3:\n";
 
     int index = 0;
     for (auto& field_name : m_records_table.at(m_recordnames_table.at(node.m_record_name))) {
+        std::cout << " " << field_name << " (" << index << ")\n";
+
         if (field_name == node.identifier) {
             break;
         }
         index++;
     }
 
-    llvm::Value* field_ptr = builder.CreateStructGEP(record->getType(), record, index, node.identifier);
+    llvm::Value* field_ptr = builder.CreateStructGEP(record->getType()->getPointerElementType(), record, index, node.identifier);
     current_expression = field_ptr;
 
-    llvm::StructType* struct_type = llvm::dyn_cast<llvm::StructType>(record->getType());
+    llvm::StructType* struct_type = llvm::dyn_cast<llvm::StructType>(record->getType()->getPointerElementType());
     current_access_type = struct_type->getElementType(index);
 }
 
