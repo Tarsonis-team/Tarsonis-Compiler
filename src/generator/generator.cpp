@@ -36,7 +36,8 @@ void Generator::gen_expr_fork(parsing::Math& node, llvm::Value*& left, llvm::Val
 
 void Generator::apply() {
     m_type_table.emplace("integer", llvm::Type::getInt32Ty(context));
-    m_type_table.emplace("real", llvm::Type::getFloatTy(context));
+    m_type_table.emplace("real", llvm::Type::getDoubleTy(context));
+    m_type_table.emplace("boolean", llvm::Type::getInt1Ty(context));
 
     m_tree->accept(*this);
 
