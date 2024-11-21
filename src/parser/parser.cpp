@@ -5,6 +5,7 @@
 #include "lexer/token.hpp"
 #include "return.hpp"
 #include "statement.hpp"
+#include "std-function.hpp"
 #include <algorithm>
 #include <array>
 #include <memory>
@@ -604,7 +605,16 @@ std::shared_ptr<RoutineCall> Parser::parse_routine_call()
     {
         throw std::runtime_error("no routine identifier");
     }
-    std::shared_ptr<RoutineCall> call = std::make_shared<RoutineCall>(currentTok().m_value);
+
+    std::shared_ptr<RoutineCall> call = nullptr;
+
+    // calling standart function, e.g. 'print'
+    if (StdFunction::is_std_function(currentTok().m_value)) {
+        call = std::make_shared<StdFunction>(currentTok().m_value);
+    } else {
+        call = std::make_shared<RoutineCall>(currentTok().m_value);
+    }
+
     advanceTok();
 
     if (currentTok().m_id != TOKEN_LPAREN)
@@ -801,9 +811,9 @@ std::shared_ptr<Variable> Parser::parse_variable_decl()
             if (currentTok().m_id == TOKEN_IS)
             {
                 advanceTok();
-                return make_shared<PrimitiveVariable>(var_name, type, parse_expression());
+                return std::make_shared<PrimitiveVariable>(var_name, type, parse_expression());
             }
-            return make_shared<PrimitiveVariable>(var_name, type);
+            return std::make_shared<PrimitiveVariable>(var_name, type);
         case TOKEN_ARRAY:
             return std::make_shared<ArrayVariable>(var_name, parse_array_type());
         default:

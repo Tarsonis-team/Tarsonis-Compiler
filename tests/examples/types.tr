@@ -1,8 +1,17 @@
-
-type Weapon is record
-    var max_ammo: integer
-    var cur_ammo: array [4] integer
-end
-
 type socketFD is integer;
-type AK_74 is Weapon;
+
+routine main() is
+    var socket: socketFD;
+
+    socket := 8;
+
+    var r: real is 1.4;
+    r := r + 1.5;
+    print(r);
+
+    var b: boolean is true;
+    b := b and false;
+    print(b);
+
+    print(socket);
+end

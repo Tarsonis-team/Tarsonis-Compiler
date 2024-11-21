@@ -1,29 +1,12 @@
+type Arr_type is array[3] integer;
 
-type Point is record
-    var x: integer
-    var y: integer
-end
+routine main() is
+    var a: array[5] Arr_type;
+    var b: Arr_type;
+    var c: array[3] real;
 
-type SockFD is integer;
-type P is Point;
+    b[3] := 7;
+    a[1][2] := b[3];
 
-routine two() -> integer is
-
-end
-
-type arr is array[2] integer;
-
-routine main() -> arr is
-    var a: array[2] Point;
-    var b: array[2] array[3] P;
-
-    b[0][1].x := b[0][0].y;
-    b[0][0].x := two() + 2;
-    
-    var k: arr;
-    k[2] := b[0][0].x;
-
-    var nonc: array[2] boolean;
-
-    return k
+    print(a[1][2]);
 end

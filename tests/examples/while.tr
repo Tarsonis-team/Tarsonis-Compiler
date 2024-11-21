@@ -2,13 +2,9 @@
 routine main() is
     var n: integer is 2;
     
-    while n loop
-        var x: real is 2.13;
-        x := n - 1;
+    while n <= 5 loop
+        n := n + 1;
     end
     
-    for i in 1 .. 5 loop
-        
-    end 
-
+    print(n);
 end

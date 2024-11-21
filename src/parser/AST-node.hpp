@@ -5,8 +5,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+// #include <llvm/IR/Value.h>
 
 #include "grammar-units.hpp"
+#include "parser/visitor/complete-visitor.hpp"
 #include "visitor/abstract-visitor.hpp"
 
 namespace parsing
@@ -38,6 +40,16 @@ public:
     }
 
     virtual void accept(IVisitor&& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    virtual void accept(ICompleteVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    virtual void accept(ICompleteVisitor&& visitor)
     {
         visitor.visit(*this);
     }
@@ -154,6 +166,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     ~Expression() override = default;
 
     explicit Expression() : ASTNode(GrammarUnit::DIVISION)
@@ -166,6 +188,8 @@ public:
 
     virtual std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& var_table,
     std::unordered_map<std::string, std::shared_ptr<Declaration>>& type_table) = 0;
+
+    // llvm::Value* current_expression;
 };
 
 class Statement : public ASTNode
@@ -177,6 +201,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -200,6 +234,16 @@ public:
     {
         visitor.visit(*this);
     }
+    
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
 
     explicit Declaration(GrammarUnit gr, std::string name) : ASTNode(gr), m_name(std::move(name))
     {
@@ -217,6 +261,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -249,6 +303,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }

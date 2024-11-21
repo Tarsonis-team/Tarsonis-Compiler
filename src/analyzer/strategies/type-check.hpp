@@ -7,6 +7,7 @@
 #include "parser/visitor/abstract-visitor.hpp"
 #include "parser/return.hpp"
 #include "parser/routine.hpp"
+#include "parser/std-function.hpp"
 #include <exception>
 #include <memory>
 #include <stdexcept>
@@ -136,7 +137,9 @@ struct TypeCheck : parsing::IVisitor
         for (auto& param : node.m_params)
         {
             param->accept(*this);
+            
             m_type_table.emplace(param->m_name, m_type_table.at(param->m_type));
+            m_var_table.emplace(param->m_name, m_type_table.at(param->m_type));
         }
 
         if (!node.return_type.empty() && !m_type_table.contains(node.return_type))
@@ -145,8 +148,9 @@ struct TypeCheck : parsing::IVisitor
         }
 
         m_var_table.insert({ node.m_name, std::make_shared<parsing::Routine>(node) });
-        m_current_return_type = std::dynamic_pointer_cast<parsing::Type>(m_type_table.at(node.return_type));
- 
+        if (!node.return_type.empty()) {
+            m_current_return_type = std::dynamic_pointer_cast<parsing::Type>(m_type_table.at(node.return_type));
+        }
         node.m_body->accept(*this);
 
         for (auto& param : node.m_params)
@@ -163,6 +167,15 @@ struct TypeCheck : parsing::IVisitor
         }
         for (auto& param : node.m_parameters)
         {
+            param->accept(*this);
+        }
+    }
+
+    void visit(parsing::StdFunction& node) override {
+        if (!parsing::StdFunction::is_std_function(node.m_routine_name)) {
+            throw std::runtime_error("unknown std function is called: " + node.m_routine_name);
+        }
+        for (auto& param : node.m_parameters) {
             param->accept(*this);
         }
     }
@@ -280,6 +293,7 @@ struct TypeCheck : parsing::IVisitor
 
     void visit(parsing::If& node) override
     {
+        node.m_condition->accept(*this);
         node.m_then->accept(*this);
         if (node.m_else.get())
         {

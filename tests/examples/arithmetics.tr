@@ -1,14 +1,10 @@
-routine main() -> integer is
-    var a: integer is 4 + 2 / 1 - (-8 + 3);
+routine main() is
+    var a: integer is 10;
     var b: integer is 8;
     var d: integer;
 
-    if true then
-        return d;
-        d := 2;
-    end
-
-    var c: integer is a / a + a * b - a / b
+    var c: integer is 42;
     c := a - b;
-    return c;
+
+    print(c);
 end

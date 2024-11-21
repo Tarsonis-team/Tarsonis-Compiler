@@ -1,7 +1,42 @@
+type SomeArr is array[5] integer;
 
-routine main() -> integer is
-    var a: integer
-    var b: integer is 1 + 2
-    var vara: integer is a[2];
+routine two(integer t) -> integer is
+    return 2 + t;
+end
 
+type Color is record
+    var r: integer
+    var g: integer
+    var b: integer
+end
+
+type Point is record
+    var x: SomeArr
+    var y: integer
+    var c: Color
+end
+
+
+routine main() is
+    var arr1: array[3] integer;
+    var arr2: array[2] SomeArr;
+    var arr_rec: array[3] Point;
+
+    var x: integer is 2 + 1;
+    
+    arr2[1][2] := x;
+    arr1[0] := x;
+
+    x := arr2[1][2] + arr1[0];
+
+    arr_rec[2].y := 1;
+    x := x - arr_rec[2].y;
+
+    arr_rec[1].x[0] := 2;
+    x := x + arr_rec[1].x[0];
+
+    arr_rec[0].c.b := 10;
+    x := x * arr_rec[0].c.b;
+
+    print(x)
 end

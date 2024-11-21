@@ -26,6 +26,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     RoutineParameter(std::string name, std::string type)
         : Declaration(GrammarUnit::PARAMETER, std::move(name)), m_type(std::move(type))
     {
@@ -44,6 +54,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -116,6 +136,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Variable(std::string name, std::shared_ptr<Type> type)
         : Declaration(GrammarUnit::VARIABLE, std::move(name)), m_type(std::move(type))
     {
@@ -143,6 +173,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -175,6 +215,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit PrimitiveType(std::string type) : Type(std::move(type))
     {
     }
@@ -202,6 +252,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit ArrayType(std::shared_ptr<Type> type, std::shared_ptr<Expression> size)
         : Type("array"), m_type(std::move(type)), m_size(size)
     {
@@ -209,6 +269,7 @@ public:
 
     std::shared_ptr<Type> m_type;
     std::shared_ptr<Expression> m_size;
+    int m_generated_size;
 
     bool isArray() override
     {
@@ -244,6 +305,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit TypeAliasing(std::shared_ptr<Type> from, std::string to) : Type(to), m_from(from), m_to(std::move(to))
     {
     }
@@ -261,6 +332,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -291,6 +372,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }

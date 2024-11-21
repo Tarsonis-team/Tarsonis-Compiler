@@ -3,6 +3,8 @@
 #include "AST-node.hpp"
 #include "declaration.hpp"
 #include "grammar-units.hpp"
+
+#include <exception>
 #include <memory>
 #include <stdexcept>
 
@@ -29,6 +31,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -69,6 +81,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Boolean(bool value) : Primary(), m_value(value)
     {
         this->m_grammar = GrammarUnit::BOOL;
@@ -101,6 +123,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -155,15 +187,28 @@ struct ArrayAccess : public Chained
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     std::shared_ptr<Expression> access;
 
     void check_has_field(
         std::shared_ptr<Declaration>& current_type,
-        std::unordered_map<std::string, std::shared_ptr<Declaration>>&) override
+        std::unordered_map<std::string, std::shared_ptr<Declaration>>& types) override
     {
         // skip, it is just an array access, the array
         // identifier was before.
         // But we need to check that this is really an array...
+        if (current_type->m_name != "array") {
+            current_type = types.at(current_type->m_name);
+        }
         try
         {
             ArrayType& array = dynamic_cast<ArrayType&>(*current_type);
@@ -177,10 +222,18 @@ struct ArrayAccess : public Chained
     }
 
     std::shared_ptr<Type>
-    deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>&) override
+    deduceType(std::shared_ptr<Type> cur_type, std::unordered_map<std::string, std::shared_ptr<Declaration>>&types) override
     {
-        ArrayType& array = dynamic_cast<ArrayType&>(*cur_type);
-        return array.m_type;
+        if (cur_type->m_name != "array") {
+            cur_type = std::dynamic_pointer_cast<Type>(types.at(cur_type->m_name));
+        }
+        try {
+            ArrayType& array = dynamic_cast<ArrayType&>(*cur_type);
+            return array.m_type;
+        } catch (const std::exception& err) {
+            std::cout << "failed type deduction: " << cur_type->m_name << err.what();
+            throw ;
+        }
     }
 };
 
@@ -192,6 +245,16 @@ struct RecordAccess : public Chained
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -242,6 +305,7 @@ struct RecordAccess : public Chained
     }
 
     std::string identifier;
+    std::string m_record_type;
 };
 
 class Modifiable : public Primary
@@ -253,6 +317,16 @@ public:
     }
 
     void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
     }
@@ -313,6 +387,16 @@ public:
         visitor.visit(*this);
     }
 
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     bool isConst() override {
         return m_left->isConst() && m_right->isConst();
     }
@@ -349,6 +433,26 @@ public:
 class Plus : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Plus() : Math()
     {
         this->m_grammar = GrammarUnit::PLUS;
@@ -363,6 +467,26 @@ public:
 class Minus : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Minus() : Math()
     {
         this->m_grammar = GrammarUnit::MINUS;
@@ -377,6 +501,26 @@ public:
 class Multiplication : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Multiplication() : Math()
     {
         this->m_grammar = GrammarUnit::MULTIPLICATE;
@@ -391,6 +535,26 @@ public:
 class Division : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Division() : Math()
     {
         this->m_grammar = GrammarUnit::DIVISION;
@@ -400,6 +564,26 @@ public:
 class Logic : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
     explicit Logic() : Math()
     {
     }
@@ -408,6 +592,26 @@ public:
 class And : public Logic
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit And() : Logic()
     {
         this->m_grammar = GrammarUnit::AND;
@@ -422,6 +626,26 @@ public:
 class Or : public Logic
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Or() : Logic()
     {
         this->m_grammar = GrammarUnit::OR;
@@ -436,6 +660,26 @@ public:
 class Xor : public Logic
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Xor() : Logic()
     {
         this->m_grammar = GrammarUnit::XOR;
@@ -450,6 +694,26 @@ public:
 class True : public Boolean
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit True() : Boolean(true)
     {
         this->m_grammar = GrammarUnit::TRUE;
@@ -464,6 +728,26 @@ public:
 class False : public Boolean
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit False() : Boolean(false)
     {
         this->m_grammar = GrammarUnit::FALSE;
@@ -478,6 +762,26 @@ public:
 class Relation : public Math
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Relation() : Math()
     {
     }
@@ -486,6 +790,26 @@ public:
 class Mod : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Mod() : Relation()
     {
         this->m_grammar = GrammarUnit::MOD;
@@ -500,6 +824,26 @@ public:
 class Greater : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Greater() : Relation()
     {
         this->m_grammar = GrammarUnit::GREATER;
@@ -514,6 +858,26 @@ public:
 class Less : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Less() : Relation()
     {
         this->m_grammar = GrammarUnit::LESS;
@@ -528,6 +892,26 @@ public:
 class GreaterEqual : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit GreaterEqual() : Relation()
     {
         this->m_grammar = GrammarUnit::GREATER_EQUAL;
@@ -542,6 +926,26 @@ public:
 class LessEqual : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit LessEqual() : Relation()
     {
         this->m_grammar = GrammarUnit::LESS_EQUAL;
@@ -556,6 +960,26 @@ public:
 class Equal : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit Equal() : Relation()
     {
         this->m_grammar = GrammarUnit::EQUAL;
@@ -570,6 +994,26 @@ public:
 class NotEqual : public Relation
 {
 public:
+    void accept(IVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(IVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor& visitor) override
+    {
+        visitor.visit(*this);
+    }
+
+    void accept(ICompleteVisitor&& visitor) override
+    {
+        visitor.visit(*this);
+    }
+    
     explicit NotEqual() : Relation()
     {
         this->m_grammar = GrammarUnit::NOT_EQUAL;

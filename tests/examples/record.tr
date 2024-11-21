@@ -3,18 +3,12 @@ type Point is record
     var y: integer
 end
 
-type Line is record
-    var _begin: Point
-    var _end: Point
-end
 
-type aes is Line;
+routine main() is
+    var point: Point;
 
-routine new_line(Point p1, Point p2) -> Line is
-    var pf: aes
-    
-    
-    pf._begin := 1
-    pf._end := p2
-    pf := 1;
+    point.x := 5;
+    point.y := 3;
+
+    print(point.x + point.y);
 end
