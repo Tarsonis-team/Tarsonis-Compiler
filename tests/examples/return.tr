@@ -1,0 +1,37 @@
+type Arr_type is array[3] integer;
+
+type Point is record
+    var x: integer
+    var y: integer
+end
+
+routine upd_record(Point old_point) -> Point is
+    var new_point: Point;
+
+    new_point.x := old_point.x + old_point.y;
+    return new_point; 
+end
+
+routine upd_arr(Arr_type old_arr) -> Arr_type is
+    var new_arr: Arr_type;
+    new_arr[1] := old_arr[2] + 1;
+
+    return new_arr;
+end
+
+routine main() is
+    var a: Arr_type;
+    var b: Arr_type;
+
+    b[2] := 7;
+
+    a := upd_arr(b);
+
+    var p: Point;
+    p.x := 2;
+    p.y := 3;
+
+    p := upd_record(p);
+
+    print(p.x);
+end

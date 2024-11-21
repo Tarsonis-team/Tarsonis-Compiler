@@ -230,6 +230,14 @@ void Generator::visit(parsing::Routine& node) {
         llvm::AllocaInst *space = builder.CreateAlloca(typenameToType(arg->m_type), nullptr, arg->m_name);
         m_var_table[arg->m_name] = space;
 
+        if (m_ast_decl_table.contains(arg->m_type)) {
+            m_ast_decl_table[arg->m_name] = m_ast_decl_table.at(arg->m_type);
+        }
+
+        if (m_records_table.contains(arg->m_type)) {
+            m_recordnames_table[arg->m_name] = arg->m_type;
+        }
+
         arg->accept(*this);
 
         llvm::Value* arg_value = current_function->getArg(arg_idx);
@@ -265,6 +273,7 @@ void Generator::visit(parsing::RoutineCall& node) {
     // create a vector of arguments
     std::vector<llvm::Value*> params;
     for (auto& par : node.m_parameters) {
+        is_lvalue = false;
         par->accept(*this);
         params.push_back(current_expression);
     }
@@ -395,6 +404,7 @@ void Generator::visit(parsing::Modifiable& node) {
 void Generator::visit(parsing::ReturnStatement& node) {
     std::cout << "Generating return statement...\n";
 
+    is_lvalue = false;
     node.m_expr->accept(*this);
     llvm::Value* ret_res = current_expression;
 
