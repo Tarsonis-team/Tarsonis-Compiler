@@ -2,7 +2,7 @@
 routine main() is
     var n: integer is 2;
     
-    while n < 5 loop
+    while n <= 5 loop
         n := n + 1;
     end
     

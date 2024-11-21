@@ -1,4 +1,4 @@
-routine main() -> integer is
+routine main() is
     var a: integer is 10;
     var b: integer is 8;
     var d: integer;
@@ -7,5 +7,4 @@ routine main() -> integer is
     c := a - b;
 
     print(c);
-    return c;
 end
