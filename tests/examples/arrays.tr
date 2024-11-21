@@ -1,8 +1,9 @@
-type arr_type is array[3] integer;
+type Arr_type is array[3] integer;
 
 routine main() is
-    var a: array[5] arr_type;
-    var b: arr_type;
+    var a: array[5] Arr_type;
+    var b: Arr_type;
+    var c: array[3] real;
 
     b[3] := 7;
     a[1][2] := b[3];

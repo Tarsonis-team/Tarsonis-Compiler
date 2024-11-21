@@ -104,6 +104,8 @@ void Generator::visit(parsing::Type& node) {}
 void Generator::visit(parsing::RecordType& node) {
     std::cout << "Generating a record " << node.m_name << "...\n";
 
+    m_ast_decl_table[node.m_name] = std::make_shared<parsing::RecordType>(node);
+
     std::vector<llvm::Type*> struct_fields;
     std::vector<std::string> field_names;
 
@@ -127,7 +129,11 @@ void Generator::visit(parsing::ArrayType& node) {
     //     return;
     // }
 
-    std::cout << "Generating array type with inner type: " << inner_type_str << "...\n"; 
+    std::cout << "Generating array type with inner type: " << inner_type_str << "...\n";
+
+    std::cout << "I'm here :( " << node.m_name << "\n";
+
+    m_ast_decl_table[node.m_name] = std::make_shared<parsing::ArrayType>(node);
 
     auto *inner_type = typenameToType(inner_type_str);
     // llvm::Type* ptr = nullptr;
@@ -160,7 +166,9 @@ void Generator::visit(parsing::ArrayType& node) {
 void Generator::visit(parsing::Variable& node) {}
 
 void Generator::visit(parsing::ArrayVariable& node) {
-    std::cout << "Generating array var...\n"; 
+    std::cout << "Generating array var...\n";
+
+    m_ast_decl_table[node.m_name] = node.m_type;
 
     node.m_type->accept(*this);
 
@@ -173,7 +181,9 @@ void Generator::visit(parsing::ArrayVariable& node) {
 
 void Generator::visit(parsing::PrimitiveVariable& node) {
     // this is never an array, arrays get dispathed into ArrayVariable visit method
-    std::cout << "Generating non-array variable " << node.m_name << "...\n";
+    std::cout << "Generating non-array variable " << node.m_name << " of type: " << node.m_type->m_name << "...\n";
+
+    m_ast_decl_table[node.m_name] = node.m_type;
 
     llvm::AllocaInst *var = builder.CreateAlloca(typenameToType(node.m_type->m_name), nullptr, node.m_name);
 
@@ -292,12 +302,86 @@ void Generator::visit(parsing::Modifiable& node) {
     auto *var = m_var_table.at(node.m_head_name);
     current_expression = var;
 
+    std::string cur_rec_type = "";
+    
+    std::shared_ptr<parsing::Type> cur_chain_type = nullptr;
+    if (m_records_table.contains(node.m_head_name)) {
+        cur_rec_type = m_recordnames_table.at(node.m_head_name);
+    }
+
+    if (m_ast_decl_table.contains(node.m_head_name)) {
+        cur_chain_type = m_ast_decl_table.at(node.m_head_name);
+    }
+
+    if (cur_chain_type == nullptr) {
+        throw std::runtime_error("Unknown variable (Generator stage): " + node.m_head_name);
+    }
+
     for (auto& item : node.m_chain) {
+        if (cur_chain_type != nullptr && m_records_table.contains(cur_chain_type->m_name)) {
+            cur_rec_type = cur_chain_type->m_name;
+        }
+        
         if (auto rec_access = std::dynamic_pointer_cast<parsing::RecordAccess>(item)) {
-            rec_access->m_record_name = node.m_head_name;
+            rec_access->m_record_type = cur_rec_type;
+
+            std::shared_ptr<parsing::RecordType> rec_item_type = nullptr;
+            if (m_ast_decl_table.contains(cur_chain_type->m_name)) {
+                rec_item_type = std::dynamic_pointer_cast<parsing::RecordType>(m_ast_decl_table.at(cur_chain_type->m_name));
+            }
+
+            if (rec_item_type == nullptr) {
+                throw std::runtime_error("Unknown record type: " + cur_chain_type->m_name);
+            }
+            
+            std::shared_ptr<parsing::Declaration> accessed_field = nullptr;
+            for (auto& field : rec_item_type->m_fields) {
+                if (field->m_name == rec_access->identifier) {
+                    accessed_field = field;
+                    break;
+                }
+            }
+
+            if (accessed_field == nullptr) {
+                throw std::runtime_error("Accessed field wasn't found: " + node.m_head_name);
+            }
+
+            if (auto new_arr = std::dynamic_pointer_cast<parsing::ArrayVariable>(accessed_field)) {
+                // array
+                cur_chain_type = new_arr->m_type->m_type;
+            } else {
+                auto new_primitive = std::dynamic_pointer_cast<parsing::Variable>(accessed_field);
+                
+                if (m_records_table.contains(new_primitive->m_type->m_name)) {
+                    // record
+                    cur_chain_type = m_ast_decl_table.at(new_primitive->m_type->m_name);
+                } else {
+                    if (m_ast_decl_table.contains(new_primitive->m_type->m_name)) {
+                        // alias
+                        cur_chain_type = m_ast_decl_table.at(new_primitive->m_type->m_name);
+                    } else {
+                        // simple
+                        cur_chain_type = nullptr;
+                    }
+                }
+            }
         }
 
         item->accept(*this);
+
+        
+
+        if (auto arr_access = std::dynamic_pointer_cast<parsing::ArrayAccess>(item)) {
+            auto arr_item_type = std::dynamic_pointer_cast<parsing::ArrayType>(cur_chain_type);
+
+            if (arr_item_type == nullptr) {
+                if (m_ast_decl_table.contains(cur_chain_type->m_name)) {
+                    arr_item_type = std::dynamic_pointer_cast<parsing::ArrayType>(m_ast_decl_table.at(cur_chain_type->m_name));   
+                }
+            }
+
+            cur_chain_type = arr_item_type->m_type;
+        }
     }
 
     if (is_lvalue) {
@@ -484,12 +568,11 @@ void Generator::visit(parsing::RecordAccess& node) {
     std::cout << "\n";
 
 
-    std::cout << "1: " << node.m_record_name << "\n";
-    std::cout << "2: " << m_recordnames_table.at(node.m_record_name) << "\n";
-    std::cout << "3:\n";
+    std::cout << "1: " << node.m_record_type << "\n";
+    std::cout << "2:\n";
 
     int index = 0;
-    for (auto& field_name : m_records_table.at(m_recordnames_table.at(node.m_record_name))) {
+    for (auto& field_name : m_records_table.at(node.m_record_type)) {
         std::cout << " " << field_name << " (" << index << ")\n";
 
         if (field_name == node.identifier) {
@@ -506,6 +589,8 @@ void Generator::visit(parsing::RecordAccess& node) {
 }
 
 void Generator::visit(parsing::TypeAliasing& node) {
+    std::cout << "Generating an aliasing type " << node.m_to << " as " << node.m_from->m_name << "...\n";
+
     auto default_type = node.m_from;
     llvm::Type* real_type = nullptr;
 
@@ -518,6 +603,8 @@ void Generator::visit(parsing::TypeAliasing& node) {
     }
 
     m_type_table.emplace(node.m_to, real_type);
+
+    m_ast_decl_table[node.m_to] = node.m_from;
 }
 
 void Generator::visit(parsing::StdFunction& node) {

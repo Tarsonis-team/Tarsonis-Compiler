@@ -33,6 +33,7 @@ struct Generator : public parsing::ICompleteVisitor {
     std::unordered_map<std::string, llvm::Function*> m_routine_table;
     std::unordered_map<std::string, std::vector<std::string>> m_records_table;
     std::unordered_map<std::string, std::string> m_recordnames_table;
+    std::unordered_map<std::string, std::shared_ptr<parsing::Type>> m_ast_decl_table;
 
     llvm::Value* current_expression;
     llvm::Function* current_function;
