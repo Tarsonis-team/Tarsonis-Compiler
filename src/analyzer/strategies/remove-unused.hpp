@@ -1,8 +1,7 @@
 #pragma once
 
-#include "AST-node.hpp"
-#include "declaration.hpp"
-#include "grammar-units.hpp"
+#include "parser/declaration.hpp"
+#include "parser/grammar-units.hpp"
 #include "parser/AST-node.hpp"
 #include <memory>
 #include <unordered_map>
@@ -16,7 +15,7 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
 
     void visit(parsing::ASTNode& node) override
     {
-        node.accept(*this)
+        node.accept(*this);
     }
 
     void visit(parsing::Program& node) override
@@ -57,7 +56,7 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
 
     void visit(parsing::Body& node) override
     {
-        std::unordered_map<std::string, int> variables = outer_table;
+        std::unordered_map<std::string, int> variables = this->table;
         std::unordered_set<std::string> shadows;
 
         for (auto& stmt : node.m_items)
@@ -65,14 +64,14 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
             // only var decls introduce new variable symbols
             if (stmt->isVariableDecl())
             {
-                auto& var = dynamic_cast<Variable&>(*stmt);
-                if (outer_table.contains(var.name))
+                auto& var = dynamic_cast<parsing::Variable&>(*stmt);
+                if (this->table.contains(var.m_name))
                 {
                     shadows.emplace(var.m_name);
                 }
                 if (var.m_value.get())
                 {
-                    var.m_value->removeUnused(variables);
+                    var.m_value->accept(*this);
                 }
 
                 variables.emplace(var.m_name, 0);
@@ -80,17 +79,17 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
             }
 
             // here we calculate the usages of vars
-            stmt->removeUnused(variables);
+            stmt->accept(*this);
         }
 
         // remove stuff that is not used
         std::erase_if(
-            m_items,
+            node.m_items,
             [&variables](auto stmt)
             {
                 if (stmt->isVariableDecl())
                 {
-                    auto& var = dynamic_cast<Variable&>(*stmt);
+                    auto& var = dynamic_cast<parsing::Variable&>(*stmt);
                     return variables.at(var.m_name) == 0;
                 }
                 return false;
@@ -103,9 +102,9 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
             {
                 continue;
             }
-            if (outer_table.contains(variable))
+            if (this->table.contains(variable))
             {
-                outer_table[variable] = usages;
+                this->table[variable] = usages;
             }
         }
     }
@@ -142,7 +141,6 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
 
     void visit(parsing::Expression& node) override
     {
-        // TODO: outer_table[m_head_name] += 1;
     }
 
     void visit(parsing::True&) override
@@ -173,6 +171,7 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
 
     void visit(parsing::Modifiable& node) override
     {
+        this->table[node.m_head_name] += 1;
     }
 
     void visit(parsing::ArrayAccess& node) override
@@ -190,7 +189,6 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
 
     void visit(parsing::If& node) override
     {
-        // pass outer_table?
         node.m_then->accept(*this);
         if (node.m_else.get())
         {
@@ -229,4 +227,5 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
     }
 
     std::shared_ptr<parsing::Program> m_ast;
-}
+    std::unordered_map<std::string, int> table;
+};
