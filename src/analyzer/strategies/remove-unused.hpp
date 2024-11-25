@@ -56,7 +56,6 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
 
     void visit(parsing::Body& node) override
     {
-        std::unordered_map<std::string, int> variables = this->table;
         std::unordered_set<std::string> shadows;
 
         for (auto& stmt : node.m_items)
@@ -74,13 +73,15 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
                     var.m_value->accept(*this);
                 }
 
-                variables.emplace(var.m_name, 0);
+                this->table.emplace(var.m_name, 0);
                 continue;
             }
 
             // here we calculate the usages of vars
             stmt->accept(*this);
         }
+
+        std::unordered_map<std::string, int> variables = this->table;
 
         // remove stuff that is not used
         std::erase_if(
