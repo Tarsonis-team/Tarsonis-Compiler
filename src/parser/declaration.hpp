@@ -158,10 +158,6 @@ public:
     {
         return true;
     }
-
-    void removeUnused(std::unordered_map<std::string, int>& table) override
-    {
-    }
 };
 
 class RecordType : public Type
@@ -346,10 +342,6 @@ public:
         visitor.visit(*this);
     }
 
-    void removeUnused(std::unordered_map<std::string, int>& table) override
-    {
-    }
-
     explicit PrimitiveVariable(std::string name, std::shared_ptr<Type> type)
         : Variable(std::move(name), std::move(type))
     {
@@ -388,10 +380,6 @@ public:
 
     explicit ArrayVariable(std::string name, std::shared_ptr<ArrayType> type)
         : Variable(std::move(name), type->m_type), m_type(type)
-    {
-    }
-
-    void removeUnused(std::unordered_map<std::string, int>& table) override
     {
     }
 

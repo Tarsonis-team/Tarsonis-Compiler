@@ -46,11 +46,6 @@ public:
         // }
     }
 
-    void removeUnused(std::unordered_map<std::string, int>& table) override
-    {
-        m_expr->removeUnused(table);
-    }
-
     std::shared_ptr<Expression> m_expr;
 };
 

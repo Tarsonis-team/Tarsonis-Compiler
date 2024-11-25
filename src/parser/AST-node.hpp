@@ -59,10 +59,6 @@ public:
     {
     }
 
-    virtual void removeUnused(std::unordered_map<std::string, int>& table)
-    {
-    }
-
     virtual GrammarUnit get_grammar() const
     {
         return this->m_grammar;
@@ -277,14 +273,6 @@ public:
 
     void checkTypes()
     {
-    }
-
-    void removeUnused(std::unordered_map<std::string, int>& table) override
-    {
-        for (auto& entity : m_declarations)
-        {
-            entity->removeUnused(table);
-        }
     }
 
     explicit Program() : ASTNode(GrammarUnit::PROGRAM)

@@ -35,11 +35,6 @@ public:
         return_type = "";
     }
 
-    void removeUnused(std::unordered_map<std::string, int>& table) override
-    {
-        m_body->removeUnused(table);
-    }
-
     std::shared_ptr<Body> m_body;
     std::vector<std::shared_ptr<RoutineParameter>> m_params;
     std::string return_type;

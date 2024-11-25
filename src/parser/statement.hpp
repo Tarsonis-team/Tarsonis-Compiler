@@ -48,15 +48,6 @@ public:
         }
     }
 
-    void removeUnused(std::unordered_map<std::string, int>& outer_table) override
-    {
-        m_then->removeUnused(outer_table);
-        if (m_else.get())
-        {
-            m_else->removeUnused(outer_table);
-        }
-    }
-
     std::shared_ptr<Expression> m_condition;
     std::shared_ptr<Body> m_then;
     std::shared_ptr<Body> m_else;
@@ -93,11 +84,6 @@ public:
         std::shared_ptr<Type> type, std::unordered_map<std::string, std::shared_ptr<Declaration>>& table) override
     {
         m_body->checkReturnCoincides(type, table);
-    }
-
-    void removeUnused(std::unordered_map<std::string, int>& outer_table) override
-    {
-        m_body->removeUnused(outer_table);
     }
 
     std::shared_ptr<Range> m_range;
@@ -138,12 +124,6 @@ public:
         m_body->checkReturnCoincides(type, table);
     }
 
-    void removeUnused(std::unordered_map<std::string, int>& outer_table) override
-    {
-        m_condition->removeUnused(outer_table);
-        m_body->removeUnused(outer_table);
-    }
-
     std::shared_ptr<Body> m_body;
     std::shared_ptr<Expression> m_condition;
 };
@@ -177,14 +157,6 @@ public:
 
     std::string m_routine_name;
     std::vector<std::shared_ptr<Expression>> m_parameters;
-
-    void removeUnused(std::unordered_map<std::string, int>& outer_table) override
-    {
-        for (const auto& param : m_parameters)
-        {
-            param->removeUnused(outer_table);
-        }
-    }
 };
 
 class RoutineCallResult : public Expression
@@ -208,11 +180,6 @@ public:
     void accept(ICompleteVisitor&& visitor) override
     {
         visitor.visit(*this);
-    }
-
-    void removeUnused(std::unordered_map<std::string, int>& outer_table) override
-    {
-        m_routine_call->removeUnused(outer_table);
     }
 
     std::shared_ptr<Type> deduceType(std::unordered_map<std::string, std::shared_ptr<Declaration>>& var_table,
@@ -256,13 +223,7 @@ public:
     {
         visitor.visit(*this);
     }
-
-    void removeUnused(std::unordered_map<std::string, int>& outer_table) override
-    {
-        m_modifiable->removeUnused(outer_table);
-        m_expression->removeUnused(outer_table);
-    }
-
+    
     std::shared_ptr<Modifiable> m_modifiable;
     std::shared_ptr<Expression> m_expression;
 };
