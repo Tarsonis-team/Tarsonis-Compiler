@@ -350,11 +350,6 @@ public:
         return std::dynamic_pointer_cast<Type>(type_table.at(cur_type->m_name));
     }
 
-    void removeUnused(std::unordered_map<std::string, int>& outer_table) override
-    {
-        outer_table[m_head_name] += 1;
-    }
-
     explicit Modifiable(std::string head) : Primary(), m_head_name(head)
     {
         this->m_grammar = GrammarUnit::IDENTIFIER;
@@ -418,12 +413,6 @@ public:
                 + right_type->m_name);
         }
         return left_type;
-    }
-
-    void removeUnused(std::unordered_map<std::string, int>& table) override
-    {
-        m_left->removeUnused(table);
-        m_right->removeUnused(table);
     }
 
     std::shared_ptr<Expression> m_left;

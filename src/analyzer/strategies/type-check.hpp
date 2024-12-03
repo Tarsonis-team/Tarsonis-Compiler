@@ -107,9 +107,9 @@ struct TypeCheck : parsing::IVisitor
         {
             throw std::runtime_error("Unknown type: " + node.m_type->m_name);
         }
-        if (node.m_assigned.get())
+        if (node.m_value.get())
         {
-            node.m_assigned->accept(*this);
+            node.m_value->accept(*this);
         }
         m_var_table.emplace(node.m_name, m_type_table.at(node.m_type->m_name));
     }

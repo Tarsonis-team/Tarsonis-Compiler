@@ -85,10 +85,10 @@ void visit(ArrayVariable& node) override {
 
 void visit(PrimitiveVariable& node) override {
     cout << m_nest << "var: " << node.m_name << " " << "type: " << node.m_type->m_name;
-    if (node.m_assigned.get())
+    if (node.m_value.get())
     {
         std::cout << " = ";
-        node.m_assigned->accept(*this);
+        node.m_value->accept(*this);
     }
     cout << "\n";
 }
