@@ -19,6 +19,15 @@ routine upd_arr(Arr_type old_arr) -> Arr_type is
     return new_arr;
 end
 
+type Complex is array[3] Point;
+
+routine upd_complex(Complex old_complex) -> Complex is
+    var new_complex: Complex;
+    new_complex[1].x := old_complex[0].y + 1;
+
+    return new_complex;
+end
+
 routine main() is
     var a: Arr_type;
     var b: Arr_type;
@@ -33,5 +42,10 @@ routine main() is
 
     p := upd_record(p);
 
-    print(p.x);
+    var comp: Complex;
+    comp[0].y := 8;
+
+    comp := upd_complex(comp);
+
+    print(comp[1].x);
 end

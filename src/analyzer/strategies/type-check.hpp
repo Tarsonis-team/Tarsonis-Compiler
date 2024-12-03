@@ -110,6 +110,13 @@ struct TypeCheck : parsing::IVisitor
         if (node.m_value.get())
         {
             node.m_value->accept(*this);
+            auto exp_type = node.m_value->deduceType(m_var_table, m_type_table);
+
+            if (*node.m_type != *exp_type)
+            {
+                throw std::runtime_error(
+                    "The assigned type does not match declared: " + node.m_type->m_name + " is not " + exp_type->m_name);
+            }
         }
         m_var_table.emplace(node.m_name, m_type_table.at(node.m_type->m_name));
     }

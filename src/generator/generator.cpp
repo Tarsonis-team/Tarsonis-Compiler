@@ -132,8 +132,6 @@ void Generator::visit(parsing::ArrayType& node) {
 
     std::cout << "Generating array type with inner type: " << inner_type_str << "...\n";
 
-    std::cout << "I'm here :( " << node.m_name << "\n";
-
     m_ast_decl_table[node.m_name] = std::make_shared<parsing::ArrayType>(node);
 
     auto *inner_type = typenameToType(inner_type_str);
