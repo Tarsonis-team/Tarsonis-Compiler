@@ -1,61 +1,45 @@
 ; ModuleID = 'I_module'
 source_filename = "I_module"
 
-%Point = type { i32, i32 }
-
 @0 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
-
-define %Point @upd_record(%Point %0) {
-entry:
-  %old_point = alloca %Point, align 8
-  store %Point %0, %Point* %old_point, align 4
-  %new_point = alloca %Point, align 8
-  %x = getelementptr inbounds %Point, %Point* %old_point, i32 0, i32 0
-  %accessed_value = load i32, i32* %x, align 4
-  %y = getelementptr inbounds %Point, %Point* %old_point, i32 0, i32 1
-  %accessed_value1 = load i32, i32* %y, align 4
-  %addtmp = add i32 %accessed_value, %accessed_value1
-  %x2 = getelementptr inbounds %Point, %Point* %new_point, i32 0, i32 0
-  store i32 %addtmp, i32* %x2, align 4
-  %new_point3 = load %Point, %Point* %new_point, align 4
-  ret %Point %new_point3
-}
-
-define [3 x i32] @upd_arr([3 x i32] %0) {
-entry:
-  %old_arr = alloca [3 x i32], align 4
-  store [3 x i32] %0, [3 x i32]* %old_arr, align 4
-  %new_arr = alloca [3 x i32], align 4
-  %arr_index = getelementptr [3 x i32], [3 x i32]* %old_arr, i32 0, i32 2
-  %accessed_value = load i32, i32* %arr_index, align 4
-  %addtmp = add i32 %accessed_value, 1
-  %arr_index1 = getelementptr [3 x i32], [3 x i32]* %new_arr, i32 0, i32 1
-  store i32 %addtmp, i32* %arr_index1, align 4
-  %new_arr2 = load [3 x i32], [3 x i32]* %new_arr, align 4
-  ret [3 x i32] %new_arr2
-}
+@1 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+@2 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
 
 define void @main() {
 entry:
-  %a = alloca [3 x i32], align 4
-  %b = alloca [3 x i32], align 4
-  %arr_index = getelementptr [3 x i32], [3 x i32]* %b, i32 0, i32 2
-  store i32 7, i32* %arr_index, align 4
-  %b1 = load [3 x i32], [3 x i32]* %b, align 4
-  %call_upd_arr = call [3 x i32] @upd_arr([3 x i32] %b1)
-  store [3 x i32] %call_upd_arr, [3 x i32]* %a, align 4
-  %p = alloca %Point, align 8
-  %x = getelementptr inbounds %Point, %Point* %p, i32 0, i32 0
-  store i32 2, i32* %x, align 4
-  %y = getelementptr inbounds %Point, %Point* %p, i32 0, i32 1
-  store i32 3, i32* %y, align 4
-  %p2 = load %Point, %Point* %p, align 4
-  %call_upd_record = call %Point @upd_record(%Point %p2)
-  store %Point %call_upd_record, %Point* %p, align 4
-  %x3 = getelementptr inbounds %Point, %Point* %p, i32 0, i32 0
-  %accessed_value = load i32, i32* %x3, align 4
-  %0 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @0, i32 0, i32 0), i32 %accessed_value)
+  %a = alloca i32, align 4
+  store i32 10, ptr %a, align 4
+  %b = alloca i32, align 4
+  store i32 8, ptr %b, align 4
+  br i1 true, label %then, label %ifskip6
+
+then:                                             ; preds = %entry
+  %b1 = alloca i32, align 4
+  store i32 11, ptr %b1, align 4
+  %b2 = load i32, ptr %b1, align 4
+  %0 = call i32 (ptr, ...) @printf(ptr @0, i32 %b2)
+  br i1 true, label %then3, label %ifskip
+
+then3:                                            ; preds = %then
+  %a4 = alloca i32, align 4
+  store i32 13, ptr %a4, align 4
+  %a5 = load i32, ptr %a4, align 4
+  %1 = call i32 (ptr, ...) @printf(ptr @1, i32 %a5)
+  br label %ifskip
+
+ifskip:                                           ; preds = %then3, %then
+  br label %ifskip6
+
+ifskip6:                                          ; preds = %ifskip, %entry
+  %c = alloca i32, align 4
+  store i32 42, ptr %c, align 4
+  %a7 = load i32, ptr %a, align 4
+  %b8 = load i32, ptr %b, align 4
+  %subtmp = sub i32 %a7, %b8
+  store i32 %subtmp, ptr %c, align 4
+  %c9 = load i32, ptr %c, align 4
+  %2 = call i32 (ptr, ...) @printf(ptr @2, i32 %c9)
   ret void
 }
 
-declare i32 @printf(i8*, ...)
+declare i32 @printf(ptr, ...)

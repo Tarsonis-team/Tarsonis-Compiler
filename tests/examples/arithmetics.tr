@@ -3,6 +3,15 @@ routine main() is
     var b: integer is 8;
     var d: integer;
 
+    if (21 > 0) then
+        var b: integer is 11;
+        print(b);
+        if (21 > 0) then
+            var a: integer is 13;
+            print(a);
+        end
+    end
+    
     var c: integer is 42;
     c := a - b;
 

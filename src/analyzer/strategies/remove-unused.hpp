@@ -1,9 +1,12 @@
 #pragma once
 
 #include "parser/declaration.hpp"
-#include "parser/grammar-units.hpp"
+#include "parser/statement.hpp"
+#include "parser/visitor/abstract-visitor.hpp"
 #include "parser/AST-node.hpp"
+#include "parser/std-function.hpp"
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -31,7 +34,7 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
     }
 
     void visit(parsing::Variable& node) override {
-        
+
     }
 
     void visit(parsing::Type& node) override
@@ -52,10 +55,14 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
 
     void visit(parsing::PrimitiveVariable& node) override
     {
+        if (node.m_value) {
+            node.m_value->accept(*this);
+        }
     }
 
     void visit(parsing::Body& node) override
     {
+        std::unordered_map<std::string, int> outer_scope = this->table;
         std::unordered_set<std::string> shadows;
 
         for (auto& stmt : node.m_items)
@@ -64,9 +71,8 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
             if (stmt->isVariableDecl())
             {
                 auto& var = dynamic_cast<parsing::Variable&>(*stmt);
-                if (this->table.contains(var.m_name))
-                {
-                    shadows.emplace(var.m_name);
+                if (outer_scope.contains(var.m_name)){
+                    shadows.insert(var.m_name);
                 }
                 if (var.m_value.get())
                 {
@@ -81,33 +87,29 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
             stmt->accept(*this);
         }
 
-        std::unordered_map<std::string, int> variables = this->table;
-
         // remove stuff that is not used
         std::erase_if(
             node.m_items,
-            [&variables](auto stmt)
+            [this](auto stmt)
             {
                 if (stmt->isVariableDecl())
                 {
                     auto& var = dynamic_cast<parsing::Variable&>(*stmt);
-                    return variables.at(var.m_name) == 0;
+                    return this->table.at(var.m_name) == 0;
                 }
                 return false;
             });
 
         // and then update counts in outer table.
-        for (const auto& [variable, usages] : variables)
+        for (const auto& [variable, usages] : this->table)
         {
-            if (shadows.contains(variable))
+            // if this variable is from outside the scope, and is not shadowing
+            if (outer_scope.contains(variable) && !shadows.contains(variable))
             {
-                continue;
-            }
-            if (this->table.contains(variable))
-            {
-                this->table[variable] = usages;
+                outer_scope[variable] = usages;
             }
         }
+        this->table = std::move(outer_scope);
     }
 
     void visit(parsing::Routine& node) override
@@ -125,6 +127,10 @@ struct RemoveUnusedDeclarations : public parsing::IVisitor
 
     void visit(parsing::StdFunction& node) override 
     {
+        for (const auto& param : node.m_parameters)
+        {
+            param->accept(*this);
+        }
     }
 
     void visit(parsing::RoutineCallResult& node) override

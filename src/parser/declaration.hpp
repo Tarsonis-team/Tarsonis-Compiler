@@ -348,8 +348,9 @@ public:
     }
 
     PrimitiveVariable(std::string name, std::shared_ptr<Type> type, std::shared_ptr<Expression> expr)
-        : Variable(std::move(name), std::move(type)), m_assigned(expr)
+        : Variable(std::move(name), std::move(type))
     {
+        m_value = expr;
     }
 
     std::shared_ptr<Expression> m_assigned;

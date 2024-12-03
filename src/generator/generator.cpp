@@ -188,8 +188,8 @@ void Generator::visit(parsing::PrimitiveVariable& node) {
 
     llvm::AllocaInst *var = builder.CreateAlloca(typenameToType(node.m_type->m_name), nullptr, node.m_name);
 
-    if (node.m_assigned) {
-        node.m_assigned->accept(*this);
+    if (node.m_value) {
+        node.m_value->accept(*this);
         builder.CreateStore(current_expression, var);
     }
     m_var_table[node.m_name] = var;
@@ -201,9 +201,11 @@ void Generator::visit(parsing::PrimitiveVariable& node) {
 }
 
 void Generator::visit(parsing::Body& node) {
+    auto outer_scope = m_var_table;
     for(const auto& stmt : node.m_items) {
         stmt->accept(*this);
     }
+    m_var_table = std::move(outer_scope);
 }
 
 void Generator::visit(parsing::Routine& node) {
@@ -378,8 +380,6 @@ void Generator::visit(parsing::Modifiable& node) {
         }
 
         item->accept(*this);
-
-        
 
         if (auto arr_access = std::dynamic_pointer_cast<parsing::ArrayAccess>(item)) {
             auto arr_item_type = std::dynamic_pointer_cast<parsing::ArrayType>(cur_chain_type);
