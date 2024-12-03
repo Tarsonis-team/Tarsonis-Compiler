@@ -10,5 +10,7 @@ routine main() is
     point.x := 5;
     point.y := 3;
 
+    var x: integer is point;
+
     print(point.x + point.y);
 end
